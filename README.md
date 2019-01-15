@@ -6,8 +6,10 @@ An R package to support requirements.txt style project dependencies.
 
 Simply include a text file named requirements.txt in your project root directory. It should look something like:
 
+```
 mgsub >= 1.5.0
 dplyr = 0.7.0
+```
 
 Note that you must have spaces between package names, the comparison operator, and the version.
 
