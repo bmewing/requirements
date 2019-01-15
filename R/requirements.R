@@ -1,6 +1,6 @@
 #' @export
 
-requirements <- function(root_dir = getwd(), packrat = FALSE, dryrun = FALSE,
+requirements <- function(root_dir = getwd(), load = TRUE, packrat = FALSE, dryrun = FALSE,
                          verbose = TRUE, repo = "https://cran.rstudio.com") {
   #' @title Load project requirements
   #'
@@ -23,6 +23,11 @@ requirements <- function(root_dir = getwd(), packrat = FALSE, dryrun = FALSE,
   content = readLines(req)
   stopifnot(length(content) > 0)
 
+  if(packrat){
+    tryCatch(packrat::status(),
+             error=function(x){packrat::init();packrat::on()})
+  }
+
   required = strsplit(content," +")
   installed = installed.packages()[,3]
   needed = vapply(required,compare_and_install,FUN.VALUE = 1,
@@ -31,9 +36,12 @@ requirements <- function(root_dir = getwd(), packrat = FALSE, dryrun = FALSE,
                   verbose=verbose,
                   repo=repo)
   installed = installed.packages()[,3]
-  loading = lapply(required,load_packages,
-                   verbose=verbose,
-                   dryrun=dryrun)
+  if(load){
+    loading = lapply(required,load_packages,
+                     verbose=verbose,
+                     dryrun=dryrun)
+  }
+
   if(dryrun) cat("NOTE: This was just a dry run. No packages have been installed or loaded.")
   return(invisible(0))
 }
