@@ -8,7 +8,7 @@ Simply include a text file named requirements.txt in your project root directory
 
 ```
 mgsub >= 1.5.0
-dplyr = 0.7.0
+dplyr == 0.7.0
 ```
 
 Note that you must have spaces between package names, the comparison operator, and the version.

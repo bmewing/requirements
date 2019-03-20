@@ -7,6 +7,7 @@ requirements <- function(root_dir = getwd(), load = TRUE, packrat = FALSE, dryru
   #' @description Load and (if necessary) install required packages
   #'
   #' @param root_dir Path to where requirements.txt is located
+  #' @param load Should the packages listed in requirements.txt be loaded to the search path?
   #' @param packrat Should project be initialized with packrat?
   #' @param dryrun Flag if you just want to see what would happen if your ran
   #' the function
