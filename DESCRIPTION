@@ -13,3 +13,5 @@ Imports:
   devtools (>= 1.13.5),
   packrat (>= 0.4.9)
 RoxygenNote: 6.0.1
+Suggests: 
+    testthat
