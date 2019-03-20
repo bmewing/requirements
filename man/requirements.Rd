@@ -26,5 +26,7 @@ invisible
 Load and (if necessary) install required packages
 }
 \examples{
+\dontrun{
 requirements(dryrun = TRUE)
+}
 }

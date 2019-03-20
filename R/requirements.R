@@ -15,8 +15,9 @@ requirements <- function(root_dir = getwd(), load = TRUE, packrat = FALSE, dryru
   #'
   #' @return invisible
   #' @examples
+  #' \dontrun{
   #' requirements(dryrun = TRUE)
-
+  #' }
   req = file.path(root_dir,"requirements.txt")
   stopifnot(file.exists(req))
 

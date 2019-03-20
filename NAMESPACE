@@ -1,1 +1,3 @@
-exportPattern("^[[:alpha:]]+")
+export("requirements")
+export("generate_requirements")
+importFrom("utils", "installed.packages", "packageVersion")
