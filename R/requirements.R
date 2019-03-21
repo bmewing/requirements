@@ -37,13 +37,10 @@ load_requirements <- function(root_dir = getwd(), install = TRUE, packrat = FALS
                   verbose=verbose,
                   repo=repo,
                   install=install)
-  installed = installed.packages()[,3]
-  
-  if(load){
-    loading = lapply(required,load_packages,
-                     verbose=verbose,
-                     dryrun=dryrun)
-  }
+
+  loading = lapply(required,load_packages,
+                   verbose=verbose,
+                   dryrun=dryrun)
 
   if(dryrun) cat("NOTE: This was just a dry run. No packages have been installed.")
   return(invisible(0))

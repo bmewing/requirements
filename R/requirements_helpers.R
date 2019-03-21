@@ -32,36 +32,39 @@ compare_and_install = function(target,existing,dryrun,verbose,repo,install){
       }
       output = 0
     }
-  }
-  
-  correct_version = compare_version(version,installed,comp)
-  
-  if(correct_version){
-    if(verbose & dryrun) cat("NOTE:",name,"is already installed with version",version,"\n")
-    output = 0
   } else {
-    if(grepl(">",comp)){
-      newest_good_enough = check_newest_version(name, repo, version, comp)
-      if(!newest_good_enough){
-        stop(paste0("ERROR: ",name," is not a new enough version. However, no version exists which is suitable."))
-      }
-      if(install){
-        if(verbose) cat("NOTE:",name,"is not a new enough version.\nInstalling the latest version of",name,"\n")
-        if(!dryrun){
-          devtools::install_version(name,version=NULL,repos=repo,quiet = TRUE)
-        }
-        output = 0
-      }
+    correct_version = compare_version(version,installed,comp)
+
+    if(correct_version){
+      if(verbose & dryrun) cat("NOTE:",name,"is already installed with version",installed,"\n")
+      output = 0
     } else {
-      if(install){
-        if(verbose) cat("NOTE:",name,"is not the correct version.\nInstalling",name,"version",version,"\n")
-        if(!dryrun){
-          devtools::install_version(name,version=version,repos=repo,quiet = TRUE)
+      if(grepl("[><]",comp)){
+        extreme_good_enough = check_extreme_version(name, repo, version, comp)
+        if(!extreme_good_enough){
+          direction = if(grepl(">",comp)) "high" else "low"
+          error = "ERROR: %s is not a %s enough version. However, no version exists which is suitable."
+          stop(sprintf(error,name,direction))
         }
-        output = 0
+        if(install){
+          if(verbose) cat("NOTE:",name,"is not a new enough version.\nInstalling the latest version of",name,"\n")
+          if(!dryrun){
+            devtools::install_version(name,version=NULL,repos=repo,quiet = TRUE)
+          }
+          output = 0
+        }
+      } else {
+        if(install){
+          if(verbose) cat("NOTE:",name,"is not the correct version.\nInstalling",name,"version",version,"\n")
+          if(!dryrun){
+            devtools::install_version(name,version=version,repos=repo,quiet = TRUE)
+          }
+          output = 0
+        }
       }
     }
   }
+
   return(output)
 }
 
@@ -83,6 +86,14 @@ read_archive = function (repo){
   })
 }
 
+check_extreme_version = function(package, repo, target, comp){
+  if(grepl("<",comp)){
+    return(check_oldest_version(package, repo, target, comp))
+  } else {
+    return(check_newest_version(package, repo, target, comp))
+  }
+}
+
 check_newest_version = function(package, repo, target, comp){
   archive = read_archive(repo)
   info = archive[[package]]
@@ -95,4 +106,18 @@ check_newest_version = function(package, repo, target, comp){
   version = sub("\\.tar\\.gz","",version)
   new_enough = compare_version(target, version, comp)
   return(new_enough)
+}
+
+check_oldest_version = function(package, repo, target, comp){
+  archive = read_archive(repo)
+  info = archive[[package]]
+  if (!is.null(info)) {
+    info$repo = repo
+    info$path = rownames(info)
+  }
+  latest = info[order(info$path, info$mtime),][1,"path"]
+  version = strsplit(latest,"_")[[1]][2]
+  version = sub("\\.tar\\.gz","",version)
+  old_enough = compare_version(target, version, comp)
+  return(old_enough)
 }
