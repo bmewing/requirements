@@ -1,5 +1,7 @@
 ## requirements
 
+[![Build Status](https://travis-ci.org/bmewing/requirements.svg?branch=master)](https://travis-ci.org/bmewing/requirements) [![Coverage Status](https://img.shields.io/codecov/c/github/bmewing/requirements/master.svg)](https://codecov.io/github/bmewing/requirements?branch=master) [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/requirements)](https://CRAN.R-project.org/package=requirements) ![](http://cranlogs.r-pkg.org/badges/requirements)
+
 An R package to support requirements.txt style project dependencies.
 
 ### requirements.txt
