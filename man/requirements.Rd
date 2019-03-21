@@ -10,6 +10,8 @@ requirements(root_dir = getwd(), load = TRUE, packrat = FALSE,
 \arguments{
 \item{root_dir}{Path to where requirements.txt is located}
 
+\item{load}{Should the packages listed in requirements.txt be loaded to the search path?}
+
 \item{packrat}{Should project be initialized with packrat?}
 
 \item{dryrun}{Flag if you just want to see what would happen if your ran
