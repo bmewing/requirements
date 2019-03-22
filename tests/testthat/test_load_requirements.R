@@ -17,13 +17,6 @@ test_that('Invalid Package Requirement', {
                                  dryrun = TRUE, verbose = FALSE))
 })
 
-REQ = c("mgsub >= 1.5.0", "lexRankr == 0.4.*",
-        "readOffice < 1", "whitechapelR >= 0.3")
-writeLines(text = REQ, con = 'testdata/requirements.txt')
-
-test_that('Install needed', {
-  expect_output(tmp <- capture.output(
-                load_requirements('testdata',install = TRUE, packrat = FALSE,
-                                  dryrun = TRUE, verbose = TRUE));print(tmp),
-                'mgsub is already installed with version 1\\.5\\.1\\.3')
-})
+# REQ = c("mgsub >= 1.5.0", "lexRankr == 0.4.*",
+#         "readOffice < 1", "whitechapelR >= 0.3")
+# writeLines(text = REQ, con = 'testdata/requirements.txt')
