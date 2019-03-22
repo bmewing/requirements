@@ -39,10 +39,11 @@ match_package = function(candidate_lines, package_regex) {
   #' @param package_regex Regex as string to be used to match package references in code.
   #'
   #' @return Character vector of package names matched.
-  lib_matches = stringr::str_match(candidate_lines, package_regex)[,2]
-  lib_matches = lib_matches[!is.na(lib_matches)]
+  lib_matches_list = stringr::str_match_all(candidate_lines, package_regex)
+  lib_matches_str = unlist(lapply(lib_matches_list, function(m) m[, 2]))
+  lib_matches_str = lib_matches_str[!is.na(lib_matches_str)]
 
-  return(lib_matches)
+  return(unique(lib_matches_str))
 }
 
 

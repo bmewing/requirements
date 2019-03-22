@@ -6,11 +6,12 @@ FILE_2 = file.path(TMP_DIR, 'file_2.R')
 FILE_3 = file.path(TMP_DIR, 'file_3.R')
 
 FILE_TEXT_1 = c(
-  'library(fake.package)',
+  'library(fake.package, quietly = TRUE)',
   'require(testthat)',
   'pacman::p_load("dplyr")',
   'requirements::requirements()',
   'devtools:::fake_function()',
+  'stringr::function(readr:::function)',
   'dt[, x := 1]\n'
 )
 
@@ -28,7 +29,9 @@ PACKAGE_LINES_3 = character(0)
 PACKAGE_LINES_ALL = c(PACKAGE_LINES_1, PACKAGE_LINES_2, PACKAGE_LINES_3)
 PACKAGE_LINES_ALL = unique(PACKAGE_LINES_ALL)
 
-PACKAGES_ALL = c('fake.package', 'packrat', 'testthat', 'pacman', 'requirements', 'devtools')
+PACKAGES_1 = c('fake.package', 'testthat', 'dplyr', 'pacman', 'requirements', 'devtools', 'stringr', 'readr')
+PACKAGES_2 = c('packrat')
+PACKAGES_ALL = c(PACKAGES_1, PACKAGES_2)
 
 setup({
   invisible(
@@ -45,7 +48,10 @@ test_that('read_package_lines_from_files', {
 })
 
 test_that('match_packages', {
-  expect_equal(match_packages(PACKAGE_LINES_ALL, PACKAGE_RES), PACKAGES_ALL)
+  expect_equal(
+    sort(match_packages(PACKAGE_LINES_ALL, PACKAGE_RES)),
+    sort(PACKAGES_ALL)
+  )
 })
 
 test_that('safe_package_version', {
