@@ -2,4 +2,8 @@
 ^\.Rproj\.user$
 internal_data
 examples
-requirements.txt
+^\.travis\.yml$
+^codecov\.yml$
+cran-comments\.md
+^\.gitignore$
+requirements\\.txt
