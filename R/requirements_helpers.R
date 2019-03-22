@@ -1,123 +1,343 @@
-compare_version = function(target,existing,comp){
-  target = strsplit(target,"[[:punct:]]")[[1]]
-  existing = strsplit(existing,"[[:punct:]]")[[1]]
-  if(length(target) > length(existing)){
-    existing = c(existing,rep("0",length(target) - length(existing)))
-  } else {
-    target = c(target,rep("0",length(existing) - length(target)))
+read_requirements_file = function(req){
+  #' @param req path to requirements file
+  #' @return vector of requirements to be processed
+  
+  EXIST_ERR = 'The specified requirements file, %s, does not exist'
+  EMPTY_ERR = 'The requirements file %s is empty.'
+  if(!file.exists(req)) stop(sprintf(EXIST_ERR, req))
+  
+  content = readLines(req)
+  if(length(content) == 0) stop(sprintf(EMPTY_ERR, req))
+  
+  additional_files = grep('^ *\\-r', content, value=TRUE)
+  if(length(additional_files) > 0){
+    for(af in additional_files){
+      tmp = read_requirements_file(sub('^ *\\-r *','',af))
+      content = c(content, tmp)
+    }
   }
-  to_compare = cbind(existing,target)
-  results = mapply(get(comp),to_compare[,1],to_compare[,2])
-  if(all(results)) return(TRUE) else return(FALSE)
+  return(content)
 }
 
-compare_and_install = function(target,existing,dryrun,verbose,repo,install){
-  #' @param target Package to be compared/installed
-  #' @param existing Named vector of currently installed packages
-  #' @param dryrun Should any action actually be taken?
-  #' @param verbose Should the function be verbose in what it is doing?
-  #' @param repo What repositiory should be used for installation?
-  #' @param install In the event of a requirements mismatch, should a correct version be installed?
-  name = target[1]
-  installed = existing[name]
-  comp = target[2]
-  version = target[3]
-  output = 1
-  if(comp == "=") comp = "=="
-  if(is.na(installed)){
-    if(install){
-      if(verbose) cat("NOTE:",name,"is not installed.\nInstalling",name,"version",version,"\n")
-      if(!dryrun){
-        devtools::install_version(name,version=version,repos=repo,quiet = TRUE)
-      }
-      output = 0
-    }
-  } else {
-    correct_version = compare_version(version,installed,comp)
+legal_r_package_name = function(name){
+  #' @param name package name to be checked for validity
+  #' @return logical vector of names being legal r package names
+  
+  #TODO: ideally this would be able to come from the regexes.R file
+  CANONICAL_PACKAGE_NAME_RE = '[a-zA-Z]{1}[a-zA-Z0-9\\.]*[a-zA-Z0-9]{1,}'
+  return(grepl(CANONICAL_PACKAGE_NAME_RE,name))
+}
 
-    if(correct_version){
-      if(verbose & dryrun) cat("NOTE:",name,"is already installed with version",installed,"\n")
-      output = 0
-    } else {
-      if(grepl("[><]",comp)){
-        extreme_good_enough = check_extreme_version(name, repo, version, comp)
-        if(!extreme_good_enough){
-          direction = if(grepl(">",comp)) "high" else "low"
-          error = "ERROR: %s is not a %s enough version. However, no version exists which is suitable."
-          stop(sprintf(error,name,direction))
-        }
-        if(install){
-          if(verbose) cat("NOTE:",name,"is not a new enough version.\nInstalling the latest version of",name,"\n")
-          if(!dryrun){
-            devtools::install_version(name,version=NULL,repos=repo,quiet = TRUE)
-          }
-          output = 0
-        }
-      } else {
-        if(install){
-          if(verbose) cat("NOTE:",name,"is not the correct version.\nInstalling",name,"version",version,"\n")
-          if(!dryrun){
-            devtools::install_version(name,version=version,repos=repo,quiet = TRUE)
-          }
-          output = 0
-        }
-      }
-    }
+process_requirements_file = function(req){
+  #' @param req path to requirements file
+  #' @return list with all supported requirement types
+  
+  content = read_requirements_file(req)
+  
+  #TODO: move these to a central data store
+  COMPS = c('==','<=','>=','>','<','~=','!=')
+  # remove comments, additional files
+  content = content[!grepl('^ *#',content)]
+  content = content[!grepl('^ *\\-r',content)]
+  # special installs
+  git_req = grep('^git[\\+:]',content,value=TRUE)
+  svn_req = grep('^svn\\+',content,value=TRUE)
+  bioc_req = grep('^bioc\\+',content,value=TRUE)
+  url_req = grep('^https?:',content,value=TRUE)
+  content = content[!content %in% c(git_req,svn_req,bioc_req,url_req)]
+  # version specific
+  version_req = grep(paste(COMPS,collapse='|'),content,value=TRUE)
+  tmp = strsplit(version_req,paste(COMPS,collapse='|'))
+  pkg_name = vapply(tmp,`[[`,"pkg",1)
+  version_req = version_req[legal_r_package_name(pkg_name)]
+  content = content[!content %in% version_req]
+  # local file can only be .tar.gz, .tgz, or .zip
+  local_source_req = grep('\\.tar\\.gz$',content,value=TRUE)
+  local_win_req = grep('\\.zip$',content,value=TRUE)
+  local_mac_req = grep('\\.tgz$',content,value=TRUE)
+  local_req = c(local_source_req,local_win_req,local_mac_req)
+  local_req = local_req[file.exists(local_req)]
+  content = content[!content %in% local_req]
+  # remaining packages
+  pkg_req = content[legal_r_package_name(content)]
+  content = content[!content %in% pkg_req]
+  
+  if(length(content) > 0){
+    RESOLUTION_ERR = 'Not all requirements are allowed: %s'
+    stop(sprintf(RESOLUTION_ERR,paste(content,collapse=', ')))
   }
-
+  
+  output = list(git = git_req,
+                svn = svn_req,
+                bioc = bioc_req,
+                url = url_req,
+                local = local_req,
+                versioned = version_req,
+                unversioned = pkg_req)
   return(output)
 }
 
+compare_version = function(existing, target, comp){
+  #' @param target The semantic version number targeted
+  #' @param existing The semantic version number installed
+  #' @param comp The version comparison operator
+  #' @return logical indicating if semantic version matches requirements
+  
+  if(existing == '*' | target == '*'){
+    if(comp == "!=") return(FALSE) else return(TRUE)
+  }
+  return(get(comp)(existing, target))
+}
+
+check_version = function(target,existing,comp){
+  #' @param target The version targeted for installation
+  #' @param existing The currently installed version
+  #' @param comp The version comparison operator
+  #' @return logical indicating if existing version matches requirements
+  
+  target = strsplit(target,"[[:punct:]]")[[1]]
+  existing = strsplit(existing,"[[:punct:]]")[[1]]
+  fill = '0'
+  if(target[length(target)] == '*' | comp == '~=') fill = '*'
+  if(length(target) > length(existing)){
+    existing = c(existing,rep(fill,length(target) - length(existing)))
+  } else {
+    target = c(target,rep(fill,length(existing) - length(target)))
+  }
+  to_compare = cbind(existing,target,comp)
+  results = mapply(compare_version,to_compare[,1],to_compare[,2],to_compare[,3])
+  return(all(results))
+}
+
+get_installed = function(dummy=NULL){
+  #' @param dummy dummy data to return for testing purposes
+  #' @return named vector of package versions
+  if(!is.null(dummy)){
+    return(dummy)
+  } else {
+    return(installed.packages()[,3])
+  }
+}
+
+install_reqs = function(reqs, dryrun, verbose = dryrun, 
+                        repo = options()$repo[1],...){
+  #' @param reqs results of process_requirements_file
+  #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
+  #' @param verbose should the function be explicit about activities
+  #' @param repo what CRAN repository should be used?
+  #' @param ... values to pass to get_installed
+  #' @return data.frame of installed packages and their versions
+  
+  INSTALL = 'Installing %s %s'
+  INSTALL_VERSION = 'at version %s'
+  NOT_INSTALLED = 'NOTE: %s is not currently installed.'
+  BAD_VERSION = 'NOTE: %s is current installed at version %s which is not sufficient.'
+  NONE_EXISTS = 'ERROR: No version exists for %s which meets requirements.'
+  OTHER_FAIL = 'ERROR: Requirement %s could not be satisified for some reason.'
+  
+  failures = 0
+  
+  # Install git
+  if(length(reqs$git) > 0){
+    for(i in reqs$git){
+      url = sub('^git\\+','',i)
+      v = vmess(sprintf(INSTALL,url,''),verbose)
+      if(!dryrun){
+        tryCatch(devtools::install_git(url),
+                 error=function(x){
+                   failures <<- failures + 1
+                   message(sprintf(OTHER_FAIL,url))
+                 })
+      }
+    }
+  }
+  
+  if(length(reqs$svn) > 0){
+    for(i in reqs$svn){
+      url = sub('^svn\\+','',i)
+      v = vmess(sprintf(INSTALL,url,''),verbose)
+      if(!dryrun){
+        tryCatch(devtools::install_svn(url),
+                 error=function(x){
+                   failures <<- failures + 1
+                   message(sprintf(OTHER_FAIL,url))
+                 })
+      }
+    }
+  }
+  
+  if(length(reqs$bioc) > 0){
+    for(i in reqs$bioc){
+      url = sub('^bioc\\+','',i)
+      v = vmess(sprintf(INSTALL,url,''),verbose)
+      if(!dryrun){
+        tryCatch(devtools::install_bioc(url),
+                 error=function(x){
+                   failures <<- failures + 1
+                   message(sprintf(OTHER_FAIL,url))
+                 })
+      }
+    }
+  }
+  
+  if(length(reqs$url) > 0){
+    for(i in reqs$url){
+      v = vmess(sprintf(INSTALL,i,''),verbose)
+      if(!dryrun){
+        tryCatch(devtools::install_url(i),
+                 error=function(x){
+                   failures <<- failures + 1
+                   message(sprintf(OTHER_FAIL,i))
+                 })
+      }
+    }
+  }
+  
+  if(length(reqs$local) > 0){
+    for(i in reqs$local){
+      type = 'source'
+      if(!grepl('\\.tar\\.gz$',i)){
+        type = 'binary'
+      }
+      v = vmess(sprintf(INSTALL,i,''),verbose)
+      if(!dryrun){
+        tryCatch(install.packages(i,repos=NULL,type=type),
+                 error=function(x){
+                   failures <<- failures + 1
+                   message(sprintf(OTHER_FAIL,i))
+                 })
+      }
+    }
+  }
+  
+  installed = get_installed(...)
+  
+  if(length(reqs$unversioned) > 0){
+    for(i in reqs$unversioned){
+      if(is.na(installed[i])){
+        v = vmess(sprintf(NOT_INSTALLED,i),verbose)
+        version = get_extreme_version(i,'last',repo)
+        v = vmess(sprintf(INSTALL,i,sprintf(INSTALL_VERSION,version)),verbose)
+        if(!dryrun){
+          tryCatch(install.packages(i,repos=repo),
+                   error=function(x){
+                     failures <<- failures + 1
+                     message(sprintf(OTHER_FAIL,i))
+                   })
+        }
+      }
+      
+    }
+  }
+  
+  if(length(reqs$versioned) > 0){
+    COMPS = c('==','<=','>=','>','<','~=','!=')
+    for(i in reqs$versioned){
+      install_needed = FALSE
+      comp = sub(paste0('^.*?(',paste(COMPS,collapse='|'),').*$'),'\\1',i)
+      if(comp == "=") comp = "=="
+      split = strsplit(i,paste(COMPS,collapse='|'))[[1]]
+      package = split[1]
+      version = split[2]
+      if(is.na(installed[i])){
+        v = vmess(sprintf(NOT_INSTALLED,i),verbose)
+        install_needed = TRUE
+      } else {
+        install_needed = !check_version(version,installed[i],comp)
+      }
+      if(install_needed){
+        v = vmess(sprintf(BAD_VERSION,package,installed[i]),verbose)
+        
+        available_versions = get_available_versions(package)$version
+        available_compatibility = vapply(available_versions,
+                                         check_version,
+                                         TRUE,
+                                         target = version, 
+                                         comp = comp)
+        if(!any(available_compatibility)){
+          failures = failures + 1
+          v = vmess(sprintf(NONE_EXISTS,package),verbose)
+        } else {
+          latest_compatible = names(which.max(which(available_compatibility)))
+          v = vmess(sprintf(INSTALL,package,
+                            sprintf(INSTALL_VERSION,latest_compatible)),verbose)
+          if(!dryrun){
+            tryCatch(devtools::install_version(package,
+                                               version=latest_compatible,
+                                               repos=repo,
+                                               quiet=TRUE),
+                     error=function(x){
+                       failures <<- failures + 1
+                       message(sprintf(OTHER_FAIL,i))
+                     })
+          }
+        }
+      }
+    }
+  }
+  
+  if(failures > 0) stop(paste0('There were ',failures,' package(s) which could not be installed.'))
+  return(0)
+}
+
+#TODO make sure this works in the new context
 load_packages = function(packages,verbose,dryrun){
   if(verbose) cat("Loading",packages[1],"version",packages[3],"\n")
   if(!dryrun) library(packages[1],character.only=TRUE)
   return(0)
 }
 
-read_archive = function (repo){
-  tryCatch({
-    con = gzcon(url(sprintf("%s/src/contrib/Meta/archive.rds", repo), "rb"))
-    on.exit(close(con))
-    readRDS(con)
-  }, warning = function(e) {
-    list()
-  }, error = function(e) {
-    list()
-  })
-}
-
-check_extreme_version = function(package, repo, target, comp){
-  if(grepl("<",comp)){
-    return(check_oldest_version(package, repo, target, comp))
-  } else {
-    return(check_newest_version(package, repo, target, comp))
+read_archive = local({
+  archive = list()
+  function (repo = options()$repo[1]){
+    #' @param repo what repo should the archive be fetched from?
+    #' @return data.frame
+    #' @details memoized to reduce external calls needed
+    
+    if(!is.null(archive[[repo]])) return(archive[[repo]])
+    tryCatch({
+      con = gzcon(url(sprintf("%s/src/contrib/Meta/archive.rds", repo), "rb"))
+      on.exit(close(con))
+      content = readRDS(con)
+      archive[[repo]] <<- content
+      return(content)
+    }, warning = function(e) {
+      list()
+    }, error = function(e) {
+      list()
+    })
   }
-}
+})
 
-check_newest_version = function(package, repo, target, comp){
+get_available_versions = function(package, repo = options()$repo[1]){
+  #' @param package what package do you need versions for?
+  #' @param repo what repo should be checked?
+  #' @return vector of available package versions
+  
+  output = NULL
   archive = read_archive(repo)
   info = archive[[package]]
   if (!is.null(info)) {
     info$repo = repo
     info$path = rownames(info)
+    versions = strsplit(info$path,"_")
+    versions = vapply(versions,function(x){
+      sub("\\.tar\\.gz","",x[2])
+    },'version')
+    info$version = versions
+    output = info
   }
-  latest = info[order(info$path, info$mtime),][nrow(info),"path"]
-  version = strsplit(latest,"_")[[1]][2]
-  version = sub("\\.tar\\.gz","",version)
-  new_enough = compare_version(target, version, comp)
-  return(new_enough)
+  return(output)
 }
 
-check_oldest_version = function(package, repo, target, comp){
-  archive = read_archive(repo)
-  info = archive[[package]]
-  if (!is.null(info)) {
-    info$repo = repo
-    info$path = rownames(info)
+vmess = function(x,v){
+  #' @param x what message should be printed?
+  #' @param v should the message actually be printed?
+  #' @return nothing important
+  #' @details To help with verbose message printing
+  
+  if(v){
+    message(x)
   }
-  latest = info[order(info$path, info$mtime),][1,"path"]
-  version = strsplit(latest,"_")[[1]][2]
-  version = sub("\\.tar\\.gz","",version)
-  old_enough = compare_version(target, version, comp)
-  return(old_enough)
+  invisible(return(NULL))
 }

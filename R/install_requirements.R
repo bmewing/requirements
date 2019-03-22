@@ -1,11 +1,12 @@
 #' @export
-install_requirements <- function(root_dir = getwd(), install = TRUE, packrat = FALSE, dryrun = FALSE,
-                         verbose = TRUE, repo = "https://cran.rstudio.com") {
+install_requirements <- function(requirements = file.path(getwd(),"requirements.txt"), 
+                                 install = TRUE, packrat = FALSE, dryrun = FALSE,
+                                 verbose = TRUE, repo = "https://cran.rstudio.com") {
   #' @title Install project requirements
   #'
   #' @description Install (and optionally generate) required packages
   #'
-  #' @param root_dir Path to where requirements.txt is located
+  #' @param requirements filename where requirements are stored
   #' @param gen Should required packages be generated?
   #' @param packrat Should project be initialized with packrat?
   #' @param dryrun Flag if you just want to see what would happen if you ran
@@ -18,11 +19,7 @@ install_requirements <- function(root_dir = getwd(), install = TRUE, packrat = F
   #' \dontrun{
   #' requirements(dryrun = TRUE)
   #' }
-  req = file.path(root_dir,"requirements.txt")
-  stopifnot(file.exists(req))
-
-  content = readLines(req)
-  stopifnot(length(content) > 0)
+  content = process_requirements_file(requirements)
 
   if(packrat){
     tryCatch(packrat::status(),

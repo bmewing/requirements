@@ -1,3 +1,4 @@
-devtools>=2.0.1
-packrat>=0.5.0
+#requirements package requirements
+devtools >= 2.0.1
+packrat
 stringr>=1.4.0
