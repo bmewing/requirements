@@ -2,3 +2,7 @@
 ^\.Rproj\.user$
 internal_data
 examples
+^\.travis\.yml$
+^codecov\.yml$
+cran-comments\.md
+^\.gitignore$
