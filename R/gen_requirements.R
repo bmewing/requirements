@@ -7,7 +7,7 @@
 #' @param output_path String indicating where to write resulting requirements file to.
 #' @param eq_sym The equality symbol to be used when writing requirements (i.e. package>=1.0.0).
 #'   Use \code{NULL} to not include package versions in your requirements file.
-#' @param rm_missing Should packages not installed locally be exlcuded from output?
+#' @param rm_missing Should packages not installed locally be excluded from output?
 #'
 #' @return Nothing is returned.  Results are written to \code{output_path}
 #'

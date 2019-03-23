@@ -17,7 +17,7 @@ See \code{?Sys.glob} for more details.}
 \item{eq_sym}{The equality symbol to be used when writing requirements (i.e. package>=1.0.0).
 Use \code{NULL} to not include package versions in your requirements file.}
 
-\item{rm_missing}{Should packages not installed locally be exlcuded from output?}
+\item{rm_missing}{Should packages not installed locally be excluded from output?}
 }
 \value{
 Nothing is returned.  Results are written to \code{output_path}
