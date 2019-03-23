@@ -43,10 +43,13 @@ The following lines of code show examples where the \code{data.table} package wi
   \item \code{data.table:::data.table()}
 }
 
-Matching will fail if loading multiple packages with \code{pacman::p_load}; only the first package will be matched.
+Matching will fail if:
 
-Matching will fail if using a character vector to load (i.e. \code{pkg = 'testthat'; library(pkg, character.only = TRUE)}).
-This will match \code{pkg} as package instead of \code{testthat}.
+\itemize{
+  \item loading multiple packages with \code{pacman::p_load} (only the first package will be matched)
+  \item using a character vector to load; e.g. \code{pkg = 'testthat'; library(pkg, character.only = TRUE)} (will match \code{pkg} as package instead of \code{testthat})
+  \item using a string resembling a package load; e.g. \code{'library(fake.package)'} (will match \code{fake.package})
+}
 }
 \examples{
 
