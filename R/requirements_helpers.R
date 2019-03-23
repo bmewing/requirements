@@ -19,6 +19,12 @@ read_requirements_file = function(req){
   return(content)
 }
 
+activate_packrat = function(){
+  tryCatch(packrat::status(),
+           error=function(x){packrat::init();packrat::on()})
+  return(NULL)
+}
+
 legal_r_package_name = function(name){
   #' @param name package name to be checked for validity
   #' @return logical vector of names being legal r package names
@@ -86,6 +92,7 @@ compare_version = function(existing, target, comp){
   if(existing == '*' | target == '*'){
     if(comp == "!=") return(FALSE) else return(TRUE)
   }
+  if(comp == "~=") comp = "=="
   return(get(comp)(existing, target))
 }
 
@@ -95,8 +102,8 @@ check_version = function(target,existing,comp){
   #' @param comp The version comparison operator
   #' @return logical indicating if existing version matches requirements
   
-  target = strsplit(target,"[[:punct:]]")[[1]]
-  existing = strsplit(existing,"[[:punct:]]")[[1]]
+  target = strsplit(target,"[^0-9a-zA-Z\\*]")[[1]]
+  existing = strsplit(existing,"[^0-9a-zA-Z\\*]")[[1]]
   fill = '0'
   if(target[length(target)] == '*' | comp == '~=') fill = '*'
   if(length(target) > length(existing)){
@@ -106,7 +113,7 @@ check_version = function(target,existing,comp){
   }
   to_compare = cbind(existing,target,comp)
   results = mapply(compare_version,to_compare[,1],to_compare[,2],to_compare[,3])
-  return(all(results))
+  if(comp == '!=') return(any(results)) else return(all(results))
 }
 
 get_installed = function(dummy=NULL){
@@ -120,7 +127,7 @@ get_installed = function(dummy=NULL){
 }
 
 install_reqs = function(reqs, dryrun, verbose = dryrun, 
-                        repo = options()$repo[1],...){
+                        repo = options()$repo[1], ...){
   #' @param reqs results of process_requirements_file
   #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
   #' @param verbose should the function be explicit about activities
@@ -215,8 +222,9 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
   if(length(reqs$unversioned) > 0){
     for(i in reqs$unversioned){
       if(is.na(installed[i])){
+        available_versions = get_available_versions(i)$version
         v = vmess(sprintf(NOT_INSTALLED,i),verbose)
-        version = get_extreme_version(i,'last',repo)
+        version = which.max(available_versions)
         v = vmess(sprintf(INSTALL,i,sprintf(INSTALL_VERSION,version)),verbose)
         if(!dryrun){
           tryCatch(install.packages(i,repos=repo),
@@ -237,8 +245,8 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
       comp = sub(paste0('^.*?(',paste(COMPS,collapse='|'),').*$'),'\\1',i)
       if(comp == "=") comp = "=="
       split = strsplit(i,paste(COMPS,collapse='|'))[[1]]
-      package = split[1]
-      version = split[2]
+      package = gsub(' *','',split[1])
+      version = gsub(' *','',split[2])
       if(is.na(installed[i])){
         v = vmess(sprintf(NOT_INSTALLED,i),verbose)
         install_needed = TRUE
@@ -246,9 +254,9 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
         install_needed = !check_version(version,installed[i],comp)
       }
       if(install_needed){
-        v = vmess(sprintf(BAD_VERSION,package,installed[i]),verbose)
+        if(!is.na(installed[i])) v = vmess(sprintf(BAD_VERSION,package,installed[i]),verbose)
         
-        available_versions = get_available_versions(package)$version
+        available_versions = get_available_versions(package, repo)$version
         available_compatibility = vapply(available_versions,
                                          check_version,
                                          TRUE,
@@ -297,8 +305,21 @@ read_archive = local({
     if(!is.null(archive[[repo]])) return(archive[[repo]])
     tryCatch({
       con = gzcon(url(sprintf("%s/src/contrib/Meta/archive.rds", repo), "rb"))
+      con2 = gzcon(url(sprintf("%s/src/contrib/Meta/current.rds", repo), "rb"))
+      current_version = readLines(sprintf('%s/src/contrib/',repo))
+      
       on.exit(close(con))
+      on.exit(close(con2))
+      
       content = readRDS(con)
+      content2 = readRDS(con2)
+      cv = sub('^.*?>(.*?\\.tar\\.gz).*$','\\1',grep('\\.tar\\.gz',current_version,value=TRUE))
+      for(i in 1:nrow(content2)){
+        pkg = rownames(content2)[i]
+        latest = content2[pkg,]
+        rownames(latest) = max(grep(paste0('^',pkg,'_.*?\\.tar\\.gz$'),cv,value=TRUE))
+        content[[pkg]] = rbind(content[[pkg]],latest)
+      }
       archive[[repo]] <<- content
       return(content)
     }, warning = function(e) {

@@ -4,11 +4,12 @@
 \alias{load_requirements}
 \title{Load project requirements}
 \usage{
-load_requirements(root_dir = getwd(), install = TRUE, packrat = FALSE,
-  dryrun = FALSE, verbose = TRUE, repo = "https://cran.rstudio.com")
+load_requirements(requirements = file.path(getwd(), "requirements.txt"),
+  install = TRUE, packrat = FALSE, dryrun = FALSE, verbose = TRUE,
+  repo = "https://cran.rstudio.com")
 }
 \arguments{
-\item{root_dir}{Path to where requirements.txt is located}
+\item{requirements}{filename where requirements are stored}
 
 \item{install}{Should required packages be installed?}
 

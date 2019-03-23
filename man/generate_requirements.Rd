@@ -4,8 +4,9 @@
 \alias{generate_requirements}
 \title{Generate a requirements.txt for your project}
 \usage{
-generate_requirements(glob_paths = "*.R", output_path = "requirements.txt",
-  eq_sym = ">=", rm_missing = FALSE)
+generate_requirements(glob_paths = "*.R",
+  output_path = "requirements.txt", eq_sym = ">=",
+  rm_missing = FALSE)
 }
 \arguments{
 \item{glob_paths}{Character vector of patterns for relative or absolute filepaths. Missing values will be ignored.

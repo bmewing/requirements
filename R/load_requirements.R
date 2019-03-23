@@ -20,25 +20,6 @@ load_requirements <- function(requirements = file.path(getwd(),"requirements.txt
   #' requirements(dryrun = TRUE)
   #' }
   content = process_requirements_file(requirements)
-
-  if(packrat){
-    tryCatch(packrat::status(),
-             error=function(x){packrat::init();packrat::on()})
-  }
-
-  required = strsplit(content," +")
-  installed = 
-  needed = vapply(required,compare_and_install,FUN.VALUE = 1,
-                  existing=installed,
-                  dryrun=dryrun,
-                  verbose=verbose,
-                  repo=repo,
-                  install=install)
-
-  loading = lapply(required,load_packages,
-                   verbose=verbose,
-                   dryrun=dryrun)
-
-  if(dryrun) cat("NOTE: This was just a dry run. No packages have been installed.")
+  
   return(invisible(0))
 }

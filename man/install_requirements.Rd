@@ -4,11 +4,14 @@
 \alias{install_requirements}
 \title{Install project requirements}
 \usage{
-install_requirements(root_dir = getwd(), install = TRUE, packrat = FALSE,
-  dryrun = FALSE, verbose = TRUE, repo = "https://cran.rstudio.com")
+install_requirements(requirements = file.path(getwd(),
+  "requirements.txt"), packrat = FALSE, dryrun = FALSE,
+  verbose = dryrun, repo = options()$repo[1],
+  gen = !file.exists(requirements),
+  glob_paths = file.path(dirname(requirements), "*.R"), ...)
 }
 \arguments{
-\item{root_dir}{Path to where requirements.txt is located}
+\item{requirements}{filename where requirements are stored}
 
 \item{packrat}{Should project be initialized with packrat?}
 
@@ -20,6 +23,10 @@ the function}
 \item{repo}{What repository should be used to install pacakges?}
 
 \item{gen}{Should required packages be generated?}
+
+\item{glob_paths}{Character vector of patterns for relative or absolute filepaths. Missing values will be ignored. See ?Sys.glob for more details.}
+
+\item{...}{Arguments to pass to helper functions called}
 }
 \value{
 invisible
