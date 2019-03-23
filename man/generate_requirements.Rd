@@ -4,8 +4,9 @@
 \alias{generate_requirements}
 \title{Generate a requirements.txt for your project}
 \usage{
-generate_requirements(glob_paths = "*.R", output_path = "requirements.txt",
-  eq_sym = ">=", rm_missing = FALSE)
+generate_requirements(glob_paths = "*.R",
+  output_path = "requirements.txt", eq_sym = ">=",
+  rm_missing = FALSE)
 }
 \arguments{
 \item{glob_paths}{Character vector of patterns for relative or absolute filepaths. Missing values will be ignored.
@@ -24,9 +25,33 @@ Nothing is returned.  Results are written to \code{output_path}
 \description{
 Generate a requirements file from existing file(s) and installed packages
 }
+\details{
+Methodology for package matching relies on string pattern matching rather than a more sophisticated method.
+This will match most 'standard' ways of referencing libraries in R code.
+The following lines of code show examples where the \code{data.table} package will be matched properly:
+\itemize{
+  \item \code{library(data.table)}
+  \item \code{library('data.table')}
+  \item \code{library(data.table, warn.conflicts = TRUE)}
+  \item \code{require(data.table)}
+  \item \code{require('data.table')}
+  \item \code{require(data.table, quietly = TRUE)}
+  \item \code{pacman::p_load(data.table)}
+  \item \code{pacman::p_load('data.table')}
+  \item \code{pacman::p_load(data.table, install = FALSE)}
+  \item \code{data.table::data.table()}
+  \item \code{data.table:::data.table()}
+}
+
+Matching will fail if loading multiple packages with \code{pacman::p_load}; only the first package will be matched.
+
+Matching will fail if using a character vector to load (i.e. \code{pkg = 'testthat'; library(pkg, character.only = TRUE)}).
+This will match \code{pkg} as package instead of \code{testthat}.
+}
 \examples{
 
 \dontrun{
+
 generate_requirements('R/*.R')
 generate_requirements('R/*.R', output_path='my_requirements.txt')
 generate_requirements('R/*.R', output_path='equal_to_requirements.txt', eq_sym='>=')
