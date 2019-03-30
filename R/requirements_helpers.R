@@ -283,14 +283,6 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
   return(0)
 }
 
-#TODO make sure this works in the new context
-load_packages = function(packages,verbose,dryrun){
-  if(verbose) cat("Loading",packages[1],"version",packages[3],"\n")
-  if(!dryrun) library(packages[1],character.only=TRUE)
-  return(0)
-}
-
-
 get_available_versions = function(package) {
   #' @param package name of package to fetch versions for
   #' @return character vector of available package versions; NULL if package not found
