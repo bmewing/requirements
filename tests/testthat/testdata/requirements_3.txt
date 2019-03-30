@@ -1,0 +1,11 @@
+mgsub >= 1.5.0
+lexRankr == 0.4.*
+readOffice ~= 0
+whitechapelR < 0.4
+dplyr != 0.7.*
+tidyr
+git+https://github.com/bmewing/requirements
+svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/
+bioc+release/SummarizedExperiment
+https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz
+testdata/dummy_package.zip
