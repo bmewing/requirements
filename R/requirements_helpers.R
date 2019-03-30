@@ -220,7 +220,7 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
       if(is.na(installed[i])){
         available_versions = get_available_versions(i)
         v = vmess(sprintf(NOT_INSTALLED,i),verbose)
-        version = tail(sort(available_versions), i)
+        version = tail(sort(available_versions), 1)
         v = vmess(sprintf(INSTALL,i,sprintf(INSTALL_VERSION,version)),verbose)
         if(!dryrun){
           tryCatch(install.packages(i,repos=repo),
