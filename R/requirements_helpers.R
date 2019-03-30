@@ -1,14 +1,14 @@
 read_requirements_file = function(req){
   #' @param req path to requirements file
   #' @return vector of requirements to be processed
-  
+
   EXIST_ERR = 'The specified requirements file, %s, does not exist'
   EMPTY_ERR = 'The requirements file %s is empty.'
   if(!file.exists(req)) stop(sprintf(EXIST_ERR, req))
-  
+
   content = readLines(req)
   if(length(content) == 0) stop(sprintf(EMPTY_ERR, req))
-  
+
   additional_files = grep('^ *\\-r', content, value=TRUE)
   if(length(additional_files) > 0){
     for(af in additional_files){
@@ -28,20 +28,16 @@ activate_packrat = function(){
 legal_r_package_name = function(name){
   #' @param name package name to be checked for validity
   #' @return logical vector of names being legal r package names
-  
-  #TODO: ideally this would be able to come from the regexes.R file
-  CANONICAL_PACKAGE_NAME_RE = '[a-zA-Z]{1}[a-zA-Z0-9\\.]*[a-zA-Z0-9]{1,}'
+
   return(grepl(CANONICAL_PACKAGE_NAME_RE,name))
 }
 
 process_requirements_file = function(req){
   #' @param req path to requirements file
   #' @return list with all supported requirement types
-  
+
   content = read_requirements_file(req)
-  
-  #TODO: move these to a central data store
-  COMPS = c('==','<=','>=','>','<','~=','!=')
+
   # remove comments, additional files
   content = content[!grepl('^ *#',content)]
   content = content[!grepl('^ *\\-r',content)]
@@ -67,12 +63,12 @@ process_requirements_file = function(req){
   # remaining packages
   pkg_req = content[legal_r_package_name(content)]
   content = content[!content %in% pkg_req]
-  
+
   if(length(content) > 0){
     RESOLUTION_ERR = 'Not all requirements are allowed: %s'
     stop(sprintf(RESOLUTION_ERR,paste(content,collapse=', ')))
   }
-  
+
   output = list(git = git_req,
                 svn = svn_req,
                 bioc = bioc_req,
@@ -88,7 +84,7 @@ compare_version = function(existing, target, comp){
   #' @param existing The semantic version number installed
   #' @param comp The version comparison operator
   #' @return logical indicating if semantic version matches requirements
-  
+
   if(existing == '*' | target == '*'){
     if(comp == "!=") return(FALSE) else return(TRUE)
   }
@@ -101,7 +97,7 @@ check_version = function(target,existing,comp){
   #' @param existing The currently installed version
   #' @param comp The version comparison operator
   #' @return logical indicating if existing version matches requirements
-  
+
   target = strsplit(target,"[^0-9a-zA-Z\\*]")[[1]]
   existing = strsplit(existing,"[^0-9a-zA-Z\\*]")[[1]]
   fill = '0'
@@ -126,7 +122,7 @@ get_installed = function(dummy=NULL){
   }
 }
 
-install_reqs = function(reqs, dryrun, verbose = dryrun, 
+install_reqs = function(reqs, dryrun, verbose = dryrun,
                         repo = options()$repo[1], ...){
   #' @param reqs results of process_requirements_file
   #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
@@ -134,16 +130,16 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
   #' @param repo what CRAN repository should be used?
   #' @param ... values to pass to get_installed
   #' @return data.frame of installed packages and their versions
-  
+
   INSTALL = 'Installing %s %s'
   INSTALL_VERSION = 'at version %s'
   NOT_INSTALLED = 'NOTE: %s is not currently installed.'
   BAD_VERSION = 'NOTE: %s is current installed at version %s which is not sufficient.'
   NONE_EXISTS = 'ERROR: No version exists for %s which meets requirements.'
   OTHER_FAIL = 'ERROR: Requirement %s could not be satisified for some reason.'
-  
+
   failures = 0
-  
+
   # Install git
   if(length(reqs$git) > 0){
     for(i in reqs$git){
@@ -158,7 +154,7 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
       }
     }
   }
-  
+
   if(length(reqs$svn) > 0){
     for(i in reqs$svn){
       url = sub('^svn\\+','',i)
@@ -172,7 +168,7 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
       }
     }
   }
-  
+
   if(length(reqs$bioc) > 0){
     for(i in reqs$bioc){
       url = sub('^bioc\\+','',i)
@@ -186,7 +182,7 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
       }
     }
   }
-  
+
   if(length(reqs$url) > 0){
     for(i in reqs$url){
       v = vmess(sprintf(INSTALL,i,''),verbose)
@@ -199,7 +195,7 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
       }
     }
   }
-  
+
   if(length(reqs$local) > 0){
     for(i in reqs$local){
       type = 'source'
@@ -216,9 +212,9 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
       }
     }
   }
-  
+
   installed = get_installed(...)
-  
+
   if(length(reqs$unversioned) > 0){
     for(i in reqs$unversioned){
       if(is.na(installed[i])){
@@ -234,12 +230,11 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
                    })
         }
       }
-      
+
     }
   }
-  
+
   if(length(reqs$versioned) > 0){
-    COMPS = c('==','<=','>=','>','<','~=','!=')
     for(i in reqs$versioned){
       install_needed = FALSE
       comp = sub(paste0('^.*?(',paste(COMPS,collapse='|'),').*$'),'\\1',i)
@@ -255,12 +250,12 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
       }
       if(install_needed){
         if(!is.na(installed[i])) v = vmess(sprintf(BAD_VERSION,package,installed[i]),verbose)
-        
+
         available_versions = get_available_versions(package, repo)$version
         available_compatibility = vapply(available_versions,
                                          check_version,
                                          TRUE,
-                                         target = version, 
+                                         target = version,
                                          comp = comp)
         if(!any(available_compatibility)){
           failures = failures + 1
@@ -283,7 +278,7 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
       }
     }
   }
-  
+
   if(failures > 0) stop(paste0('There were ',failures,' package(s) which could not be installed.'))
   return(0)
 }
@@ -301,16 +296,16 @@ read_archive = local({
     #' @param repo what repo should the archive be fetched from?
     #' @return data.frame
     #' @details memoized to reduce external calls needed
-    
+
     if(!is.null(archive[[repo]])) return(archive[[repo]])
     tryCatch({
       con = gzcon(url(sprintf("%s/src/contrib/Meta/archive.rds", repo), "rb"))
       con2 = gzcon(url(sprintf("%s/src/contrib/Meta/current.rds", repo), "rb"))
       current_version = readLines(sprintf('%s/src/contrib/',repo))
-      
+
       on.exit(close(con))
       on.exit(close(con2))
-      
+
       content = readRDS(con)
       content2 = readRDS(con2)
       cv = sub('^.*?>(.*?\\.tar\\.gz).*$','\\1',grep('\\.tar\\.gz',current_version,value=TRUE))
@@ -334,7 +329,7 @@ get_available_versions = function(package, repo = options()$repo[1]){
   #' @param package what package do you need versions for?
   #' @param repo what repo should be checked?
   #' @return vector of available package versions
-  
+
   output = NULL
   archive = read_archive(repo)
   info = archive[[package]]
@@ -356,7 +351,7 @@ vmess = function(x,v){
   #' @param v should the message actually be printed?
   #' @return nothing important
   #' @details To help with verbose message printing
-  
+
   if(v){
     message(x)
   }
