@@ -6,4 +6,5 @@ examples
 ^codecov\.yml$
 cran-comments\.md
 ^\.gitignore$
-requirements\\.txt
+requirements.txt
+.lintr
