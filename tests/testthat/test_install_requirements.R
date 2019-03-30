@@ -1,3 +1,11 @@
+context('general_helpers')
+
+test_that('Reading requirements files', {
+  expect_equal(read_requirements_file('testdata/requirements_1.txt'), c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice < 1", "whitechapelR >= 0.3"))
+  expect_equal(read_requirements_file('testdata/requirements_2.txt'), c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice ~= 0", "whitechapelR >= 0.3", "dplyr != 0.7.*"))
+})
+
+
 context('install_requirements')
 
 TMP_DIR = tempdir()
