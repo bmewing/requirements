@@ -16,7 +16,8 @@ LazyData: true
 Imports:
   devtools (>= 1.13.5),
   packrat (>= 0.4.9),
-  stringr
+  stringr,
+  httr
 Depends: R (>= 2.10)
 RoxygenNote: 6.1.1
 Suggests: 
