@@ -20,7 +20,6 @@ test_that('Invalid Package Requirement', {
 })
 
 test_that('Requirements Generate Correctly', {
-  browser()
   expect_error(install_requirements(file.path(TMP_DIR,'tmp_req.txt'),
                                       gen = TRUE, packrat = FALSE,
                                       dryrun = TRUE, verbose = TRUE,
