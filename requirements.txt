@@ -2,3 +2,4 @@
 devtools >= 2.0.1
 packrat
 stringr>=1.4.0
+roxygen2 == 6.1.1

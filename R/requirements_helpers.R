@@ -222,7 +222,7 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
   if(length(reqs$unversioned) > 0){
     for(i in reqs$unversioned){
       if(is.na(installed[i])){
-        available_versions = get_available_versions(i)$version
+        available_versions = get_available_versions(i)
         v = vmess(sprintf(NOT_INSTALLED,i),verbose)
         version = which.max(available_versions)
         v = vmess(sprintf(INSTALL,i,sprintf(INSTALL_VERSION,version)),verbose)
@@ -256,7 +256,7 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
       if(install_needed){
         if(!is.na(installed[i])) v = vmess(sprintf(BAD_VERSION,package,installed[i]),verbose)
         
-        available_versions = get_available_versions(package, repo)$version
+        available_versions = get_available_versions(package, repo)
         available_compatibility = vapply(available_versions,
                                          check_version,
                                          TRUE,
@@ -348,7 +348,7 @@ get_available_versions = function(package, repo = options()$repo[1]){
     info$version = versions
     output = info
   }
-  return(output)
+  return(output$version)
 }
 
 vmess = function(x,v){
