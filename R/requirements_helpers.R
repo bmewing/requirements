@@ -250,8 +250,8 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
       }
       if(install_needed){
         if(!is.na(installed[i])) v = vmess(sprintf(BAD_VERSION,package,installed[i]),verbose)
-        
-        available_versions = get_available_versions(package, repo)
+
+        available_versions = get_available_versions(package)
         available_compatibility = vapply(available_versions,
                                          check_version,
                                          TRUE,
@@ -290,61 +290,28 @@ load_packages = function(packages,verbose,dryrun){
   return(0)
 }
 
-read_archive = local({
-  archive = list()
-  function (repo = options()$repo[1]){
-    #' @param repo what repo should the archive be fetched from?
-    #' @return data.frame
-    #' @details memoized to reduce external calls needed
 
-    if(!is.null(archive[[repo]])) return(archive[[repo]])
-    tryCatch({
-      con = gzcon(url(sprintf("%s/src/contrib/Meta/archive.rds", repo), "rb"))
-      con2 = gzcon(url(sprintf("%s/src/contrib/Meta/current.rds", repo), "rb"))
-      current_version = readLines(sprintf('%s/src/contrib/',repo))
+get_available_versions = function(package) {
+  #' @param package name of package to fetch versions for
+  #' @return character vector of available package versions; NULL if package not found
+  #'
+  #' @examples
+  #' get_available_versions('mgsub')
+  #' # [1] "1.0.0" "1.5.0" "1.7.0" "1.7.1"
+  #'
+  #' get_available_versions('mgsub_fakerino')
+  #' # NULL
+  crandb_url = paste0("http://crandb.r-pkg.org/", package, "/all")
+  response = httr::GET(crandb_url)
 
-      on.exit(close(con))
-      on.exit(close(con2))
+  if (httr::status_code(response) == 404) return(NULL)
 
-      content = readRDS(con)
-      content2 = readRDS(con2)
-      cv = sub('^.*?>(.*?\\.tar\\.gz).*$','\\1',grep('\\.tar\\.gz',current_version,value=TRUE))
-      for(i in 1:nrow(content2)){
-        pkg = rownames(content2)[i]
-        latest = content2[pkg,]
-        rownames(latest) = max(grep(paste0('^',pkg,'_.*?\\.tar\\.gz$'),cv,value=TRUE))
-        content[[pkg]] = rbind(content[[pkg]],latest)
-      }
-      archive[[repo]] <<- content
-      return(content)
-    }, warning = function(e) {
-      list()
-    }, error = function(e) {
-      list()
-    })
-  }
-})
+  response_content = httr::content(response)
+  version_timeline = response_content$timeline
 
-get_available_versions = function(package, repo = options()$repo[1]){
-  #' @param package what package do you need versions for?
-  #' @param repo what repo should be checked?
-  #' @return vector of available package versions
-
-  output = NULL
-  archive = read_archive(repo)
-  info = archive[[package]]
-  if (!is.null(info)) {
-    info$repo = repo
-    info$path = rownames(info)
-    versions = strsplit(info$path,"_")
-    versions = vapply(versions,function(x){
-      sub("\\.tar\\.gz","",x[2])
-    },'version')
-    info$version = versions
-    output = info
-  }
-  return(output$version)
+  return(names(version_timeline))
 }
+
 
 vmess = function(x,v){
   #' @param x what message should be printed?
