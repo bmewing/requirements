@@ -34,13 +34,16 @@ test_that('Requirements Generate Correctly', {
 })
 
 test_that('Getting available package versions', {
-  expect_equal(get_available_versions('mgsub')[1:4],c("1.0.0", "1.5.0", "1.7.0", "1.7.1"))
-  expect_equal(get_available_versions('lexRankr')[1:7],c("0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.4.1", "0.5.0", "0.5.2"))
-  expect_equal(get_available_versions('dplyr')[1:24],c("0.1.1", "0.1.2", "0.1.3", "0.1", "0.2", "0.3.0.1", "0.3.0.2", 
-                                                       "0.3", "0.4.0", "0.4.1", "0.4.2", "0.4.3", "0.5.0", "0.7.0", 
-                                                       "0.7.1", "0.7.2", "0.7.3", "0.7.4", "0.7.5", "0.7.6", "0.7.7", 
-                                                       "0.7.8", "0.8.0", "0.8.0.1"))
+  expect_equal(get_available_versions('mgsub')[1:4],
+               c("1.0.0", "1.5.0", "1.7.0", "1.7.1"))
+  expect_equal(get_available_versions('lexRankr')[1:7],
+               c("0.1.0", "0.2.0", "0.3.0", "0.4.0", "0.4.1", "0.5.0", "0.5.2"))
+  expect_equal(get_available_versions('dplyr')[1:24],
+               c("0.1.1", "0.1.2", "0.1.3", "0.1", "0.2", "0.3.0.1", "0.3.0.2", 
+                 "0.3", "0.4.0", "0.4.1", "0.4.2", "0.4.3", "0.5.0", "0.7.0", 
+                 "0.7.1", "0.7.2", "0.7.3", "0.7.4", "0.7.5", "0.7.6", "0.7.7", 
+                 "0.7.8", "0.8.0", "0.8.0.1"))
   expect_equal(get_available_versions('readOffice')[1],c("0.2.2"))
   expect_null(get_available_versions('lexrankR'))
-  
+
 })
