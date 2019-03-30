@@ -17,7 +17,7 @@ See \code{?Sys.glob} for more details.}
 \item{eq_sym}{The equality symbol to be used when writing requirements (i.e. package>=1.0.0).
 Use \code{NULL} to not include package versions in your requirements file.}
 
-\item{rm_missing}{Should packages not installed locally be exlcuded from output?}
+\item{rm_missing}{Should packages not installed locally be excluded from output?}
 }
 \value{
 Nothing is returned.  Results are written to \code{output_path}
@@ -25,9 +25,36 @@ Nothing is returned.  Results are written to \code{output_path}
 \description{
 Generate a requirements file from existing file(s) and installed packages
 }
+\details{
+Methodology for package matching relies on string pattern matching rather than a more sophisticated method.
+This will match most 'standard' ways of referencing libraries in R code.
+The following lines of code show examples where the \code{data.table} package will be matched properly:
+\itemize{
+  \item \code{library(data.table)}
+  \item \code{library('data.table')}
+  \item \code{library(data.table, warn.conflicts = TRUE)}
+  \item \code{require(data.table)}
+  \item \code{require('data.table')}
+  \item \code{require(data.table, quietly = TRUE)}
+  \item \code{pacman::p_load(data.table)}
+  \item \code{pacman::p_load('data.table')}
+  \item \code{pacman::p_load(data.table, install = FALSE)}
+  \item \code{data.table::data.table()}
+  \item \code{data.table:::data.table()}
+}
+
+Matching will fail if:
+
+\itemize{
+  \item loading multiple packages with \code{pacman::p_load} (only the first package will be matched)
+  \item using a character vector to load; e.g. \code{pkg = 'testthat'; library(pkg, character.only = TRUE)} (will match \code{pkg} as package instead of \code{testthat})
+  \item using a string resembling a package load; e.g. \code{'library(fake.package)'} (will match \code{fake.package})
+}
+}
 \examples{
 
 \dontrun{
+
 generate_requirements('R/*.R')
 generate_requirements('R/*.R', output_path='my_requirements.txt')
 generate_requirements('R/*.R', output_path='equal_to_requirements.txt', eq_sym='>=')

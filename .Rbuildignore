@@ -7,3 +7,4 @@ examples
 cran-comments\.md
 ^\.gitignore$
 requirements\.txt
+\.lintr
