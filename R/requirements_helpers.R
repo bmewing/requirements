@@ -13,6 +13,7 @@ legal_r_package_name = function(name){
 
 
 equivalent_version = function(existing, target) {
+  #' @keywords internal
   #' Check if wildcarded target version is equivalent to existing installed version
   #'
   #' @param existing The semantic version number installed
@@ -36,6 +37,7 @@ equivalent_version = function(existing, target) {
 
 
 compare_compatible_version = function(existing, target) {
+  #' @keywords internal
   #' Check if existing installed version ~= target version
   #'
   #' @param existing The semantic version number installed
@@ -61,6 +63,7 @@ compare_compatible_version = function(existing, target) {
 
 
 compare_version = function(existing, target, comp) {
+  #' @keywords internal
   #' Check if existing requirement matches user specified target version
   #'
   #' @param existing The semantic version number installed
