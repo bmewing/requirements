@@ -9,12 +9,14 @@ globalVariables(
   )
 )
 
-install_special_req = function(elem, pattern, f, verbose){
+install_special_req = function(elem, pattern, f, dryrun, verbose){
   #' @param elem list element to be worked on
   #' @param pattern regex pattern to match on
   #' @param f the function used to install
+  #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
+  #' @param verbose should the function be explicit about activities
+  #'
   #' @return count of failures
-
   failures = 0
 
   if(length(elem) > 0){
@@ -44,9 +46,13 @@ install_local = function(pkg){
   return(NULL)
 }
 
-install_unversioned = function(elem, installed, verbose){
+install_unversioned = function(elem, installed, dryrun, verbose, repo){
   #' @param elem the list element of unversioned package requirements
   #' @param installed list of installed packages
+  #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
+  #' @param verbose should the function be explicit about activities
+  #' @param repo what CRAN repository should be used?
+  #'
   #' @return the number of failures
   failures = 0
 
@@ -87,9 +93,13 @@ is_versioned_install_needed = function(req, installed, verbose){
   return(install_needed)
 }
 
-install_versioned = function(elem, installed, verbose){
+install_versioned = function(elem, installed, dryrun, verbose, repo){
   #' @param elem the list element of unversioned package requirements
   #' @param installed list of installed packages
+  #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
+  #' @param verbose should the function be explicit about activities
+  #' @param repo what CRAN repository should be used?
+  #'
   #' @return the number of failures
   failures = 0
 
@@ -151,13 +161,13 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
 
   # Install git
   failures = failures +
-    install_special_req(reqs$git, '^git\\+', devtools::install_git, verbose) +
-    install_special_req(reqs$svn, '^svn\\+', devtools::install_svn, verbose) +
-    install_special_req(reqs$bioc, '^bioc\\+', devtools::install_bioc, verbose) +
-    install_special_req(reqs$url, '', devtools::install_url, verbose) +
-    install_special_req(reqs$local, '', install_local, verbose) +
-    install_unversioned(reqs$unversioned, verbose) +
-    install_versioned(reqs$versioned, verbose)
+    install_special_req(reqs$git, '^git\\+', devtools::install_git, dryrun, verbose) +
+    install_special_req(reqs$svn, '^svn\\+', devtools::install_svn, dryrun, verbose) +
+    install_special_req(reqs$bioc, '^bioc\\+', devtools::install_bioc, dryrun, verbose) +
+    install_special_req(reqs$url, '', devtools::install_url, dryrun, verbose) +
+    install_special_req(reqs$local, '', install_local, dryrun, verbose) +
+    install_unversioned(reqs$unversioned, dryrun, verbose, repo) +
+    install_versioned(reqs$versioned, dryrun, verbose, repo)
 
   if(failures > 0) stop(paste0('There were ',failures,' package(s) which could not be installed.'))
   return(0)
