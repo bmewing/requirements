@@ -1,24 +1,3 @@
-read_requirements_file = function(req){
-  #' @param req path to requirements file
-  #' @return vector of requirements to be processed
-
-  EXIST_ERR = 'The specified requirements file, %s, does not exist'
-  EMPTY_ERR = 'The requirements file %s is empty.'
-  if(!file.exists(req)) stop(sprintf(EXIST_ERR, req))
-
-  content = readLines(req)
-  if(length(content) == 0) stop(sprintf(EMPTY_ERR, req))
-
-  additional_files = grep('^ *\\-r', content, value=TRUE)
-  if(length(additional_files) > 0){
-    for(af in additional_files){
-      tmp = read_requirements_file(sub('^ *\\-r *','',af))
-      content = c(content, tmp)
-    }
-  }
-  return(content)
-}
-
 activate_packrat = function(){
   tryCatch(packrat::status(),
            error=function(x){packrat::init();packrat::on()})
@@ -30,53 +9,6 @@ legal_r_package_name = function(name){
   #' @return logical vector of names being legal r package names
 
   return(grepl(CANONICAL_PACKAGE_NAME_RE,name))
-}
-
-process_requirements_file = function(req){
-  #' @param req path to requirements file
-  #' @return list with all supported requirement types
-
-  content = read_requirements_file(req)
-
-  # remove comments, additional files
-  content = content[!grepl('^ *#',content)]
-  content = content[!grepl('^ *\\-r',content)]
-  # special installs
-  git_req = grep('^git[\\+:]',content,value=TRUE)
-  svn_req = grep('^svn\\+',content,value=TRUE)
-  bioc_req = grep('^bioc\\+',content,value=TRUE)
-  url_req = grep('^https?:',content,value=TRUE)
-  content = content[!content %in% c(git_req,svn_req,bioc_req,url_req)]
-  # version specific
-  version_req = grep(paste(COMPS,collapse='|'),content,value=TRUE)
-  tmp = strsplit(version_req,paste(COMPS,collapse='|'))
-  pkg_name = vapply(tmp,`[[`,"pkg",1)
-  version_req = version_req[legal_r_package_name(pkg_name)]
-  content = content[!content %in% version_req]
-  # local file can only be .tar.gz, .tgz, or .zip
-  local_source_req = grep('\\.tar\\.gz$',content,value=TRUE)
-  local_win_req = grep('\\.zip$',content,value=TRUE)
-  local_mac_req = grep('\\.tgz$',content,value=TRUE)
-  local_req = c(local_source_req,local_win_req,local_mac_req)
-  local_req = local_req[file.exists(local_req)]
-  content = content[!content %in% local_req]
-  # remaining packages
-  pkg_req = content[legal_r_package_name(content)]
-  content = content[!content %in% pkg_req]
-
-  if(length(content) > 0){
-    RESOLUTION_ERR = 'Not all requirements are allowed: %s'
-    stop(sprintf(RESOLUTION_ERR,paste(content,collapse=', ')))
-  }
-
-  output = list(git = git_req,
-                svn = svn_req,
-                bioc = bioc_req,
-                url = url_req,
-                local = local_req,
-                versioned = version_req,
-                unversioned = pkg_req)
-  return(output)
 }
 
 compare_version = function(existing, target, comp){
