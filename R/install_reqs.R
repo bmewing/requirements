@@ -3,9 +3,9 @@ install_special_req = function(elem, pattern, f, verbose){
   #' @param pattern regex pattern to match on
   #' @param f the function used to install
   #' @return count of failures
-  
+
   failures = 0
-  
+
   if(length(elem) > 0){
     for(i in elem){
       url = sub(pattern,'',i)
@@ -38,7 +38,7 @@ install_unversioned = function(elem, installed, verbose){
   #' @param installed list of installed packages
   #' @return the number of failures
   failures = 0
-  
+
   if(length(elem) > 0){
     for(i in elem){
       if(is.na(installed[i])){
@@ -56,7 +56,7 @@ install_unversioned = function(elem, installed, verbose){
       }
     }
   }
-  
+
   return(failures)
 }
 
@@ -81,13 +81,13 @@ install_versioned = function(elem, installed, verbose){
   #' @param installed list of installed packages
   #' @return the number of failures
   failures = 0
-  
+
   if(length(elem) > 0){
     for(i in elem){
       install_needed = is_versioned_install_needed(i, installed, verbose)
       if(install_needed){
         if(!is.na(installed[i])) v = vmess(sprintf(BAD_VERSION,package,installed[i]),verbose)
-        
+
         available_versions = get_available_versions(package)
         available_compatibility = vapply(available_versions,
                                          check_version,
@@ -126,86 +126,28 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
   #' @param repo what CRAN repository should be used?
   #' @param ... values to pass to get_installed
   #' @return data.frame of installed packages and their versions
-  
+
   INSTALL = 'Installing %s %s'
   INSTALL_VERSION = 'at version %s'
   NOT_INSTALLED = 'NOTE: %s is not currently installed.'
   BAD_VERSION = 'NOTE: %s is current installed at version %s which is not sufficient.'
   NONE_EXISTS = 'ERROR: No version exists for %s which meets requirements.'
   OTHER_FAIL = 'ERROR: Requirement %s could not be satisified for some reason.'
-  
+
   installed = get_installed(...)
-  
+
   failures = 0
-  
+
   # Install git
-  failures = failures + 
+  failures = failures +
     install_special_req(reqs$git, '^git\\+', devtools::install_git, verbose) +
-    install_special_req(reqs$svn, '^svn\\+', devtools::install_svn, verbose) + 
-    install_special_req(reqs$bioc, '^bioc\\+', devtools::install_bioc, verbose) + 
-    install_special_req(reqs$url, '', devtools::install_url, verbose) + 
-    install_special_req(reqs$local, '', install_local, verbose) + 
-    install_unversioned(reqs$unversioned, verbose) + 
+    install_special_req(reqs$svn, '^svn\\+', devtools::install_svn, verbose) +
+    install_special_req(reqs$bioc, '^bioc\\+', devtools::install_bioc, verbose) +
+    install_special_req(reqs$url, '', devtools::install_url, verbose) +
+    install_special_req(reqs$local, '', install_local, verbose) +
+    install_unversioned(reqs$unversioned, verbose) +
     install_versioned(reqs$versioned, verbose)
-  
-  # if(length(reqs$svn) > 0){
-  #   for(i in reqs$svn){
-  #     url = sub('^svn\\+','',i)
-  #     v = vmess(sprintf(INSTALL,url,''),verbose)
-  #     if(!dryrun){
-  #       tryCatch(devtools::install_svn(url),
-  #                error=function(x){
-  #                  failures <<- failures + 1
-  #                  message(sprintf(OTHER_FAIL,url))
-  #                })
-  #     }
-  #   }
-  # }
-  # 
-  # if(length(reqs$bioc) > 0){
-  #   for(i in reqs$bioc){
-  #     url = sub('^bioc\\+','',i)
-  #     v = vmess(sprintf(INSTALL,url,''),verbose)
-  #     if(!dryrun){
-  #       tryCatch(devtools::install_bioc(url),
-  #                error=function(x){
-  #                  failures <<- failures + 1
-  #                  message(sprintf(OTHER_FAIL,url))
-  #                })
-  #     }
-  #   }
-  # }
-  # 
-  # if(length(reqs$url) > 0){
-  #   for(i in reqs$url){
-  #     v = vmess(sprintf(INSTALL,i,''),verbose)
-  #     if(!dryrun){
-  #       tryCatch(devtools::install_url(i),
-  #                error=function(x){
-  #                  failures <<- failures + 1
-  #                  message(sprintf(OTHER_FAIL,i))
-  #                })
-  #     }
-  #   }
-  # }
-  # 
-  # if(length(reqs$local) > 0){
-  #   for(i in reqs$local){
-  #     type = 'source'
-  #     if(!grepl('\\.tar\\.gz$',i)){
-  #       type = 'binary'
-  #     }
-  #     v = vmess(sprintf(INSTALL,i,''),verbose)
-  #     if(!dryrun){
-  #       tryCatch(install.packages(i,repos=NULL,type=type),
-  #                error=function(x){
-  #                  failures <<- failures + 1
-  #                  message(sprintf(OTHER_FAIL,i))
-  #                })
-  #     }
-  #   }
-  # }
-  
+
   if(failures > 0) stop(paste0('There were ',failures,' package(s) which could not be installed.'))
   return(0)
 }
