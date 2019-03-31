@@ -41,7 +41,7 @@ capture_versioned_requirements = function(content){
   version_req = grep(paste(COMPS,collapse='|'),content,value=TRUE)
   tmp = strsplit(version_req,paste(COMPS,collapse='|'))
   pkg_name = vapply(tmp,`[[`,"pkg",1)
-  version_req = version_req[legal_r_package_name(pkg_name)]
+  version_req = version_req[legal_r_package_name(trimws(pkg_name))]
   return(version_req)
 }
 
@@ -71,7 +71,7 @@ process_requirements_file = function(req){
   output$local = capture_local_requirements(content)
   content = content[!content %in% output$local]
   # remaining packages
-  output$unversioned = content[legal_r_package_name(content)]
+  output$unversioned = content[legal_r_package_name(trimws(content))]
   content = content[!content %in% output$unversioned]
   
   if(length(content) > 0){
