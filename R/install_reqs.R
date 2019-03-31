@@ -1,4 +1,4 @@
-install_special_req = function(elem,pattern,f){
+install_special_req = function(elem, pattern, f, verbose){
   #' @param elem list element to be worked on
   #' @param pattern regex pattern to match on
   #' @param f the function used to install
@@ -33,7 +33,7 @@ install_local = function(pkg){
   return(NULL)
 }
 
-install_unversioned = function(elem, installed){
+install_unversioned = function(elem, installed, verbose){
   #' @param elem the list element of unversioned package requirements
   #' @param installed list of installed packages
   #' @return the number of failures
@@ -60,7 +60,23 @@ install_unversioned = function(elem, installed){
   return(failures)
 }
 
-install_versioned = function(elem, installed){
+is_versioned_install_needed = function(req, installed, verbose){
+  install_needed = FALSE
+  comp = sub(paste0('^.*?(',paste(COMPS,collapse='|'),').*$'),'\\1',req)
+  if(comp == "=") comp = "=="
+  split = strsplit(req,paste(COMPS,collapse='|'))[[1]]
+  package = gsub(' *','',split[1])
+  version = gsub(' *','',split[2])
+  if(is.na(installed[req])){
+    v = vmess(sprintf(NOT_INSTALLED,req),verbose)
+    install_needed = TRUE
+  } else {
+    install_needed = !check_version(version,installed[i],comp)
+  }
+  return(install_needed)
+}
+
+install_versioned = function(elem, installed, verbose){
   #' @param elem the list element of unversioned package requirements
   #' @param installed list of installed packages
   #' @return the number of failures
@@ -68,18 +84,7 @@ install_versioned = function(elem, installed){
   
   if(length(elem) > 0){
     for(i in elem){
-      install_needed = FALSE
-      comp = sub(paste0('^.*?(',paste(COMPS,collapse='|'),').*$'),'\\1',i)
-      if(comp == "=") comp = "=="
-      split = strsplit(i,paste(COMPS,collapse='|'))[[1]]
-      package = gsub(' *','',split[1])
-      version = gsub(' *','',split[2])
-      if(is.na(installed[i])){
-        v = vmess(sprintf(NOT_INSTALLED,i),verbose)
-        install_needed = TRUE
-      } else {
-        install_needed = !check_version(version,installed[i],comp)
-      }
+      install_needed = is_versioned_install_needed(i, installed, verbose)
       if(install_needed){
         if(!is.na(installed[i])) v = vmess(sprintf(BAD_VERSION,package,installed[i]),verbose)
         
@@ -135,13 +140,13 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
   
   # Install git
   failures = failures + 
-    install_special_req(reqs$git, '^git\\+', devtools::install_git) +
-    install_special_req(reqs$svn, '^svn\\+', devtools::install_svn) + 
-    install_special_req(reqs$bioc, '^bioc\\+', devtools::install_bioc) + 
-    install_special_req(reqs$url, '', devtools::install_url) + 
-    install_special_req(reqs$local, '', install_local) + 
-    install_unversioned(reqs$unversioned) + 
-    install_versioned(reqs$versioned)
+    install_special_req(reqs$git, '^git\\+', devtools::install_git, verbose) +
+    install_special_req(reqs$svn, '^svn\\+', devtools::install_svn, verbose) + 
+    install_special_req(reqs$bioc, '^bioc\\+', devtools::install_bioc, verbose) + 
+    install_special_req(reqs$url, '', devtools::install_url, verbose) + 
+    install_special_req(reqs$local, '', install_local, verbose) + 
+    install_unversioned(reqs$unversioned, verbose) + 
+    install_versioned(reqs$versioned, verbose)
   
   # if(length(reqs$svn) > 0){
   #   for(i in reqs$svn){
