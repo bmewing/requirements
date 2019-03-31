@@ -1,9 +1,9 @@
 #' @export
-install_requirements <- function(requirements = file.path(getwd(),"requirements.txt"), 
+install_requirements <- function(requirements = "requirements.txt", 
                                  packrat = FALSE, dryrun = FALSE,
                                  verbose = dryrun, repo = options()$repo[1],
                                  gen = !file.exists(requirements), 
-                                 glob_paths = file.path(dirname(requirements),"*.R"), ...) {
+                                 glob_paths = file.path(dirname(requirements),"*.R")) {
   #' @title Install project requirements
   #'
   #' @description Install (and optionally generate) required packages
@@ -16,7 +16,6 @@ install_requirements <- function(requirements = file.path(getwd(),"requirements.
   #' @param repo What repository should be used to install pacakges?
   #' @param gen Should required packages be generated?
   #' @param glob_paths Character vector of patterns for relative or absolute filepaths. Missing values will be ignored. See ?Sys.glob for more details.
-  #' @param ... Arguments to pass to helper functions called
   #'
   #' @return invisible
   #' @examples
@@ -33,7 +32,7 @@ install_requirements <- function(requirements = file.path(getwd(),"requirements.
   tmp = install_reqs(reqs = reqs,
                      dryrun = dryrun, 
                      verbose = verbose, 
-                     repo = repo, ...)
+                     repo = repo)
 
   if(dryrun) cat("NOTE: This was just a dry run. No packages have been installed.")
   return(invisible(0))
