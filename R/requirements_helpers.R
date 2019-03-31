@@ -8,7 +8,7 @@ legal_r_package_name = function(name){
   #' @param name package name to be checked for validity
   #' @return logical vector of names being legal r package names
 
-  return(grepl(CANONICAL_PACKAGE_NAME_RE,name))
+  return(grepl(CANONICAL_PACKAGE_NAME_RE_STANDALONE,name))
 }
 
 compare_version = function(existing, target, comp){

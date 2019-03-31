@@ -1,8 +1,4 @@
-mgsub >= 1.5.0
-lexRankr == 0.4.*
-readOffice ~= 0
-whitechapelR < 0.4
-dplyr != 0.7.*
+-r testdata/requirements_2.txt
 tidyr
 git+https://github.com/bmewing/requirements
 svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/
