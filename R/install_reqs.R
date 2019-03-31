@@ -1,3 +1,14 @@
+globalVariables(
+  c(
+    "INSTALL",
+    "INSTALL_VERSION",
+    "NOT_INSTALLED",
+    "BAD_VERSION",
+    "NONE_EXISTS",
+    "OTHER_FAIL"
+  )
+)
+
 install_special_req = function(elem, pattern, f, verbose){
   #' @param elem list element to be worked on
   #' @param pattern regex pattern to match on
