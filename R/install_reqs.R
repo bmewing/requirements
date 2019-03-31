@@ -88,7 +88,7 @@ is_versioned_install_needed = function(req, installed, verbose){
     v = vmess(sprintf(NOT_INSTALLED,req),verbose)
     install_needed = TRUE
   } else {
-    install_needed = !check_version(version,installed[i],comp)
+    install_needed = !check_version(version,installed[req],comp)
   }
   return(install_needed)
 }
