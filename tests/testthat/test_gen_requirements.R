@@ -103,7 +103,7 @@ test_that('append_version_requirements', {
 
 test_that('generate_requirements', {
   test_requirements_file = file.path(TMP_DIR, 'requirements.txt')
-  test_glob = file.path(TMP_DIR, '*.R')
+  test_glob = file.path(TMP_DIR, 'file_*.R')
 
   generate_requirements(test_glob, test_requirements_file, eq_sym = NULL)
 
@@ -112,4 +112,3 @@ test_that('generate_requirements', {
     sort(PACKAGES_ALL)
   )
 })
-

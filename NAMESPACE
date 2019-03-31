@@ -1,3 +1,4 @@
-export("load_requirements")
+export("install_requirements")
 export("generate_requirements")
-importFrom("utils", "installed.packages", "packageVersion")
+importFrom("utils", "installed.packages", "packageVersion", "install.packages")
+importFrom("utils", "tail")

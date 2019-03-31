@@ -9,4 +9,3 @@ PAC_RE   = sprintf('p_load\\([\'"]?(%s)[\'"]?[\\),]',  CANONICAL_PACKAGE_NAME_RE
 COLON_RE = sprintf('(%s):{2,3}[^:]',                   CANONICAL_PACKAGE_NAME_RE)
 
 PACKAGE_RES = c(LIB_RE, REQ_RE, PAC_RE, COLON_RE)
-usethis::use_data(PACKAGE_RES, internal = TRUE, overwrite = TRUE)
