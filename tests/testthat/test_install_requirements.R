@@ -1,4 +1,6 @@
-context('general_helpers')
+INST = c("mgsub"="1.5.1.3","lexRankr"="0.4.1","readOffice"="0.2.2")
+
+context('Read and Process Requirements File')
 
 test_that('read_requirements_file', {
   expect_type(read_requirements_file('testdata/requirements_1.txt'),'character')
@@ -9,12 +11,13 @@ test_that('read_requirements_file', {
                c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice ~= 0", 
                  "whitechapelR >= 0.3", "dplyr != 0.7.*"))
   expect_equal(read_requirements_file('testdata/requirements_3.txt'), 
-               c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice ~= 0", "whitechapelR < 0.4", 
-                 "dplyr != 0.7.*", "tidyr", "git+https://github.com/bmewing/requirements", 
+               c("-r testdata/requirements_2.txt", "tidyr", 
+                 "git+https://github.com/bmewing/requirements", 
                  "svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/", 
                  "bioc+release/SummarizedExperiment", 
                  "https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz", 
-                 "testdata/dummy_package.zip"))
+                 "testdata/dummy_package.zip", "mgsub >= 1.5.0", "lexRankr == 0.4.*", 
+                 "readOffice ~= 0", "whitechapelR >= 0.3", "dplyr != 0.7.*"))
 })
 
 test_that('process_requirements_file',{
@@ -27,7 +30,7 @@ test_that('process_requirements_file',{
                c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice ~= 0", "whitechapelR >= 0.3", 
                  "dplyr != 0.7.*"))
   expect_equal(process_requirements_file('testdata/requirements_3.txt')[['versioned']],
-               c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice ~= 0", "whitechapelR < 0.4", 
+               c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice ~= 0", "whitechapelR >= 0.3", 
                  "dplyr != 0.7.*"))
   expect_length(process_requirements_file('testdata/requirements_3.txt')[['unversioned']],1)
   expect_length(process_requirements_file('testdata/requirements_3.txt')[['git']],1)
@@ -36,6 +39,8 @@ test_that('process_requirements_file',{
   expect_length(process_requirements_file('testdata/requirements_3.txt')[['local']],1)
   expect_length(process_requirements_file('testdata/requirements_3.txt')[['url']],1)
 })
+
+context("Version Comparison")
 
 test_that('compare_version',{ #existing, target, comp
   expect_true(compare_version('12','9','>')) #semantic version 12 should be greater than requested 9
@@ -70,12 +75,28 @@ test_that('check_version',{ #target, existing, comp
   expect_false(check_version('*.0.2', '1.0.2', '!='))
 })
 
+context('General Helpers')
+test_that('legal_r_package_name',{
+  expect_true(legal_r_package_name('mgsub'))
+  expect_false(legal_r_package_name('2fun2quit'))
+})
 
-context('install_requirements')
+test_that('get_installed',{
+  expect_type(get_installed(),'character')
+  expect_true(length(get_installed()) > 0)
+  expect_type(get_installed(dummy=INST),'character')
+  expect_equal(get_installed(dummy=INST),INST)
+})
+
+test_that('vmess',{
+  expect_message(vmess('hi',TRUE),'hi')
+  expect_silent(vmess('hi',FALSE))
+})
+
+context('Core Install Functionality')
 
 TMP_DIR = tempdir()
 writeLines(c('library(mgsub)','require(lexRankr)'),file.path(TMP_DIR,'dummy.R'))
-INST = c("mgsub"="1.5.1.3","lexRankr"="0.4.1","readOffice"="0.2.2")
 
 test_that('Invalid Package Requirement', {
   expect_error(install_requirements('testdata/requirements_1.txt',
@@ -103,5 +124,4 @@ test_that('Getting available package versions', {
                  "0.7.8", "0.8.0", "0.8.0.1"))
   expect_equal(get_available_versions('readOffice')[1],c("0.2.2"))
   expect_null(get_available_versions('lexrankR'))
-
 })
