@@ -62,8 +62,8 @@ compare_compatible_version = function(existing, target) {
   compatible_version_wildcard = sub("(.*\\.)(.+)", "\\1*", target)
 
   # Per PEP 440 `~= 2.2` is equivalent to `>= 2.2 & == 2.*`
-  compare_version(existing, compatible_version_wildcard, "==") &
-    compare_version(existing, target, ">=")
+  compare_version(existing, compatible_version_wildcard, COMP_EXACTLY_EQUAL) &
+    compare_version(existing, target, COMP_GTE)
 }
 
 
@@ -78,24 +78,24 @@ compare_version = function(existing, target, comp) {
   #' @return logical(1) indicating if comparison is TRUE
   #'
   #' @examples
-  #' compare_version("1.0.1", "1.*", "==")
+  #' compare_version("1.0.1", "1.*", COMP_EXACTLY_EQUAL)
   #' [1] TRUE
-  #' compare_version("1.0.1", "1.*", "~=")
+  #' compare_version("1.0.1", "1.*", COMP_COMPATIBLE)
   #' [1] TRUE
-  #' compare_version("1.0.1", "1.*", "!=")
+  #' compare_version("1.0.1", "1.*", COMP_NOT_EQUAL)
   #' [1] FALSE
 
   # Push compatible version check to dedicated helper
-  if (comp == "~=") return(compare_compatible_version(existing, target))  # nolint
+  if (comp == COMP_COMPATIBLE) return(compare_compatible_version(existing, target))
 
   # Check if existing == target would satisfy comparison
-  is_equality_check = comp %in% c(">=", "<=", "~=", "==")  # nolint
+  is_equality_check = comp %in% COMP_EQUALITY
 
   # Check if `target` is equivalent to `existing` wrt wildcards
   is_equivalent_version = equivalent_version(existing, target)
 
   if (is_equality_check & is_equivalent_version) return(TRUE)
-  if (comp == "!=" & is_equivalent_version) return(FALSE)
+  if (comp == COMP_NOT_EQUAL & is_equivalent_version) return(FALSE)
 
   # TODO: definitively prove this is a valid substitution
   non_wild_card_target = gsub("*", "0", target, fixed = TRUE)

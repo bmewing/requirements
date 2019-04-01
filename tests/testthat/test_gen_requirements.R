@@ -76,7 +76,7 @@ test_that("append_version_requirements", {
   )
 
   expect_equal(
-    append_version_requirement("testthat", eq_sym = "=="),
+    append_version_requirement("testthat", eq_sym = COMP_EXACTLY_EQUAL),
     paste0("testthat==", packageVersion("testthat")),
     label = "change eq_sym"
   )
