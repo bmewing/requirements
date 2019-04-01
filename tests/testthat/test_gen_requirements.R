@@ -1,5 +1,6 @@
 context("gen_requirements")
 
+# nolint start
 TMP_DIR = tempdir()
 FILE_1 = file.path(TMP_DIR, "file_1.R")
 FILE_2 = file.path(TMP_DIR, "file_2.R")
@@ -32,6 +33,7 @@ PACKAGE_LINES_ALL = unique(PACKAGE_LINES_ALL)
 PACKAGES_1 = c("fake.package", "testthat", "dplyr", "pacman", "requirements", "devtools", "stringr", "readr")
 PACKAGES_2 = c("packrat")
 PACKAGES_ALL = c(PACKAGES_1, PACKAGES_2)
+# nolint end
 
 setup({
   invisible(

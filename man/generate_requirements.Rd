@@ -47,8 +47,10 @@ Matching will fail if:
 
 \itemize{
   \item loading multiple packages with \code{pacman::p_load} (only the first package will be matched)
-  \item using a character vector to load; e.g. \code{pkg = "testthat"; library(pkg, character.only = TRUE)} (will match \code{pkg} as package instead of \code{testthat})
-  \item using a string resembling a package load; e.g. \code{"library(fake.package)"} (will match \code{fake.package})
+  \item using a character vector to load; e.g. \code{pkg = "testthat"; library(pkg, character.only = TRUE)}
+    (will match \code{pkg} as package instead of \code{testthat})
+  \item using a string resembling a package load; e.g. \code{"library(fake.package)"}
+    (will match \code{fake.package})
 }
 }
 \examples{

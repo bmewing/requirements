@@ -2,8 +2,8 @@ read_requirements_file = function(req){
   #' @param req path to requirements file
   #' @return vector of requirements to be processed
 
-  EXIST_ERR = "The specified requirements file, %s, does not exist"
-  EMPTY_ERR = "The requirements file %s is empty."
+  EXIST_ERR = "The specified requirements file, %s, does not exist"  # nolint
+  EMPTY_ERR = "The requirements file %s is empty."  # nolint
   if (!file.exists(req)) stop(sprintf(EXIST_ERR, req))
 
   content = readLines(req)
@@ -75,7 +75,7 @@ process_requirements_file = function(req){
   content = content[!content %in% output$unversioned]
 
   if (length(content) > 0) {
-    RESOLUTION_ERR = "Not all requirements are allowed: %s"
+    RESOLUTION_ERR = "Not all requirements are allowed: %s"  # nolint
     stop(sprintf(RESOLUTION_ERR, paste(content, collapse = ", ")))
   }
 
