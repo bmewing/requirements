@@ -114,3 +114,12 @@ test_that("generate_requirements", {
     sort(PACKAGES_ALL)
   )
 })
+
+test_that('validate_eq_sym', {
+  expect_error(
+    validate_eq_sym("42"),
+    regexp = "'42'"
+  )
+  
+  expect_equal(validate_eq_sym("=="), "==")
+})
