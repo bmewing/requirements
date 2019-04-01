@@ -87,7 +87,7 @@ validate_eq_sym = function(eq_sym) {
 }
 
 
-append_version_requirement = function(pkg, eq_sym=">=", rm_missing=FALSE) {
+append_version_requirement = function(pkg, eq_sym=COMP_GTE, rm_missing=FALSE) {
   #' @keywords internal
   #' Paste version requirements to character vector of package names
   #'
@@ -113,7 +113,7 @@ append_version_requirement = function(pkg, eq_sym=">=", rm_missing=FALSE) {
 }
 
 
-append_version_requirements = function(package_names, eq_sym=">=", rm_missing=FALSE) {
+append_version_requirements = function(package_names, eq_sym=COMP_GTE, rm_missing=FALSE) {
   #' @keywords internal
   #' Paste version requirements to character vector of package names
   #'

@@ -1,14 +1,3 @@
-globalVariables(
-  c(
-    "INSTALL",
-    "INSTALL_VERSION",
-    "NOT_INSTALLED",
-    "BAD_VERSION",
-    "NONE_EXISTS",
-    "OTHER_FAIL"
-  )
-)
-
 install_special_req = function(elem, pattern, f, dryrun, verbose){
   #' @param elem list element to be worked on
   #' @param pattern regex pattern to match on
@@ -22,12 +11,12 @@ install_special_req = function(elem, pattern, f, dryrun, verbose){
   if (length(elem) > 0) {
     for (i in elem) {
       url = sub(pattern, "", i)
-      vmess(sprintf(INSTALL, url, ""), verbose)
+      vmess(sprintf(NOTE_INSTALL_PACKAGE, url, ""), verbose)
       if (!dryrun) {
         tryCatch(f(url),
                  error = function(x) {
                    failures <<- failures + 1
-                   message(sprintf(OTHER_FAIL, url))
+                   message(sprintf(ERROR_OTHER_FAILURE, url))
                  })
       }
     }
@@ -60,14 +49,14 @@ install_unversioned = function(elem, installed, dryrun, verbose, repo){
     for (i in elem) {
       if (is.na(installed[i])) {
         available_versions = get_available_versions(i)
-        vmess(sprintf(NOT_INSTALLED, i), verbose)
+        vmess(sprintf(NOTE_PACKAGE_NOT_INSTALLED, i), verbose)
         version = tail(sort(available_versions), 1)
-        vmess(sprintf(INSTALL, i, sprintf(INSTALL_VERSION, version)), verbose)
+        vmess(sprintf(NOTE_INSTALL_PACKAGE, i, sprintf(NOTE_INSTALL_PACKAGE_VERSION, version)), verbose)
         if (!dryrun) {
           tryCatch(install.packages(i, repos = repo),
                    error = function(x){
                      failures <<- failures + 1
-                     message(sprintf(OTHER_FAIL, i))
+                     message(sprintf(ERROR_OTHER_FAILURE, i))
                    })
         }
       }
@@ -79,7 +68,7 @@ install_unversioned = function(elem, installed, dryrun, verbose, repo){
 
 process_versioned_requirement = function(req){
   comp = sub(paste0("^.*?(", paste(COMPS, collapse = "|"), ").*$"), "\\1", req)
-  if (comp == "=") comp = "=="
+  if (comp == "=") comp = COMP_EXACTLY_EQUAL
   split = strsplit(req, paste(COMPS, collapse = "|"))[[1]]
   package = gsub(" *", "", split[1])
   version = gsub(" *", "", split[2])
@@ -91,7 +80,7 @@ process_versioned_requirement = function(req){
 is_versioned_install_needed = function(package, version, comp, installed, verbose){
   install_needed = FALSE
   if (is.na(installed[package])) {
-    vmess(sprintf(NOT_INSTALLED, package), verbose)
+    vmess(sprintf(NOTE_PACKAGE_NOT_INSTALLED, package), verbose)
     install_needed = TRUE
   } else {
     install_needed = !compare_version(installed[package], version, comp)
@@ -120,7 +109,7 @@ install_versioned = function(elem, installed, dryrun, verbose, repo){
 
       if (install_needed) {
         if (!is.na(installed[package])) {
-          vmess(sprintf(BAD_VERSION, package, installed[package]), verbose)
+          vmess(sprintf(NOTE_BAD_PACKAGE_VERSION, package, installed[package]), verbose)
         }
 
         available_versions = get_available_versions(package)
@@ -133,11 +122,13 @@ install_versioned = function(elem, installed, dryrun, verbose, repo){
 
         if (!any(available_compatibility)) {
           failures = failures + 1
-          vmess(sprintf(NONE_EXISTS, package), verbose)
+          vmess(sprintf(ERROR_NO_PACKAGE_EXISTS, package), verbose)
         } else {
           latest_compatible = names(which.max(which(available_compatibility)))
-          vmess(sprintf(INSTALL, package,
-                            sprintf(INSTALL_VERSION, latest_compatible)), verbose)
+          vmess(sprintf(NOTE_INSTALL_PACKAGE, package,
+                        sprintf(NOTE_INSTALL_PACKAGE_VERSION,
+                                latest_compatible)),
+                verbose)
           if (!dryrun) {
             tryCatch(devtools::install_version(package,
                                                version = latest_compatible,
@@ -145,7 +136,7 @@ install_versioned = function(elem, installed, dryrun, verbose, repo){
                                                quiet = TRUE),
                      error = function(x){
                        failures <<- failures + 1
-                       message(sprintf(OTHER_FAIL, i))
+                       message(sprintf(ERROR_OTHER_FAILURE, i))
                      })
           }
         }
@@ -163,13 +154,6 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
   #' @param repo what CRAN repository should be used?
   #' @param ... values to pass to get_installed
   #' @return data.frame of installed packages and their versions
-
-  INSTALL = "Installing %s %s"
-  INSTALL_VERSION = "at version %s"
-  NOT_INSTALLED = "NOTE: %s is not currently installed."
-  BAD_VERSION = "NOTE: %s is current installed at version %s which is not sufficient."
-  NONE_EXISTS = "ERROR: No version exists for %s which meets requirements."
-  OTHER_FAIL = "ERROR: Requirement %s could not be satisified for some reason."
 
   installed = get_installed(...)
 

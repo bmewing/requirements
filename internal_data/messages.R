@@ -1,0 +1,6 @@
+NOTE_INSTALL_PACKAGE = "Installing %s %s"
+NOTE_INSTALL_PACKAGE_VERSION = "at version %s"
+NOTE_PACKAGE_NOT_INSTALLED = "NOTE: %s is not currently installed."
+NOTE_BAD_PACKAGE_VERSION = "NOTE: %s is current installed at version %s which is not sufficient."
+ERROR_NO_PACKAGE_EXISTS = "ERROR: No version exists for %s which meets requirements."
+ERROR_OTHER_FAILURE = "ERROR: Requirement %s could not be satisified for some reason."

@@ -10,3 +10,9 @@ PAC_RE   = sprintf('p_load\\([\'"]?(%s)[\'"]?[\\),]',  CANONICAL_PACKAGE_NAME_RE
 COLON_RE = sprintf('(%s):{2,3}[^:]',                   CANONICAL_PACKAGE_NAME_RE)
 
 PACKAGE_RES = c(LIB_RE, REQ_RE, PAC_RE, COLON_RE)
+
+GIT_EXTRACT = "^git[\\+:]" #pattern for recognizing git requirements in .txt
+GIT_REPLACE = "^git\\+"    #pattern for preparing git req for install
+SVN_EXT_REP = "^svn\\+"    #single pattern for svn
+BIO_EXT_REP = "^bioc\\+"   #single pattern for bioconductor installs
+URL_EXTRACT = "^https?:"   #pattern for recognizing url requirements in .txt
