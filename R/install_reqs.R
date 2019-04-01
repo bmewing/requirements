@@ -77,18 +77,24 @@ install_unversioned = function(elem, installed, dryrun, verbose, repo){
   return(failures)
 }
 
-is_versioned_install_needed = function(req, installed, verbose){
-  install_needed = FALSE
+process_versioned_requirement = function(req){
   comp = sub(paste0('^.*?(',paste(COMPS,collapse='|'),').*$'),'\\1',req)
   if(comp == "=") comp = "=="
   split = strsplit(req,paste(COMPS,collapse='|'))[[1]]
   package = gsub(' *','',split[1])
   version = gsub(' *','',split[2])
-  if(is.na(installed[req])){
-    v = vmess(sprintf(NOT_INSTALLED,req),verbose)
+  return(list(package = package,
+              version = version,
+              comp = comp))
+}
+
+is_versioned_install_needed = function(package, version, comp, installed, verbose){
+  install_needed = FALSE
+  if(is.na(installed[package])){
+    v = vmess(sprintf(NOT_INSTALLED,package),verbose)
     install_needed = TRUE
   } else {
-    install_needed = !check_version(version,installed[req],comp)
+    install_needed = !check_version(version,installed[package],comp)
   }
   return(install_needed)
 }
@@ -105,9 +111,17 @@ install_versioned = function(elem, installed, dryrun, verbose, repo){
 
   if(length(elem) > 0){
     for(i in elem){
-      install_needed = is_versioned_install_needed(i, installed, verbose)
+      processed_element = process_versioned_requirement(i)
+      package = processed_element$package
+      version = processed_element$version
+      comp = processed_element$comp
+      
+      install_needed = is_versioned_install_needed(package, version, comp, installed, verbose)
+      
       if(install_needed){
-        if(!is.na(installed[i])) v = vmess(sprintf(BAD_VERSION,package,installed[i]),verbose)
+        if(!is.na(installed[package])){
+          v = vmess(sprintf(BAD_VERSION,package,installed[package]),verbose)
+        }
 
         available_versions = get_available_versions(package)
         available_compatibility = vapply(available_versions,
