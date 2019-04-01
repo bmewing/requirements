@@ -16,13 +16,13 @@
 #' The following lines of code show examples where the \code{data.table} package will be matched properly:
 #' \itemize{
 #'   \item \code{library(data.table)}
-#'   \item \code{library('data.table')}
+#'   \item \code{library("data.table")}
 #'   \item \code{library(data.table, warn.conflicts = TRUE)}
 #'   \item \code{require(data.table)}
-#'   \item \code{require('data.table')}
+#'   \item \code{require("data.table")}
 #'   \item \code{require(data.table, quietly = TRUE)}
 #'   \item \code{pacman::p_load(data.table)}
-#'   \item \code{pacman::p_load('data.table')}
+#'   \item \code{pacman::p_load("data.table")}
 #'   \item \code{pacman::p_load(data.table, install = FALSE)}
 #'   \item \code{data.table::data.table()}
 #'   \item \code{data.table:::data.table()}
@@ -32,8 +32,8 @@
 #'
 #' \itemize{
 #'   \item loading multiple packages with \code{pacman::p_load} (only the first package will be matched)
-#'   \item using a character vector to load; e.g. \code{pkg = 'testthat'; library(pkg, character.only = TRUE)} (will match \code{pkg} as package instead of \code{testthat})
-#'   \item using a string resembling a package load; e.g. \code{'library(fake.package)'} (will match \code{fake.package})
+#'   \item using a character vector to load; e.g. \code{pkg = "testthat"; library(pkg, character.only = TRUE)} (will match \code{pkg} as package instead of \code{testthat})
+#'   \item using a string resembling a package load; e.g. \code{"library(fake.package)"} (will match \code{fake.package})
 #' }
 #'
 #'
@@ -41,14 +41,14 @@
 #'
 #' \dontrun{
 #'
-#' generate_requirements('R/*.R')
-#' generate_requirements('R/*.R', output_path='my_requirements.txt')
-#' generate_requirements('R/*.R', output_path='equal_to_requirements.txt', eq_sym='>=')
-#' generate_requirements('R/*.R', output_path='versionless_requirements.txt', eq_sym=NULL)
-#' generate_requirements('R/*.R', output_path='installed_requirements.txt', rm_missing=TRUE)
+#' generate_requirements("R/*.R")
+#' generate_requirements("R/*.R", output_path = "my_requirements.txt")
+#' generate_requirements("R/*.R", output_path = "equal_to_requirements.txt", eq_sym = ">=")
+#' generate_requirements("R/*.R", output_path = "versionless_requirements.txt", eq_sym = NULL)
+#' generate_requirements("R/*.R", output_path = "installed_requirements.txt", rm_missing = TRUE)
 #' }
 #' @export
-generate_requirements = function(glob_paths='*.R', output_path='requirements.txt', eq_sym='>=', rm_missing=FALSE) {
+generate_requirements = function(glob_paths="*.R", output_path="requirements.txt", eq_sym=">=", rm_missing=FALSE) {
   file_paths = Sys.glob(glob_paths)
   package_text_lines = read_package_lines_from_files(file_paths)
 

@@ -1,23 +1,23 @@
-context('gen_requirements')
+context("gen_requirements")
 
 TMP_DIR = tempdir()
-FILE_1 = file.path(TMP_DIR, 'file_1.R')
-FILE_2 = file.path(TMP_DIR, 'file_2.R')
-FILE_3 = file.path(TMP_DIR, 'file_3.R')
+FILE_1 = file.path(TMP_DIR, "file_1.R")
+FILE_2 = file.path(TMP_DIR, "file_2.R")
+FILE_3 = file.path(TMP_DIR, "file_3.R")
 
 FILE_TEXT_1 = c(
-  'library(fake.package, quietly = TRUE)',
-  'require(testthat)',
-  'pacman::p_load("dplyr")',
-  'requirements::requirements()',
-  'devtools:::fake_function()',
-  'stringr::function(readr:::function)',
-  'dt[, x := 1]\n'
+  "library(fake.package, quietly = TRUE)",
+  "require(testthat)",
+  "pacman::p_load('dplyr')",
+  "requirements::requirements()",
+  "devtools:::fake_function()",
+  "stringr::function(readr:::function)",
+  "dt[, x := 1]\n"
 )
 
-FILE_TEXT_2 = c('library(packrat)',
-                'library(fake_package)\n')
-FILE_TEXT_3 = ''
+FILE_TEXT_2 = c("library(packrat)",
+                "library(fake_package)\n")
+FILE_TEXT_3 = ""
 
 FILES = c(FILE_1, FILE_2, FILE_3)
 FILE_TEXTS = list(FILE_TEXT_1, FILE_TEXT_2, FILE_TEXT_3)
@@ -29,8 +29,8 @@ PACKAGE_LINES_3 = character(0)
 PACKAGE_LINES_ALL = c(PACKAGE_LINES_1, PACKAGE_LINES_2, PACKAGE_LINES_3)
 PACKAGE_LINES_ALL = unique(PACKAGE_LINES_ALL)
 
-PACKAGES_1 = c('fake.package', 'testthat', 'dplyr', 'pacman', 'requirements', 'devtools', 'stringr', 'readr')
-PACKAGES_2 = c('packrat')
+PACKAGES_1 = c("fake.package", "testthat", "dplyr", "pacman", "requirements", "devtools", "stringr", "readr")
+PACKAGES_2 = c("packrat")
 PACKAGES_ALL = c(PACKAGES_1, PACKAGES_2)
 
 setup({
@@ -43,67 +43,67 @@ teardown({
   unlink(TMP_DIR)
 })
 
-test_that('read_package_lines_from_files', {
+test_that("read_package_lines_from_files", {
   expect_equal(read_package_lines_from_files(FILES), PACKAGE_LINES_ALL)
 })
 
-test_that('match_packages', {
+test_that("match_packages", {
   expect_equal(
     sort(match_packages(PACKAGE_LINES_ALL, PACKAGE_RES)),
     sort(PACKAGES_ALL)
   )
 })
 
-test_that('safe_package_version', {
+test_that("safe_package_version", {
   expect_equal(
-    safe_package_version(''),
+    safe_package_version(""),
     NA_character_,
-    label = 'return NA for fake package'
+    label = "return NA for fake package"
   )
 
   expect_equal(
-    safe_package_version('testthat'),
-    packageVersion('testthat'),
-    label = 'defaults'
+    safe_package_version("testthat"),
+    packageVersion("testthat"),
+    label = "defaults"
   )
 })
 
-test_that('append_version_requirements', {
+test_that("append_version_requirements", {
   expect_equal(
-    append_version_requirement('testthat'),
-    paste0('testthat>=', packageVersion('testthat')),
-    label = 'defaults'
+    append_version_requirement("testthat"),
+    paste0("testthat>=", packageVersion("testthat")),
+    label = "defaults"
   )
 
   expect_equal(
-    append_version_requirement('testthat', eq_sym = '=='),
-    paste0('testthat==', packageVersion('testthat')),
-    label = 'change eq_sym'
+    append_version_requirement("testthat", eq_sym = "=="),
+    paste0("testthat==", packageVersion("testthat")),
+    label = "change eq_sym"
   )
 
   expect_equal(
-    append_version_requirement('f', rm_missing = TRUE),
+    append_version_requirement("f", rm_missing = TRUE),
     NA_character_,
-    label = 'single fake package rm_missing = TRUE (return NA)'
+    label = "single fake package rm_missing = TRUE (return NA)"
   )
 
   expect_equal(
-    append_version_requirements(c('*', 'testthat'), rm_missing = TRUE),
-    paste0('testthat>=', packageVersion('testthat')),
-    label = 'fake package rm_missing = TRUE'
+    append_version_requirements(c("*", "testthat"), rm_missing = TRUE),
+    paste0("testthat>=", packageVersion("testthat")),
+    label = "fake package rm_missing = TRUE"
   )
 
   expect_equal(
-    append_version_requirements(c('*', 'testthat'), rm_missing = FALSE),
-    c('*', paste0('testthat>=', packageVersion('testthat'))),
-    label = 'fake package rm_missing = FALSE'
+    append_version_requirements(c("*", "testthat"), rm_missing = FALSE),
+    c("*", paste0("testthat>=", packageVersion("testthat"))),
+    label = "fake package rm_missing = FALSE"
   )
 })
 
 
-test_that('generate_requirements', {
-  test_requirements_file = file.path(TMP_DIR, 'requirements.txt')
-  test_glob = file.path(TMP_DIR, 'file_*.R')
+test_that("generate_requirements", {
+  test_requirements_file = file.path(TMP_DIR, "requirements.txt")
+  test_glob = file.path(TMP_DIR, "file_*.R")
 
   generate_requirements(test_glob, test_requirements_file, eq_sym = NULL)
 
