@@ -1,5 +1,5 @@
 
-read_package_lines_from_file = function(file_path, filter_words=c('::', 'library', 'require', 'p_load')) {
+read_package_lines_from_file = function(file_path, filter_words) {
   #' @keywords internal
   #' Pull package referencing lines from R file
   #'
@@ -9,14 +9,14 @@ read_package_lines_from_file = function(file_path, filter_words=c('::', 'library
   #' @return Character vector containing package referencing lines from \code{file_path}.
   all_file_lines = readLines(file_path)
 
-  package_lines_re = paste(filter_words, collapse = '|')
+  package_lines_re = paste(filter_words, collapse = "|")
   package_lines = all_file_lines[grep(package_lines_re, all_file_lines)]
 
   return(unique(package_lines))
 }
 
 
-read_package_lines_from_files = function(file_paths, filter_words=c('::', 'library', 'require', 'p_load')) {
+read_package_lines_from_files = function(file_paths, filter_words=c("::", "library", "require", "p_load")) {
   #' @keywords internal
   #' Pull package referencing lines from R files
   #'
@@ -24,7 +24,7 @@ read_package_lines_from_files = function(file_paths, filter_words=c('::', 'libra
   #' @param filter_words Character vector of 'words' to use as filter for package references.
   #'
   #' @return Character vector containing package referencing lines from \code{file_paths}.
-  package_lines_list = lapply(file_paths, read_package_lines_from_file)
+  package_lines_list = lapply(file_paths, read_package_lines_from_file, filter_words = filter_words)
   uniq_package_lines = unique(unlist(package_lines_list))
 
   return(uniq_package_lines)
@@ -87,7 +87,7 @@ validate_eq_sym = function(eq_sym) {
 }
 
 
-append_version_requirement = function(pkg, eq_sym='>=', rm_missing=FALSE) {
+append_version_requirement = function(pkg, eq_sym=">=", rm_missing=FALSE) {
   #' @keywords internal
   #' Paste version requirements to character vector of package names
   #'
@@ -96,7 +96,8 @@ append_version_requirement = function(pkg, eq_sym='>=', rm_missing=FALSE) {
   #'   Use \code{NULL} to not include package versions in your requirements file.
   #' @param rm_missing Should packages not installed locally be exlcuded from output?
   #'
-  #' @return Character vector of versioned package names; \code{NA} if package unavailable and \code{isTRUE(rm_missing)}.
+  #' @return Character vector of versioned package names;
+  #'   \code{NA} if package unavailable and \code{isTRUE(rm_missing)}.
   pkg_version = safe_package_version(pkg)
 
   if (rm_missing & is.na(pkg_version)) {
@@ -112,7 +113,7 @@ append_version_requirement = function(pkg, eq_sym='>=', rm_missing=FALSE) {
 }
 
 
-append_version_requirements = function(package_names, eq_sym='>=', rm_missing=FALSE) {
+append_version_requirements = function(package_names, eq_sym=">=", rm_missing=FALSE) {
   #' @keywords internal
   #' Paste version requirements to character vector of package names
   #'
@@ -124,13 +125,13 @@ append_version_requirements = function(package_names, eq_sym='>=', rm_missing=FA
   #' @return Character vector of versioned package names.
   versioned_packages = vapply(package_names, function(p) {
     append_version_requirement(p, eq_sym, rm_missing)
-  }, character(1), USE.NAMES = FALSE)
+  }, character(1), USE.NAMES = FALSE)  # nolint
 
   return(versioned_packages[!is.na(versioned_packages)])
 }
 
 
-write_requirements_file = function(package_requirements, file_path='requirements.txt') {
+write_requirements_file = function(package_requirements, file_path="requirements.txt") {
   #' @keywords internal
   #' Helper for writing requirements to file
   #'
