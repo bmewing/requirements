@@ -94,7 +94,7 @@ is_versioned_install_needed = function(package, version, comp, installed, verbos
     v = vmess(sprintf(NOT_INSTALLED,package),verbose)
     install_needed = TRUE
   } else {
-    install_needed = !check_version(version,installed[package],comp)
+    install_needed = !compare_version(installed[package], version, comp)
   }
   return(install_needed)
 }
@@ -115,20 +115,20 @@ install_versioned = function(elem, installed, dryrun, verbose, repo){
       package = processed_element$package
       version = processed_element$version
       comp = processed_element$comp
-      
+
       install_needed = is_versioned_install_needed(package, version, comp, installed, verbose)
-      
+
       if(install_needed){
         if(!is.na(installed[package])){
           v = vmess(sprintf(BAD_VERSION,package,installed[package]),verbose)
         }
 
         available_versions = get_available_versions(package)
-        available_compatibility = vapply(available_versions,
-                                         check_version,
-                                         TRUE,
-                                         target = version,
-                                         comp = comp)
+
+        available_compatibility = vapply(available_versions, function(available_version) {
+          compare_version(available_version, version, comp)
+        }, logical(1))
+
         if(!any(available_compatibility)){
           failures = failures + 1
           v = vmess(sprintf(NONE_EXISTS,package),verbose)
