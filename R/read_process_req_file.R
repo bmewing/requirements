@@ -26,13 +26,13 @@ remove_comments_from_req = function(content) {
 }
 
 capture_special_installs = function(content) {
-  git_req = grep("^git[\\+:]", content, value = TRUE)
-  svn_req = grep("^svn\\+", content, value = TRUE)
-  bioc_req = grep("^bioc\\+", content, value = TRUE)
-  url_req = grep("^https?:", content, value = TRUE)
+  git_req = grep(GIT_EXTRACT, content, value = TRUE)
+  svn_req = grep(SVN_EXT_REP, content, value = TRUE)
+  bio_req = grep(BIO_EXT_REP, content, value = TRUE)
+  url_req = grep(URL_EXTRACT, content, value = TRUE)
   output = list(git = git_req,
                 svn = svn_req,
-                bioc = bioc_req,
+                bioc = bio_req,
                 url = url_req)
   return(output)
 }

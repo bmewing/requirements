@@ -161,15 +161,15 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
 
   # Install git
   failures = failures +
-    install_special_req(reqs$git, "^git\\+", devtools::install_git, dryrun, verbose) +
-    install_special_req(reqs$svn, "^svn\\+", devtools::install_svn, dryrun, verbose) +
-    install_special_req(reqs$bioc, "^bioc\\+", devtools::install_bioc, dryrun, verbose) +
+    install_special_req(reqs$git, GIT_REPLACE, devtools::install_git, dryrun, verbose) +
+    install_special_req(reqs$svn, SVN_EXT_REP, devtools::install_svn, dryrun, verbose) +
+    install_special_req(reqs$bioc, BIO_EXT_REP, devtools::install_bioc, dryrun, verbose) +
     install_special_req(reqs$url, "", devtools::install_url, dryrun, verbose) +
     install_special_req(reqs$local, "", install_local, dryrun, verbose) +
     install_unversioned(reqs$unversioned, installed, dryrun, verbose, repo) +
     install_versioned(reqs$versioned, installed, dryrun, verbose, repo)
 
-  if (failures > 0) stop(paste0("There were ", failures, " package(s) which could not be installed."))
+  if (failures > 0) stop(sprintf(ERROR_FAILURE_COUNT, failures))
 
   return(0)
 }

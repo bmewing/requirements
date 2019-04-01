@@ -23,7 +23,8 @@ the function}
 
 \item{gen}{Should required packages be generated?}
 
-\item{glob_paths}{Character vector of patterns for relative or absolute filepaths. Missing values will be ignored. See ?Sys.glob for more details.}
+\item{glob_paths}{Character vector of patterns for relative or absolute filepaths.
+Missing values will be ignored. See ?Sys.glob for more details.}
 }
 \value{
 invisible
