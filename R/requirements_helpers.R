@@ -4,45 +4,104 @@ activate_packrat = function(){
   return(NULL)
 }
 
+
 legal_r_package_name = function(name){
   #' @param name package name to be checked for validity
   #' @return logical vector of names being legal r package names
 
-  return(grepl(CANONICAL_PACKAGE_NAME_RE,name))
+  return(grepl(CANONICAL_PACKAGE_NAME_RE_STANDALONE,name))
 }
 
-compare_version = function(existing, target, comp){
-  #' @param target The semantic version number targeted
+
+equivalent_version = function(existing, target) {
+  #' @keywords internal
+  #' Check if wildcarded target version is equivalent to existing installed version
+  #'
   #' @param existing The semantic version number installed
-  #' @param comp The version comparison operator
-  #' @return logical indicating if semantic version matches requirements
+  #' @param target The semantic version number targeted by requirements file
+  #'
+  #' @return TRUE if versions are equivalent; otherwise FALSE
+  #'
+  #' @examples
+  #' equivalent_version('1.0.1', '1.*')
+  #' # [1] TRUE
+  #' equivalent_version('1.9.1', '1.*')
+  #' # [1] TRUE
+  #' equivalent_version('2.0.0', '1.*')
+  #' # [1] FALSE
+  #'
+  # Convert wildcarded versions to regex
+  re_target = glob2rx(target)
 
-  if(existing == '*' | target == '*'){
-    if(comp == "!=") return(FALSE) else return(TRUE)
-  }
-  if(comp == "~=") comp = "=="
-  return(get(comp)(existing, target))
+  grepl(re_target, existing)
 }
 
-check_version = function(target,existing,comp){
-  #' @param target The version targeted for installation
-  #' @param existing The currently installed version
-  #' @param comp The version comparison operator
-  #' @return logical indicating if existing version matches requirements
 
-  target = strsplit(target,"[^0-9a-zA-Z\\*]")[[1]]
-  existing = strsplit(existing,"[^0-9a-zA-Z\\*]")[[1]]
-  fill = '0'
-  if(target[length(target)] == '*' | comp == '~=') fill = '*'
-  if(length(target) > length(existing)){
-    existing = c(existing,rep(fill,length(target) - length(existing)))
-  } else {
-    target = c(target,rep(fill,length(existing) - length(target)))
-  }
-  to_compare = cbind(existing,target,comp)
-  results = mapply(compare_version,to_compare[,1],to_compare[,2],to_compare[,3])
-  if(comp == '!=') return(any(results)) else return(all(results))
+compare_compatible_version = function(existing, target) {
+  #' @keywords internal
+  #' Check if existing installed version ~= target version
+  #'
+  #' @param existing The semantic version number installed
+  #' @param target The semantic version number targeted by requirements file
+  #'
+  #' @return TRUE if versions are compatible; otherwise FALSE
+  #'
+  #' @examples
+  #' compare_compatible_version('1.1.1', '1.*')
+  #' # [1] TRUE
+  #' compare_compatible_version('1.1.1', '1.0')
+  #' # [1] TRUE
+  #' compare_compatible_version('1.1.1', '2.0')
+  #' # [1] FALSE
+
+  # Replace trailing version specifier with wildcard (i.e. 2.2 -> 2.*)
+  compatible_version_wildcard = sub('(.*\\.)(.+)', '\\1*', target)
+
+  # Per PEP 440 `~= 2.2` is equivalent to `>= 2.2 & == 2.*`
+  compare_version(existing, compatible_version_wildcard, '==') &
+    compare_version(existing, target, '>=')
 }
+
+
+compare_version = function(existing, target, comp) {
+  #' @keywords internal
+  #' Check if existing requirement matches user specified target version
+  #'
+  #' @param existing The semantic version number installed
+  #' @param target The semantic version number targeted by requirements file
+  #' @param comp The version comparison operator
+  #'
+  #' @return logical(1) indicating if comparison is TRUE
+  #'
+  #' @examples
+  #' compare_version('1.0.1', '1.*', '==')
+  #' [1] TRUE
+  #' compare_version('1.0.1', '1.*', '~=')
+  #' [1] TRUE
+  #' compare_version('1.0.1', '1.*', '!=')
+  #' [1] FALSE
+
+  # Push compatible version check to dedicated helper
+  if (comp == "~=") return(compare_compatible_version(existing, target))
+
+  # Check if existing == target would satisfy comparison
+  is_equality_check = comp %in% c('>=', '<=', '~=', '==')
+
+  # Check if `target` is equivalent to `existing` wrt wildcards
+  is_equivalent_version = equivalent_version(existing, target)
+
+  if (is_equality_check & is_equivalent_version) return(TRUE)
+  if (comp == "!=" & is_equivalent_version) return(FALSE)
+
+  # TODO: definitively prove this is a valid substitution
+  non_wild_card_target = gsub('*', '0', target, fixed = TRUE)
+
+  existing_version = package_version(existing)
+  target_version = package_version(non_wild_card_target)
+
+  get(comp)(existing_version, target_version)
+}
+
 
 get_installed = function(dummy=NULL){
   #' @param dummy dummy data to return for testing purposes
@@ -53,6 +112,7 @@ get_installed = function(dummy=NULL){
     return(installed.packages()[,3])
   }
 }
+
 
 get_available_versions = function(package) {
   #' @param package name of package to fetch versions for
