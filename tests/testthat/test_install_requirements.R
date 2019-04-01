@@ -1,4 +1,4 @@
-INST = c("mgsub" = "1.5.1.3", "lexRankr" = "0.4.1", "readOffice" = "0.2.2")
+INST = c("mgsub" = "1.5.1.3", "lexRankr" = "0.4.1", "readOffice" = "0.2.2")  # nolint
 
 context("Read and Process Requirements File")
 
@@ -80,9 +80,9 @@ test_that("compare_version", {
   expect_true(compare_version("1.0.1", "1.*",   COMP_EXACTLY_EQUAL))
   expect_true(compare_version("1.0.1", "1.0.1", COMP_GTE))
   expect_true(compare_version("1.0.1", "1.*",   COMP_GTE))
-  expect_true(compare_version("1.0.1", "0.9",   COMP_GT ))
+  expect_true(compare_version("1.0.1", "0.9",   COMP_GT))
   expect_true(compare_version("1.0.1", "1.*",   COMP_LTE))
-  expect_true(compare_version("1.0.1", "1.5",   COMP_LT ))
+  expect_true(compare_version("1.0.1", "1.5",   COMP_LT))
   expect_true(compare_version("1.0.1", "1.5",   COMP_NOT_EQUAL))
   expect_true(compare_version("1.0.1", "2.*",   COMP_NOT_EQUAL))
   expect_true(compare_version("1.0.1", "*.0.2", COMP_NOT_EQUAL))
@@ -91,9 +91,9 @@ test_that("compare_version", {
   expect_false(compare_version("2.0.1", "1.*",   COMP_EXACTLY_EQUAL))
   expect_false(compare_version("0.0.1", "1.0.1", COMP_GTE))
   expect_false(compare_version("0.0.1", "1.*",   COMP_GTE))
-  expect_false(compare_version("0.9.0", "0.9",   COMP_GT ))
+  expect_false(compare_version("0.9.0", "0.9",   COMP_GT))
   expect_false(compare_version("2.0.1", "1.*",   COMP_LTE))
-  expect_false(compare_version("2.0.1", "1.5",   COMP_LT ))
+  expect_false(compare_version("2.0.1", "1.5",   COMP_LT))
   expect_false(compare_version("1.5.0", "1.5",   COMP_NOT_EQUAL))
   expect_false(compare_version("2.1.0", "2.*",   COMP_NOT_EQUAL))
   expect_false(compare_version("1.0.2", "*.0.2", COMP_NOT_EQUAL))
@@ -122,7 +122,7 @@ test_that("vmess", {
 
 context("Core Install Functionality")
 
-TMP_DIR = tempdir()
+TMP_DIR = tempdir()  # nolint
 writeLines(c("library(mgsub)", "require(lexRankr)"), file.path(TMP_DIR, "dummy.R"))
 
 test_that("Invalid Package Requirement", {
