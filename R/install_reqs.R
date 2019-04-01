@@ -186,5 +186,6 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
     install_versioned(reqs$versioned, installed, dryrun, verbose, repo)
 
   if (failures > 0) stop(paste0("There were ", failures, " package(s) which could not be installed."))
+
   return(0)
 }
