@@ -9,10 +9,9 @@ FILE_3 = file.path(TMP_DIR, "file_3.R")
 FILE_TEXT_1 = c(
   "library(fake.package, quietly = TRUE)",
   "require(testthat)",
-  "pacman::p_load('dplyr')",
   "requirements::requirements()",
   "devtools:::fake_function()",
-  "stringr::function(readr:::function)",
+  "stringr::stringr_function(readr:::readr_function)",
   "dt[, x := 1]\n"
 )
 
@@ -30,7 +29,7 @@ PACKAGE_LINES_3 = character(0)
 PACKAGE_LINES_ALL = c(PACKAGE_LINES_1, PACKAGE_LINES_2, PACKAGE_LINES_3)
 PACKAGE_LINES_ALL = unique(PACKAGE_LINES_ALL)
 
-PACKAGES_1 = c("fake.package", "testthat", "dplyr", "pacman", "requirements", "devtools", "stringr", "readr")
+PACKAGES_1 = c("fake.package", "testthat", "requirements", "devtools", "stringr", "readr")
 PACKAGES_2 = c("packrat")
 PACKAGES_ALL = c(PACKAGES_1, PACKAGES_2)
 # nolint end
@@ -45,17 +44,13 @@ teardown({
   unlink(TMP_DIR)
 })
 
-test_that("read_package_lines_from_files", {
-  expect_equal(read_package_lines_from_files(character(0)), character(0))
-
-  expect_equal(read_package_lines_from_files(FILES), PACKAGE_LINES_ALL)
-})
 
 test_that("match_packages", {
-  expect_equal(match_packages(character(0), PACKAGE_RES), character(0))
+  expect_equal(match_packages_from_files(character(0)), character(0))
 
+  input_files = c(FILE_1, FILE_2, FILE_3)
   expect_equal(
-    sort(match_packages(PACKAGE_LINES_ALL, PACKAGE_RES)),
+    sort(match_packages_from_files(input_files)),
     sort(PACKAGES_ALL)
   )
 })

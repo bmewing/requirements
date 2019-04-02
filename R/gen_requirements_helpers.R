@@ -1,68 +1,18 @@
 
-read_package_lines_from_file = function(file_path, filter_words) {
+
+match_packages_from_files = function(file_paths) {
   #' @keywords internal
-  #' Pull package referencing lines from R file
-  #'
-  #' @param file_path String containg path to file to check for package references.
-  #' @param filter_words Character vector of 'words' to use as filter for package references.
-  #'
-  #' @return Character vector containing package referencing lines from \code{file_path}.
-  all_file_lines = readLines(file_path)
-
-  package_lines_re = paste(filter_words, collapse = "|")
-  package_lines = all_file_lines[grep(package_lines_re, all_file_lines)]
-
-  return(unique(package_lines))
-}
-
-
-read_package_lines_from_files = function(file_paths, filter_words=c("::", "library", "require", "p_load")) {
-  #' @keywords internal
-  #' Pull package referencing lines from R files
+  #' Match valid package names from files
   #'
   #' @param file_paths Character vector of files to check for package references.
-  #' @param filter_words Character vector of 'words' to use as filter for package references.
-  #'
-  #' @return Character vector containing package referencing lines from \code{file_paths}.
-  if (length(file_paths) == 0) return(character(0))
-
-  package_lines_list = lapply(file_paths, read_package_lines_from_file, filter_words = filter_words)
-  uniq_package_lines = unique(unlist(package_lines_list))
-
-  return(uniq_package_lines)
-}
-
-
-match_package = function(candidate_lines, package_regex) {
-  #' @keywords internal
-  #' Match valid package names from character vector of lines of R code
-  #'
-  #' @param candidate_lines Character vector of code lines to search for package references.
-  #' @param package_regex Regex as string to be used to match package references in code.
   #'
   #' @return Character vector of package names matched.
-  lib_matches_list = stringr::str_match_all(candidate_lines, package_regex)
-  lib_matches_str = unlist(lapply(lib_matches_list, function(m) m[, 2]))
-  lib_matches_str = lib_matches_str[!is.na(lib_matches_str)]
+  deps_list = lapply(file_paths, packrat:::fileDependencies)
 
-  return(unique(lib_matches_str))
-}
+  if (length(deps_list) == 0) return(character(0))
 
-
-match_packages = function(candidate_lines, package_regexes) {
-  #' @keywords internal
-  #' Match valid package names from character vector of lines of R code
-  #'
-  #' @param candidate_lines Character vector of code lines to search for package references.
-  #' @param package_regexes Character vector of regexes used to match package references in code.
-  #'
-  #' @return Character vector of package names matched.
-  if (length(candidate_lines) == 0) return(character(0))
-
-  match_list = lapply(package_regexes, function(r) match_package(candidate_lines, r))
-  uniq_matches = unique(unlist(match_list))
-
-  return(uniq_matches)
+  deps_vec = unique(unlist(deps_list))
+  return(deps_vec[legal_r_package_name(deps_vec)])
 }
 
 
@@ -82,6 +32,7 @@ safe_package_version = function(pkg) {
     }
   )
 }
+
 
 validate_eq_sym = function(eq_sym) {
   #' @keywords internal

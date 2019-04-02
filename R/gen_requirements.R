@@ -52,9 +52,8 @@
 #' @export
 generate_requirements = function(glob_paths="*.R", output_path="requirements.txt", eq_sym=">=", rm_missing=FALSE) {
   file_paths = Sys.glob(glob_paths)
-  package_text_lines = read_package_lines_from_files(file_paths)
 
-  matched_packages = match_packages(package_text_lines, PACKAGE_RES)
+  matched_packages = match_packages_from_files(file_paths)
   sorted_matched_packages = sort(matched_packages)
 
   versioned_matched_packages = append_version_requirements(sorted_matched_packages, eq_sym, rm_missing)
