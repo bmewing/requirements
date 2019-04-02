@@ -122,6 +122,6 @@ test_that("validate_eq_sym", {
   )
 
   expect_equal(validate_eq_sym("=="), "==")
-  
+
   expect_equal(validate_eq_sym("="), "==")
 })
