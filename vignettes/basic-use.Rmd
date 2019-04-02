@@ -1,0 +1,94 @@
+---
+title: "Basic Use"
+author: "Mark Ewing"
+date: "2019-04-02"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Creating a Requirements File
+
+Because a requirements file is a simple text file, It's easy to create.
+
+#### From RStudio
+
+File > New File > Text File
+Then save the file as requirements.txt
+
+#### Linux and Unix-like Systems (e.g. Macs)
+
+touch requirements.txt
+
+## Adding Your First Requirement
+
+Requirements are specified one per line. The last line of the file should be empty.
+
+### CRAN Packages
+
+Packages available through the standard CRAN can be specified as an unversioned or as a versioned requirement. Unversioned requirements will always have the most recent version of the package installed. Versioned requirements will install the most recent version of a package which satisfies requirements.
+
+* Unversioned: (package)
+* Versioned: (package) (comparison) (version)
+
+Valid comparison operators are:
+
+* To specify an exact version of a package, use `==`
+* To set a minimum version of a package, use `>=` or `>`
+* To set a maximum version of a package, use `<=` or `<`
+* To specify a single incompatible version of a package, use `!=`
+* To set a compatible version of a package, use `~=`
+
+Versions may be specified using wildcards (e.g. 1.*). Use of the wildcard modifies the behavior of a comparison operator.
+
+* `mgsub == 1.*` is equivalent to `mgsub ~= 1.0`
+* `mgsub >= 1.*` is equivalent to `mgsub >= 1.0`
+* `mgsub > 1.*` is equivalent to `mgsub >= 2.0`
+* `mgsub != 1.*` is equivalent to `mgsub < 1 & mgsub > 1` (though multiple specifications is not permitted)
+
+### Git packages
+
+If your code is dependent on a package only available via git, it may be specified one of two ways. The first is to prepend the standard url with `git+`, the other is to use the git protocol. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+
+* `git+https://www.github.com/bmewing/mgsub.git`
+* `git://github.com/bmewing/mgsub.git`
+
+### SVN packages
+
+If your code is dependent on a package only available via svn, it may be specified by prepending the standard url with `svn+`. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+
+* `svn+https://github.com/hadley/httr/branches/oauth`
+
+### Bioconductor packages
+
+If your code is dependent on a package only available via Bioconductor, it may be specified by prepending the package name with `bioc+`. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+
+* `bioc+SummarizedExperiment`
+* `bioc+3.3/SummarizedExperiment`
+
+### Built packages from a URL
+
+If your code is dependent on a package only available via a specific website, it may be specified by simply including the URL, beginning with `http(s)://`. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+
+* `https://github.com/hadley/stringr/archive/master.tar.gz`
+
+### Build packages available locally
+
+If your code is dependent on a package that is only available locally, it may be specified by simply including the path to the file. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+
+* `some_package.tar.gz`
+
+## Additional capabilities
+
+You may reference other requirements files by prepending the path to those files with `-r`. These additional requirements will be added to those already listed in the file.
+
+* `-r extras/more_requirements.txt`
