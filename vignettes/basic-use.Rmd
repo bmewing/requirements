@@ -23,8 +23,8 @@ File is saved as `~/requirements.txt`
 ```
 tidyr
 devtools >= 1.13.5
-git+https://github.com/bmewing/requirements
-svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/
+git+https://github.com/AdamSpannbauer/lexRankr
+svn+svn://scm.r-forge.r-project.org/svnroot/daewr/pkg/mixexp
 bioc+release/SummarizedExperiment
 https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz
 testdata/my_package.tar.gz
@@ -39,10 +39,10 @@ This is an unversioned package requirement. It indicates that the project relies
 `devtools >= 1.13.5`
 This is a versioned package requirement. It indicates that the project relies on having `devtools` installed with a minimum version of `1.13.5`. When it is installed, the latest available version, as long as it is at least `1.13.5`, will be used. The specific version is installed using `remotes::install_version`.
 
-`git+https://github.com/bmewing/requirements`
+`git+https://github.com/AdamSpannbauer/lexRankr`
 This is a git specific package requirement. It indicates that the project relies on a package available only through the git VCS system, in this case from github.com. When it is installed, the most up-to-date code in the repository will be installed. The installation happens by passing the url into `remotes::install_git`.
 
-`svn+https://github.com/bmewing/mgsub`
+`svn+svn://scm.r-forge.r-project.org/svnroot/daewr/pkg/mixexp`
 This is a svn specific package requirement. It indicates that the project relies on a package available only through the SVN VCS system, in this case from R-Forge. When it is installed, the most up-to-date code in the repository will be installed. The installation happens by passing the url into `remotes::install_svn`.
 
 `bioc+release/SummarizedExperiment`
@@ -95,14 +95,14 @@ Versions may be specified using wildcards (e.g. 1.*). Use of the wildcard modifi
 
 If your code is dependent on a package only available via git, it may be specified one of two ways. The first is to prepend the standard url with `git+`, the other is to use the git protocol. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
 
-* `git+https://www.github.com/bmewing/mgsub.git`
-* `git://github.com/bmewing/mgsub.git`
+* `git+https://github.com/AdamSpannbauer/lexRankr`
+* `git://github.com/AdamSpannbauer/lexRankr`
 
 ### SVN packages
 
 If your code is dependent on a package only available via svn, it may be specified by prepending the standard url with `svn+`. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
 
-* `svn+https://github.com/hadley/httr/branches/oauth`
+* `svn+svn://scm.r-forge.r-project.org/svnroot/daewr/pkg/mixexp`
 
 ### Bioconductor packages
 
@@ -118,7 +118,7 @@ If your code is dependent on a package only available via Bioconductor, it may b
 
 If your code is dependent on a package only available via a specific website, it may be specified by simply including the URL, beginning with `http(s)://`. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
 
-* `https://github.com/hadley/stringr/archive/master.tar.gz`
+* `https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz`
 
 ### Build packages available locally
 
