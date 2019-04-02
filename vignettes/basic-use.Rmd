@@ -16,20 +16,52 @@ knitr::opts_chunk$set(
 )
 ```
 
+## Example Requirements File
+
+File is saved as `~/requirements.txt`
+
+```
+tidyr
+devtools >= 1.13.5
+git+https://github.com/bmewing/requirements
+svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/
+bioc+release/SummarizedExperiment
+https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz
+testdata/my_package.tar.gz
+-r extras/requirements_2.txt
+```
+
+### Example Breakdown
+
+`tidyr`
+This is an unversioned package requirement. It indicates that the project relies on having *any* version of `tidyr` available. When it is installed, the latest available version will be selected. The package is installed using `install.packages`.
+
+`devtools >= 1.13.5`
+This is a versioned package requirement. It indicates that the project relies on having `devtools` installed with a minimum version of `1.13.5`. When it is installed, the latest available version, as long as it is at least `1.13.5`, will be used. The specific version is installed using `remotes::install_version`.
+
+`git+https://github.com/bmewing/requirements`
+This is a git specific package requirement. It indicates that the project relies on a package available only through the git VCS system, in this case from github.com. When it is installed, the most up-to-date code in the repository will be installed. The installation happens by passing the url into `remotes::install_git`.
+
+`svn+https://github.com/bmewing/mgsub`
+This is a svn specific package requirement. It indicates that the project relies on a package available only through the SVN VCS system, in this case from R-Forge. When it is installed, the most up-to-date code in the repository will be installed. The installation happens by passing the url into `remotes::install_svn`.
+
+`bioc+release/SummarizedExperiment`
+This is a Bioconductor specific package requirement. It indicates that the project relies on a package available only through Bioconductor. This can string can contain a specific version or commit as noted below to control which version of code is installed. Despite this, the only supported versioning is `==` as you'll always install the same version. The installation happens by passing the url into `remotes::install_bioc`.
+
+`https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz`
+This unqualified url indicates the project requires a package available at the location. The url is passed into `remotes::install_url`
+
+`testdata/my_package.tar.gz`
+This is a local package requirement. The file type must be one of the supported package types (`.tar.gz`, `tar.bz2`, `.tar`, `tgz2`, `.zip`, `.tbz`). Note the use of a relative path to ensure the requirement is portable between systems. This would allow a project to use a custom package by including it in the project path. If the file exists, it will be installed with `remotes::install_local`.
+
+`-r extras/requirements_2.txt`
+Because this line begins with `-r` it indicates additional requirements in another file. The contents of `extras/requirements2.txt` would be read and included in the installation.
+
 ## Creating a Requirements File
 
-Because a requirements file is a simple text file, It's easy to create.
+A requirements file is a simple text file. It requires no headers or special formatting. It should be saved in the project directory, typically at the top level of the project directory and named `requirements.txt`.
 
-#### From RStudio
-
-File > New File > Text File
-Then save the file as requirements.txt
-
-#### Linux and Unix-like Systems (e.g. Macs)
-
-touch requirements.txt
-
-## Adding Your First Requirement
+## Requirement Details
 
 Requirements are specified one per line. The last line of the file should be empty.
 
@@ -70,7 +102,10 @@ If your code is dependent on a package only available via svn, it may be specifi
 
 ### Bioconductor packages
 
-If your code is dependent on a package only available via Bioconductor, it may be specified by prepending the package name with `bioc+`. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+If your code is dependent on a package only available via Bioconductor, it may be specified by prepending the package name with `bioc+`. Bioconductor packages can be provided as either unversioned or versioned. See the manual page for `remotes::install_bioc`, specifically the `repo` argument for more details.
+
+* Unversioned: bioc+(package)
+* Versioned: bioc+(username:password@)(release/)repo(#commit])
 
 * `bioc+SummarizedExperiment`
 * `bioc+3.3/SummarizedExperiment`
