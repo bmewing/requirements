@@ -57,11 +57,15 @@ This is a local package requirement. The file type must be one of the supported 
 `-r extras/requirements_2.txt`
 Because this line begins with `-r` it indicates additional requirements in another file. The contents of `extras/requirements2.txt` would be read and included in the installation.
 
+## Installing Requirements
+
+Installing the requirements in `requirements.txt` is as simple as calling `r requirements::install_requirements()`. This will parse all the requirements listed in the file and install them as needed.
+
 ## Creating a Requirements File
 
-A requirements file is a simple text file. It requires no headers or special formatting. It should be saved in the project directory, typically at the top level of the project directory and named `requirements.txt`.
+A requirements file is a simple text file. It requires no headers or special formatting. It should be saved in the project directory, typically at the top level of the project directory and named `requirements.txt`. You can either create it by hand or you can use the convenient `r requirements::generate_requirements()` function to grab all the packages used in your code and automatically generate the file for you. You an then edit the file to match your actual needs.
 
-## Requirement Details
+## Additional Details about Requirements
 
 Requirements are specified one per line. The last line of the file should be empty.
 
