@@ -26,6 +26,7 @@ usethis::use_data(
   ERROR_FAILURE_COUNT,          # Error message for counting the number of packages which failed to install
   CANONICAL_PACKAGE_NAME_RE_STANDALONE,  # String contain regex to match valid package names by CRAN standards
   PACKAGE_RES,                # Character vector of regexes to match package names used in code (i.e. `library(name)`)
+  AUTO_GEN_COMMENTS,          # Comments to be placed at the top of auto-generated requirements files
   internal = TRUE,
   overwrite = TRUE
 )

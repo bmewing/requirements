@@ -46,10 +46,14 @@ teardown({
 })
 
 test_that("read_package_lines_from_files", {
+  expect_equal(read_package_lines_from_files(character(0)), character(0))
+
   expect_equal(read_package_lines_from_files(FILES), PACKAGE_LINES_ALL)
 })
 
 test_that("match_packages", {
+  expect_equal(match_packages(character(0), PACKAGE_RES), character(0))
+
   expect_equal(
     sort(match_packages(PACKAGE_LINES_ALL, PACKAGE_RES)),
     sort(PACKAGES_ALL)
@@ -102,6 +106,14 @@ test_that("append_version_requirements", {
   )
 })
 
+test_that("write_requirements_file", {
+  test_requirements_file = file.path(TMP_DIR, "test_blank_requirements.txt")
+
+  expect_message(
+    write_requirements_file(character(0), test_requirements_file),
+    regexp = "Writing a blank requirements file"
+  )
+})
 
 test_that("generate_requirements", {
   test_requirements_file = file.path(TMP_DIR, "requirements.txt")
@@ -111,7 +123,7 @@ test_that("generate_requirements", {
 
   expect_equal(
     readLines(test_requirements_file),
-    sort(PACKAGES_ALL)
+    c(AUTO_GEN_COMMENTS, sort(PACKAGES_ALL))
   )
 })
 
