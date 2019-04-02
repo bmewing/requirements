@@ -46,10 +46,14 @@ teardown({
 })
 
 test_that("read_package_lines_from_files", {
+  expect_equal(read_package_lines_from_files(character(0)), character(0))
+
   expect_equal(read_package_lines_from_files(FILES), PACKAGE_LINES_ALL)
 })
 
 test_that("match_packages", {
+  expect_equal(match_packages(character(0), PACKAGE_RES), character(0))
+
   expect_equal(
     sort(match_packages(PACKAGE_LINES_ALL, PACKAGE_RES)),
     sort(PACKAGES_ALL)
