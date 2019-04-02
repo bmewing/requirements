@@ -155,6 +155,8 @@ write_requirements_file = function(package_requirements, file_path="requirements
   #'
   #' @param package_requirements Character vector of requirements to write to file.
   #' @param file_path Path to write requirements to.
+  if (length(package_requirements) == 0) message("No dependencies found. Writing a blank requirements file.")
+
   requirements_file_contents = c(AUTO_GEN_COMMENTS, package_requirements)
 
   writeLines(requirements_file_contents, file_path)

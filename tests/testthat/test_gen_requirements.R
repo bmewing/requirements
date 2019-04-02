@@ -106,6 +106,14 @@ test_that("append_version_requirements", {
   )
 })
 
+test_that("write_requirements_file", {
+  test_requirements_file = file.path(TMP_DIR, "test_blank_requirements.txt")
+
+  expect_message(
+    write_requirements_file(character(0), test_requirements_file),
+    regexp = "Writing a blank requirements file"
+  )
+})
 
 test_that("generate_requirements", {
   test_requirements_file = file.path(TMP_DIR, "requirements.txt")
