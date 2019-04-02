@@ -85,8 +85,9 @@ validate_eq_sym = function(eq_sym) {
   #'
   #' @param eq_sym The equality symbol to be used when writing requirements (i.e. package>=1.0.0).
   #' @return None; exception is raised if invalid symbol
+  stopifnot(length(eq_sym) == 1)
 
-  eq_sym[eq_sym == "="] = COMP_EXACTLY_EQUAL
+  if (eq_sym == "=") return(COMP_EXACTLY_EQUAL)
 
   if (!(eq_sym %in% COMPS)) {
     comps_str = paste(COMPS, collapse = "', '")

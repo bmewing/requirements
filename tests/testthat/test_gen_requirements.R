@@ -122,6 +122,8 @@ test_that("validate_eq_sym", {
   )
 
   expect_equal(validate_eq_sym("=="), "==")
-
   expect_equal(validate_eq_sym("="), "==")
+
+  expect_error(validate_eq_sym(c("==", "==")),
+               regexp = "length\\(eq_sym\\) == 1 is not TRUE")
 })
