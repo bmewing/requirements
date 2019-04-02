@@ -24,6 +24,8 @@ read_package_lines_from_files = function(file_paths, filter_words=c("::", "libra
   #' @param filter_words Character vector of 'words' to use as filter for package references.
   #'
   #' @return Character vector containing package referencing lines from \code{file_paths}.
+  if (length(file_paths) == 0) return(character(0))
+
   package_lines_list = lapply(file_paths, read_package_lines_from_file, filter_words = filter_words)
   uniq_package_lines = unique(unlist(package_lines_list))
 
@@ -55,6 +57,8 @@ match_packages = function(candidate_lines, package_regexes) {
   #' @param package_regexes Character vector of regexes used to match package references in code.
   #'
   #' @return Character vector of package names matched.
+  if (length(candidate_lines) == 0) return(character(0))
+
   match_list = lapply(package_regexes, function(r) match_package(candidate_lines, r))
   uniq_matches = unique(unlist(match_list))
 
