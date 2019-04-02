@@ -115,11 +115,11 @@ test_that("generate_requirements", {
   )
 })
 
-test_that('validate_eq_sym', {
+test_that("validate_eq_sym", {
   expect_error(
     validate_eq_sym("42"),
     regexp = "'42'"
   )
-  
+
   expect_equal(validate_eq_sym("=="), "==")
 })

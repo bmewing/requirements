@@ -86,7 +86,7 @@ validate_eq_sym = function(eq_sym) {
   #' @param eq_sym The equality symbol to be used when writing requirements (i.e. package>=1.0.0).
   #' @return None; exception is raised if invalid symbol
   if (!(eq_sym %in% COMPS)) {
-    comps_str = paste(COMPS, collapse="', '")
+    comps_str = paste(COMPS, collapse = "', '")
     error_msg = "'%s' is not a valid comparison operator; valid operators are: '%s'"
     fmt_error_msg = sprintf(error_msg, eq_sym, comps_str)
     stop(fmt_error_msg)
