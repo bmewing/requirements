@@ -111,7 +111,7 @@ test_that("generate_requirements", {
 
   expect_equal(
     readLines(test_requirements_file),
-    sort(PACKAGES_ALL)
+    c(AUTO_GEN_COMMENTS, sort(PACKAGES_ALL))
   )
 })
 
