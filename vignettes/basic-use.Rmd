@@ -1,0 +1,133 @@
+---
+title: "Basic Use"
+author: "Mark Ewing"
+date: "2019-04-02"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Example Requirements File
+
+File is saved as `~/requirements.txt`
+
+```
+tidyr
+devtools >= 1.13.5
+git+https://github.com/AdamSpannbauer/lexRankr
+svn+svn://scm.r-forge.r-project.org/svnroot/daewr/pkg/mixexp
+bioc+release/SummarizedExperiment
+https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz
+testdata/my_package.tar.gz
+-r extras/requirements_2.txt
+```
+
+### Example Breakdown
+
+`tidyr`
+This is an unversioned package requirement. It indicates that the project relies on having *any* version of `tidyr` available. When it is installed, the latest available version will be selected. The package is installed using `install.packages`.
+
+`devtools >= 1.13.5`
+This is a versioned package requirement. It indicates that the project relies on having `devtools` installed with a minimum version of `1.13.5`. When it is installed, the latest available version, as long as it is at least `1.13.5`, will be used. The specific version is installed using `remotes::install_version`.
+
+`git+https://github.com/AdamSpannbauer/lexRankr`
+This is a git specific package requirement. It indicates that the project relies on a package available only through the git VCS system, in this case from github.com. When it is installed, the most up-to-date code in the repository will be installed. The installation happens by passing the url into `remotes::install_git`.
+
+`svn+svn://scm.r-forge.r-project.org/svnroot/daewr/pkg/mixexp`
+This is a svn specific package requirement. It indicates that the project relies on a package available only through the SVN VCS system, in this case from R-Forge. When it is installed, the most up-to-date code in the repository will be installed. The installation happens by passing the url into `remotes::install_svn`.
+
+`bioc+release/SummarizedExperiment`
+This is a Bioconductor specific package requirement. It indicates that the project relies on a package available only through Bioconductor. This can string can contain a specific version or commit as noted below to control which version of code is installed. Despite this, the only supported versioning is `==` as you'll always install the same version. The installation happens by passing the url into `remotes::install_bioc`.
+
+`https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz`
+This unqualified url indicates the project requires a package available at the location. The url is passed into `remotes::install_url`
+
+`testdata/my_package.tar.gz`
+This is a local package requirement. The file type must be one of the supported package types (`.tar.gz`, `tar.bz2`, `.tar`, `tgz2`, `.zip`, `.tbz`). Note the use of a relative path to ensure the requirement is portable between systems. This would allow a project to use a custom package by including it in the project path. If the file exists, it will be installed with `remotes::install_local`.
+
+`-r extras/requirements_2.txt`
+Because this line begins with `-r` it indicates additional requirements in another file. The contents of `extras/requirements2.txt` would be read and included in the installation.
+
+## Installing Requirements
+
+Installing the requirements in `requirements.txt` is as simple as calling `requirements::install_requirements()`. This will parse all the requirements listed in the file and install them as needed.
+
+## Creating a Requirements File
+
+A requirements file is a simple text file. It requires no headers or special formatting. It should be saved in the project directory, typically at the top level of the project directory and named `requirements.txt`. You can either create it by hand or you can use the convenient `requirements::generate_requirements()` function to grab all the packages used in your code and automatically generate the file for you. You an then edit the file to match your actual needs.
+
+## Additional Details about Requirements
+
+Requirements are specified one per line. The last line of the file should be empty.
+
+### CRAN Packages
+
+Packages available through the standard CRAN can be specified as an unversioned or as a versioned requirement. Unversioned requirements will always have the most recent version of the package installed. Versioned requirements will install the most recent version of a package which satisfies requirements.
+
+* Unversioned: (package)
+* Versioned: (package) (comparison) (version)
+
+Valid comparison operators are:
+
+* To specify an exact version of a package, use `==`
+* To set a minimum version of a package, use `>=` or `>`
+* To set a maximum version of a package, use `<=` or `<`
+* To specify a single incompatible version of a package, use `!=`
+* To set a compatible version of a package, use `~=`
+
+Versions may be specified using wildcards (e.g. 1.*). Use of the wildcard modifies the behavior of a comparison operator.
+
+* `mgsub == 1.*` is equivalent to `mgsub ~= 1.0`
+* `mgsub >= 1.*` is equivalent to `mgsub >= 1.0`
+* `mgsub > 1.*` is equivalent to `mgsub >= 2.0`
+* `mgsub != 1.*` is equivalent to `mgsub < 1 & mgsub > 1` (though multiple specifications is not permitted)
+
+### Git packages
+
+If your code is dependent on a package only available via git, it may be specified one of two ways. The first is to prepend the standard url with `git+`, the other is to use the git protocol. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+
+* `git+https://github.com/AdamSpannbauer/lexRankr`
+* `git://github.com/AdamSpannbauer/lexRankr`
+
+### SVN packages
+
+If your code is dependent on a package only available via svn, it may be specified by prepending the standard url with `svn+`. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+
+* `svn+svn://scm.r-forge.r-project.org/svnroot/daewr/pkg/mixexp`
+
+### Bioconductor packages
+
+If your code is dependent on a package only available via Bioconductor, it may be specified by prepending the package name with `bioc+`. Bioconductor packages can be provided as either unversioned or versioned. See the manual page for `remotes::install_bioc`, specifically the `repo` argument for more details.
+
+* Unversioned: bioc+(package)
+* Versioned: bioc+(username:password@)(release/)repo(#commit])
+
+* `bioc+SummarizedExperiment`
+* `bioc+3.3/SummarizedExperiment`
+
+### Built packages from a URL
+
+If your code is dependent on a package only available via a specific website, it may be specified by simply including the URL, beginning with `http(s)://`. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+
+* `https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz`
+
+### Build packages available locally
+
+If your code is dependent on a package that is only available locally, it may be specified by simply including the path to the file. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+
+* `some_package.tar.gz`
+
+## Additional capabilities
+
+You may reference other requirements files by prepending the path to those files with `-r`. These additional requirements will be added to those already listed in the file.
+
+* `-r extras/more_requirements.txt`
