@@ -72,3 +72,22 @@ test_that("capture_local_requirements", {
   expect_equal(capture_local_requirements(read_requirements_file("testdata/requirements_3.txt")),
                c("testdata/dummy_package.zip"))
 })
+
+test_that("validate_versioning", {
+  expect_true(validate_versioning("mgsub >= 1.4"))
+  expect_true(validate_versioning("mgsub> 1.4"))
+  expect_true(validate_versioning("mgsub <=1.4"))
+  expect_true(validate_versioning("mgsub<1.4"))
+  expect_true(validate_versioning("mgsub==1.4"))
+  expect_true(validate_versioning("mgsub=1.4"))
+  expect_true(validate_versioning("mgsub!=1.4"))
+  expect_true(validate_versioning("mgsub~=1.4"))
+  expect_true(validate_versioning("mgsub==1.*"))
+  expect_true(validate_versioning("mgsub==1.*.1.0.15.*"))
+  expect_true(validate_versioning("mgsub==994.*.181.0.15.*"))
+  expect_false(validate_versioning("mgsub>>1.4"))
+  expect_false(validate_versioning("mgsub=*=1.4"))
+  expect_false(validate_versioning("mgsub>=1"))
+  expect_false(validate_versioning("mgsub>"))
+  expect_false(validate_versioning("mgsub>=1.4..5"))
+})
