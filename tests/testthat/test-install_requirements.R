@@ -83,20 +83,11 @@ test_that("get_installed", {
 })
 
 test_that("vmess", {
-  expect_message(vmess("hi", TRUE), "hi")
+  expect_message(vmess("hi", TRUE), regexp = "hi")
   expect_silent(vmess("hi", FALSE))
 })
 
 context("Core Install Functionality")
-
-TMP_DIR = tempdir()  # nolint
-writeLines(c("library(mgsub)", "require(lexRankr)"), file.path(TMP_DIR, "dummy.R"))
-
-test_that("Invalid Package Requirement", {
-  expect_error(install_reqs(reqs = req1,
-                            dryrun = TRUE, verbose = FALSE,
-                            dummy = INST))
-})
 
 test_that("Getting available package versions", {
   expect_equal(get_available_versions("mgsub")[1:4],
