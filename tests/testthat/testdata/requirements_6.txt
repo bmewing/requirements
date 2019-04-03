@@ -1,0 +1,4 @@
+# to test illegal package names
+readOffice < 10.0
+mgsub >= 0.0
+dummy_package >= 0.0

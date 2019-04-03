@@ -36,16 +36,16 @@ install_unversioned = function(elem, installed, dryrun, verbose, repo){
 
   for (i in elem) {
     available_versions = get_available_versions(i)
-    if(is.null(available_versions)){
+    if (is.null(available_versions)){
       failures = failures + 1
       vmess(sprintf(ERROR_NO_PACKAGE_EXISTS, i), TRUE)
     } else if (is.na(installed[i])) {
       vmess(sprintf(NOTE_PACKAGE_NOT_INSTALLED, i), verbose)
       version = tail(sort(available_versions), 1)
       vmess(sprintf(NOTE_INSTALL_PACKAGE, i, sprintf(NOTE_INSTALL_PACKAGE_VERSION, version)), verbose)
-      failures = failures + install_cran_package(package = i, 
-                                                 version = NULL, 
-                                                 repo = repo, 
+      failures = failures + install_cran_package(package = i,
+                                                 version = NULL,
+                                                 repo = repo,
                                                  dryrun = dryrun)
     }
   }
@@ -56,7 +56,7 @@ install_unversioned = function(elem, installed, dryrun, verbose, repo){
 install_cran_package = function(package, version, repo, dryrun){
   failures = 0
   if (!dryrun) {
-    tryCatch(devtools::install_version(package,
+    tryCatch(remotes::install_version(package,
                                        version = version,
                                        repos = repo,
                                        quiet = TRUE),
@@ -69,9 +69,11 @@ install_cran_package = function(package, version, repo, dryrun){
 }
 
 process_versioned_requirement = function(req){
-  comp = sub(paste0("^.*?(", paste(COMPS, collapse = "|"), ").*$"), "\\1", req)
+  comps = paste0("=|", paste(COMPS, collapse = "|"))
+  pattern = "^.*?(=|%s).*$"
+  comp = sub(sprintf(pattern, comps), "\\1", req)
   if (comp == "=") comp = COMP_EXACTLY_EQUAL
-  split = strsplit(req, paste(COMPS, collapse = "|"))[[1]]
+  split = strsplit(req, comps)[[1]]
   package = gsub(" *", "", split[1])
   version = gsub(" *", "", split[2])
   return(list(package = package,
@@ -90,8 +92,21 @@ is_versioned_install_needed = function(package, version, comp, installed, verbos
   return(install_needed)
 }
 
-install_if_compatible_available = function(available_compatibility, package, repo, verbose, dryrun){
+install_if_compat_available = function(processed_element, repo, verbose, dryrun){
   failures = 0
+
+  package = processed_element$package
+  version = processed_element$version
+  comp = processed_element$comp
+
+  available_versions = get_available_versions(package)
+
+  available_compatibility = vapply(available_versions,
+                                   FUN = compare_version,
+                                   FUN.VALUE = logical(1),
+                                   target = version,
+                                   comp = comp)
+
   if (!any(available_compatibility)) {
     failures = failures + 1
     vmess(sprintf(ERROR_NO_PACKAGE_EXISTS, package), TRUE)
@@ -116,30 +131,21 @@ install_versioned = function(elem, installed, dryrun, verbose, repo){
   #' @return the number of failures
   failures = 0
 
-  if (length(elem) > 0) {
-    for (i in elem) {
-      processed_element = process_versioned_requirement(i)
-      package = processed_element$package
-      version = processed_element$version
-      comp = processed_element$comp
+  for (i in elem) {
+    processed_element = process_versioned_requirement(i)
+    package = processed_element$package
+    version = processed_element$version
+    comp = processed_element$comp
 
-      install_needed = is_versioned_install_needed(package, version, comp, installed, verbose)
-      if(!install_needed) next
+    install_needed = is_versioned_install_needed(package, version, comp, installed, verbose)
+    if (!install_needed) next
 
-      if (!is.na(installed[package])) {
-        vmess(sprintf(NOTE_BAD_PACKAGE_VERSION, package, installed[package]), verbose)
-      }
-
-      available_versions = get_available_versions(package)
-
-      available_compatibility = vapply(available_versions,
-                                       FUN = compare_version,
-                                       FUN.VALUE = logical(1),
-                                       target = version,
-                                       comp = comp)
-      package_failure = install_if_compatible_available(available_compatibility, package, repo, verbose, dryrun)
-      failures = failures + package_failure
+    if (!is.na(installed[package])) {
+      vmess(sprintf(NOTE_BAD_PACKAGE_VERSION, package, installed[package]), verbose)
     }
+
+    package_failure = install_if_compat_available(processed_element, repo, verbose, dryrun)
+    failures = failures + package_failure
   }
   return(failures)
 }
@@ -159,11 +165,11 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
 
   # Install git
   failures = failures +
-    install_special_req(reqs$git, GIT_REPLACE, devtools::install_git, dryrun, verbose) +
-    install_special_req(reqs$svn, SVN_EXT_REP, devtools::install_svn, dryrun, verbose) +
-    install_special_req(reqs$bioc, BIO_EXT_REP, devtools::install_bioc, dryrun, verbose) +
-    install_special_req(reqs$url, "", devtools::install_url, dryrun, verbose) +
-    install_special_req(reqs$local, "", devtools::install_local, dryrun, verbose) +
+    install_special_req(reqs$git, GIT_REPLACE, remotes::install_git, dryrun, verbose) +
+    install_special_req(reqs$svn, SVN_EXT_REP, remotes::install_svn, dryrun, verbose) +
+    install_special_req(reqs$bioc, BIO_EXT_REP, remotes::install_bioc, dryrun, verbose) +
+    install_special_req(reqs$url, "", remotes::install_url, dryrun, verbose) +
+    install_special_req(reqs$local, "", remotes::install_local, dryrun, verbose) +
     install_unversioned(reqs$unversioned, installed, dryrun, verbose, repo) +
     install_versioned(reqs$versioned, installed, dryrun, verbose, repo)
 

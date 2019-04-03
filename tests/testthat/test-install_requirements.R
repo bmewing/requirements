@@ -1,48 +1,6 @@
 INST = c("mgsub" = "1.5.1.3", "lexRankr" = "0.4.1", "readOffice" = "0.2.2")  # nolint
 
-context("Read and Process Requirements File")
-
-test_that("read_requirements_file", {
-  expect_type(read_requirements_file("testdata/requirements_1.txt"), "character")
-  expect_equal(read_requirements_file("testdata/requirements_1.txt"),
-               c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice < 1",
-                 "whitechapelR >= 0.3"))
-  expect_equal(read_requirements_file("testdata/requirements_2.txt"),
-               c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice ~= 0",
-                 "whitechapelR >= 0.3", "dplyr != 0.7.*"))
-  expect_equal(read_requirements_file("testdata/requirements_3.txt"),
-               c("-r testdata/requirements_2.txt", "tidyr",
-                 "git+https://github.com/bmewing/requirements",
-                 "svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/",
-                 "bioc+release/SummarizedExperiment",
-                 "https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz",
-                 "testdata/dummy_package.zip", "mgsub >= 1.5.0", "lexRankr == 0.4.*",
-                 "readOffice ~= 0", "whitechapelR >= 0.3", "dplyr != 0.7.*"))
-})
-
-test_that("process_requirements_file", {
-  expect_type(req1 <- process_requirements_file("testdata/requirements_1.txt"), "list")
-  expect_length(process_requirements_file("testdata/requirements_1.txt"), 7)
-  expect_length(process_requirements_file("testdata/requirements_1.txt")[["url"]], 0)
-  expect_equal(process_requirements_file("testdata/requirements_1.txt")[["versioned"]],
-               c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice < 1", "whitechapelR >= 0.3"))
-  expect_equal(process_requirements_file("testdata/requirements_2.txt")[["versioned"]],
-               c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice ~= 0", "whitechapelR >= 0.3",
-                 "dplyr != 0.7.*"))
-  expect_equal(process_requirements_file("testdata/requirements_3.txt")[["versioned"]],
-               c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice ~= 0", "whitechapelR >= 0.3",
-                 "dplyr != 0.7.*"))
-  expect_length(process_requirements_file("testdata/requirements_3.txt")[["unversioned"]], 1)
-  expect_length(process_requirements_file("testdata/requirements_3.txt")[["git"]], 1)
-  expect_length(process_requirements_file("testdata/requirements_3.txt")[["svn"]], 1)
-  expect_length(process_requirements_file("testdata/requirements_3.txt")[["bioc"]], 1)
-  expect_length(process_requirements_file("testdata/requirements_3.txt")[["local"]], 1)
-  expect_length(process_requirements_file("testdata/requirements_3.txt")[["url"]], 1)
-})
-
-
 context("compare_version & helpers")
-
 
 test_that("compare_compatible_version", {
   expect_true(compare_compatible_version("1.1.1", "1.*"))

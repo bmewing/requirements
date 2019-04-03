@@ -24,6 +24,9 @@ usethis::use_data(
   ERROR_NO_PACKAGE_EXISTS,      # Error message that no package exists which satisfies requirements
   ERROR_OTHER_FAILURE,          # Error message for other generic cases
   ERROR_FAILURE_COUNT,          # Error message for counting the number of packages which failed to install
+  REQ_FILE_EXIST_ERR,           # Error message for non-existing requirements file
+  REQ_FILE_EMPTY_ERR,           # Error message for empty requirements file
+  REQ_FILE_RESOLUTION_ERR,      # Error message for non-resolvable requirements requirements file
   CANONICAL_PACKAGE_NAME_RE_STANDALONE,  # String contain regex to match valid package names by CRAN standards
   PACKAGE_RES,                # Character vector of regexes to match package names used in code (i.e. `library(name)`)
   AUTO_GEN_COMMENTS,          # Comments to be placed at the top of auto-generated requirements files

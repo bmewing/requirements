@@ -2,12 +2,10 @@ read_requirements_file = function(req){
   #' @param req path to requirements file
   #' @return vector of requirements to be processed
 
-  EXIST_ERR = "The specified requirements file, %s, does not exist"  # nolint
-  EMPTY_ERR = "The requirements file %s is empty."  # nolint
-  if (!file.exists(req)) stop(sprintf(EXIST_ERR, req))
+  if (!file.exists(req)) stop(sprintf(REQ_FILE_EXIST_ERR, req))
 
   content = readLines(req)
-  if (length(content) == 0) stop(sprintf(EMPTY_ERR, req))
+  if (length(content) == 0) stop(sprintf(REQ_FILE_EMPTY_ERR, req))
 
   additional_files = grep("^ *\\-r", content, value = TRUE)
   if (length(additional_files) > 0) {
@@ -61,6 +59,7 @@ process_requirements_file = function(req){
 
   content = read_requirements_file(req)
   content = remove_comments_from_req(content)
+  if (length(content) == 0) stop(sprintf(REQ_FILE_EMPTY_ERR, req))
 
   output = capture_special_installs(content)
   content = content[!content %in% unlist(output)]
@@ -75,8 +74,7 @@ process_requirements_file = function(req){
   content = content[!content %in% output$unversioned]
 
   if (length(content) > 0) {
-    RESOLUTION_ERR = "Not all requirements are allowed: %s"  # nolint
-    stop(sprintf(RESOLUTION_ERR, paste(content, collapse = ", ")))
+    stop(sprintf(REQ_FILE_RESOLUTION_ERR, paste(content, collapse = ", ")))
   }
 
   return(output)
