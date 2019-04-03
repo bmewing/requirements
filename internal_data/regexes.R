@@ -9,6 +9,13 @@ REQ_RE   = sprintf('require\\([\'"]?(%s)[\'"]?[\\),]', CANONICAL_PACKAGE_NAME_RE
 PAC_RE   = sprintf('p_load\\([\'"]?(%s)[\'"]?[\\),]',  CANONICAL_PACKAGE_NAME_RE)
 COLON_RE = sprintf('(%s):{2,3}[^:]',                   CANONICAL_PACKAGE_NAME_RE)
 
+COMPS_WITH_SINGLE_EQ = c("=", COMPS)
+MINIMUM_PACKAGE_REQ = "[0-9\\*]+\\.[0-9\\*\\.]*?[0-9\\*]"
+VALID_REQ = sprintf("^ *%s *(%s) *%s$",
+                    CANONICAL_PACKAGE_NAME_RE,
+                    paste(COMPS_WITH_SINGLE_EQ, collapse="|"),
+                    MINIMUM_PACKAGE_REQ)
+
 PACKAGE_RES = c(LIB_RE, REQ_RE, PAC_RE, COLON_RE)
 
 GIT_EXTRACT = "^git[\\+:]" #pattern for recognizing git requirements in .txt

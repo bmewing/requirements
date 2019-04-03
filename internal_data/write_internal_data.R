@@ -1,5 +1,5 @@
-source('internal_data/regexes.R')
 source('internal_data/comparison_symbols.R')
+source('internal_data/regexes.R')
 source('internal_data/messages.R')
 
 usethis::use_data(
@@ -27,6 +27,7 @@ usethis::use_data(
   REQ_FILE_EXIST_ERR,           # Error message for non-existing requirements file
   REQ_FILE_EMPTY_ERR,           # Error message for empty requirements file
   REQ_FILE_RESOLUTION_ERR,      # Error message for non-resolvable requirements requirements file
+  VALID_REQ,                    # Pattern for validating versioned requirements
   CANONICAL_PACKAGE_NAME_RE_STANDALONE,  # String contain regex to match valid package names by CRAN standards
   PACKAGE_RES,                # Character vector of regexes to match package names used in code (i.e. `library(name)`)
   AUTO_GEN_COMMENTS,          # Comments to be placed at the top of auto-generated requirements files

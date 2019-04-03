@@ -35,6 +35,10 @@ capture_special_installs = function(content) {
   return(output)
 }
 
+validate_versioning = function(req){
+  return(grepl(VALID_REQ, req))
+}
+
 capture_versioned_requirements = function(content) {
   versioned = vapply(content, identify_comparison_op, character(1))
   version_req = names(versioned[!is.na(versioned)])
