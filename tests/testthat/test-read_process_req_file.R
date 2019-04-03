@@ -27,7 +27,7 @@ test_that("read_requirements_file", {
 })
 
 test_that("process_requirements_file", {
-  expect_type(req1 <- process_requirements_file("testdata/requirements_1.txt"), "list")
+  expect_type(req1 <- process_requirements_file("testdata/requirements_1.txt"), "list") # nolint
   expect_length(process_requirements_file("testdata/requirements_1.txt"), 7)
   expect_length(process_requirements_file("testdata/requirements_1.txt")[["url"]], 0)
   expect_equal(process_requirements_file("testdata/requirements_1.txt")[["versioned"]],
