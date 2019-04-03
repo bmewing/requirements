@@ -24,17 +24,6 @@ install_special_req = function(elem, pattern, f, dryrun, verbose){
   return(failures)
 }
 
-install_local = function(pkg){
-  #' @param pkg the local file to be installed
-  #' @return NULL
-  type = "source"
-  if (!grepl("\\.tar\\.gz$", pkg)) {
-    type = "binary"
-  }
-  install.packages(pkg, repos = NULL, type = type)
-  return(NULL)
-}
-
 install_unversioned = function(elem, installed, dryrun, verbose, repo){
   #' @param elem the list element of unversioned package requirements
   #' @param installed list of installed packages
@@ -52,17 +41,26 @@ install_unversioned = function(elem, installed, dryrun, verbose, repo){
         vmess(sprintf(NOTE_PACKAGE_NOT_INSTALLED, i), verbose)
         version = tail(sort(available_versions), 1)
         vmess(sprintf(NOTE_INSTALL_PACKAGE, i, sprintf(NOTE_INSTALL_PACKAGE_VERSION, version)), verbose)
-        if (!dryrun) {
-          tryCatch(install.packages(i, repos = repo),
-                   error = function(x){
-                     failures <<- failures + 1
-                     message(sprintf(ERROR_OTHER_FAILURE, i))
-                   })
-        }
+        install_cran_package(i, NULL, repo, dryrun)
       }
     }
   }
 
+  return(failures)
+}
+
+install_cran_package = function(package, version, repo, dryrun){
+  failures = 0
+  if (!dryrun) {
+    tryCatch(devtools::install_version(package,
+                                       version = latest_compatible,
+                                       repos = repo,
+                                       quiet = TRUE),
+             error = function(x){
+               failures <<- failures + 1
+               message(sprintf(ERROR_OTHER_FAILURE, package))
+             })
+  }
   return(failures)
 }
 
@@ -88,6 +86,22 @@ is_versioned_install_needed = function(package, version, comp, installed, verbos
   return(install_needed)
 }
 
+install_if_compatible_available = function(available_compatibility, package, repo, verbose, dryrun){
+  failures = 0
+  if (!any(available_compatibility)) {
+    failures = failures + 1
+    vmess(sprintf(ERROR_NO_PACKAGE_EXISTS, package), verbose)
+  } else {
+    latest_compatible = names(which.max(which(available_compatibility)))
+    vmess(sprintf(NOTE_INSTALL_PACKAGE, package,
+                  sprintf(NOTE_INSTALL_PACKAGE_VERSION,
+                          latest_compatible)),
+          verbose)
+    install_cran_package(package, latest_compatible, repo, dryrun)
+  }
+  return(failures)
+}
+
 install_versioned = function(elem, installed, dryrun, verbose, repo){
   #' @param elem the list element of unversioned package requirements
   #' @param installed list of installed packages
@@ -106,41 +120,21 @@ install_versioned = function(elem, installed, dryrun, verbose, repo){
       comp = processed_element$comp
 
       install_needed = is_versioned_install_needed(package, version, comp, installed, verbose)
+      if(!install_needed) next
 
-      if (install_needed) {
-        if (!is.na(installed[package])) {
-          vmess(sprintf(NOTE_BAD_PACKAGE_VERSION, package, installed[package]), verbose)
-        }
-
-        available_versions = get_available_versions(package)
-
-        available_compatibility = vapply(available_versions,
-                                         FUN = compare_version,
-                                         FUN.VALUE = logical(1),
-                                         target = version,
-                                         comp = comp)
-
-        if (!any(available_compatibility)) {
-          failures = failures + 1
-          vmess(sprintf(ERROR_NO_PACKAGE_EXISTS, package), verbose)
-        } else {
-          latest_compatible = names(which.max(which(available_compatibility)))
-          vmess(sprintf(NOTE_INSTALL_PACKAGE, package,
-                        sprintf(NOTE_INSTALL_PACKAGE_VERSION,
-                                latest_compatible)),
-                verbose)
-          if (!dryrun) {
-            tryCatch(devtools::install_version(package,
-                                               version = latest_compatible,
-                                               repos = repo,
-                                               quiet = TRUE),
-                     error = function(x){
-                       failures <<- failures + 1
-                       message(sprintf(ERROR_OTHER_FAILURE, i))
-                     })
-          }
-        }
+      if (!is.na(installed[package])) {
+        vmess(sprintf(NOTE_BAD_PACKAGE_VERSION, package, installed[package]), verbose)
       }
+
+      available_versions = get_available_versions(package)
+
+      available_compatibility = vapply(available_versions,
+                                       FUN = compare_version,
+                                       FUN.VALUE = logical(1),
+                                       target = version,
+                                       comp = comp)
+      package_failure = install_if_compatible_available(available_compatibility, package, repo, verbose, dryrun)
+      failures = failures + package_failure
     }
   }
   return(failures)
@@ -165,7 +159,7 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
     install_special_req(reqs$svn, SVN_EXT_REP, devtools::install_svn, dryrun, verbose) +
     install_special_req(reqs$bioc, BIO_EXT_REP, devtools::install_bioc, dryrun, verbose) +
     install_special_req(reqs$url, "", devtools::install_url, dryrun, verbose) +
-    install_special_req(reqs$local, "", install_local, dryrun, verbose) +
+    install_special_req(reqs$local, "", devtools::install_local, dryrun, verbose) +
     install_unversioned(reqs$unversioned, installed, dryrun, verbose, repo) +
     install_versioned(reqs$versioned, installed, dryrun, verbose, repo)
 

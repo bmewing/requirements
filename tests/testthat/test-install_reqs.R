@@ -1,0 +1,63 @@
+context("install_reqs.R")
+
+INST = c("mgsub" = "1.5.1.3", "lexRankr" = "0.4.1", "readOffice" = "0.2.2")  # nolint
+
+test_that("install_special_req", {
+  #check working fine message on git
+  expect_message(fail_count <- install_special_req("git+https://github.com/bmewing/mgsub",
+                                     GIT_REPLACE, devtools::install_git, TRUE, TRUE),
+                 regexp = "https://github\\.com/bmewing/mgsub")
+  #check git working fine
+  expect_equal(fail_count, 0)
+  #check failure message on git
+  expect_message(fail_count <- install_special_req("git+https://github.com/bmewing/thiswillneverexist",
+                                     GIT_REPLACE, devtools::install_git, FALSE, TRUE),
+                 regexp = sprintf(ERROR_OTHER_FAILURE, 'https://github\\.com/bmewing/thiswillneverexist'))
+  #check failure counts return properly
+  expect_equal(fail_count, 1)
+  #check success for svn
+  expect_equal(install_special_req("svn+svn://scm.r-forge.r-project.org/svnroot/daewr/pkg/mixexp",
+                                   SVN_EXT_REP, devtools::install_svn, TRUE, FALSE), 0)
+  #check success for bioconductor
+  expect_equal(install_special_req("bioc+release/SummarizedExperiment",
+                                   BIO_EXT_REP, devtools::install_bioc, TRUE, FALSE), 0)
+  #check success for url
+  expect_equal(install_special_req("https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz",
+                                   "", devtools::install_url, TRUE, FALSE), 0)
+  #check success for local
+  expect_equal(install_special_req("testdata/dummy_package.zip", "", devtools::install_local, TRUE, FALSE), 0)
+})
+
+test_that("install_unversioned", {
+  expect_message(fail_count <- install_unversioned("dplyr", INST, TRUE, TRUE, "https://cran.rstudio.com"),
+                 regexp = "dplyr")
+  expect_equal(fail_count, 0)
+  expect_message(fail_count <- install_unversioned("2fun2quit", INST, FALSE, TRUE, "https://cran.rstudio.com"),
+               regexp = sprintf(ERROR_OTHER_FAILURE, '2fun2quit'))
+  expect_equal(fail_count, 1)
+})
+
+#TODO: Finish these tests
+# test_that("install_cran_package", {
+#   
+# })
+# 
+# test_that("process_versioned_requirement", {
+#   
+# })
+# 
+# test_that("is_versioned_install_needed", {
+#   
+# })
+# 
+# test_that("install_if_compatible_available", {
+#   
+# })
+# 
+# test_that("install_versioned", {
+#   
+# })
+# 
+# test_that("install_reqs", {
+#   
+# })
