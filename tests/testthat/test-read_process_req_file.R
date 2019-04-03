@@ -46,6 +46,8 @@ test_that("process_requirements_file", {
   expect_length(process_requirements_file("testdata/requirements_3.txt")[["url"]], 1)
   expect_error(process_requirements_file("testdata/requirements_4_wc.txt"),
                regexp = sprintf(REQ_FILE_EMPTY_ERR, "testdata/requirements_4_wc.txt"))
+  expect_error(process_requirements_file("testdata/requirements_6.txt"),
+               regexp = sprintf(REQ_FILE_RESOLUTION_ERR, paste("dummy_package", collapse = ", ")))
 })
 
 test_that("remove_comments_from_req", {
