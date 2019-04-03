@@ -69,12 +69,12 @@ install_cran_package = function(package, version, repo, dryrun){
 }
 
 identify_comparison_op = function(req){
-  comp_match = vapply(c(COMPS,'='),
+  comp_match = vapply(c(COMPS, "="),
                       grepl,
                       x = req,
                       fixed = TRUE,
                       FUN.VALUE = logical(1))
-  if(any(comp_match)){
+  if (any(comp_match)){
     comp = names(which.max(comp_match))
   } else {
     comp = NA_character_

@@ -36,11 +36,11 @@ capture_special_installs = function(content) {
 }
 
 capture_versioned_requirements = function(content) {
-  versioned = vapply(content,identify_comparison_op,character(1))
+  versioned = vapply(content, identify_comparison_op, character(1))
   version_req = names(versioned[!is.na(versioned)])
   processed = lapply(version_req, process_versioned_requirement)
-  valid_packages = vapply(processed, 
-                          function(x){legal_r_package_name(trimws(x$package))},
+  valid_packages = vapply(processed,
+                          function(x){legal_r_package_name(trimws(x$package))}, # nolint
                           FUN.VALUE = logical(1))
   return(version_req[valid_packages])
 }
