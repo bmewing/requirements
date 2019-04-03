@@ -35,6 +35,10 @@ capture_special_installs = function(content) {
   return(output)
 }
 
+validate_versioning = function(req){
+  return(grepl(VALID_REQ, req))
+}
+
 capture_versioned_requirements = function(content) {
   version_req = grep(paste(COMPS, collapse = "|"), content, value = TRUE)
   tmp = strsplit(version_req, paste(COMPS, collapse = "|"))
