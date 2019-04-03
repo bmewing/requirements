@@ -35,7 +35,7 @@ install_requirements <- function(requirements = "requirements.txt",
                      verbose = verbose,
                      repo = repo)
 
-  if (dryrun) cat("NOTE: This was just a dry run. No packages have been installed.")
+  if (dryrun) message("NOTE: This was just a dry run. No packages have been installed.")
 
   return(invisible(0))
 }

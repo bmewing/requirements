@@ -1,0 +1,3 @@
+# to test impossible requirements
+readOffice >= 10.0
+mgsub < 0.0

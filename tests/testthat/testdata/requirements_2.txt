@@ -1,5 +1,6 @@
+# to test comlete set of comparison operators
 mgsub >= 1.5.0
 lexRankr == 0.4.*
-readOffice ~= 0
+readOffice ~= 0.0
 whitechapelR >= 0.3
 dplyr != 0.7.*

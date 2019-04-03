@@ -14,7 +14,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
-  devtools (>= 1.13.5),
+  remotes (>= 2.0.2),
   packrat (>= 0.4.9),
   stringr,
   httr

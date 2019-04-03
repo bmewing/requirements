@@ -2,12 +2,10 @@ read_requirements_file = function(req){
   #' @param req path to requirements file
   #' @return vector of requirements to be processed
 
-  EXIST_ERR = "The specified requirements file, %s, does not exist"  # nolint
-  EMPTY_ERR = "The requirements file %s is empty."  # nolint
-  if (!file.exists(req)) stop(sprintf(EXIST_ERR, req))
+  if (!file.exists(req)) stop(sprintf(REQ_FILE_EXIST_ERR, req))
 
   content = readLines(req)
-  if (length(content) == 0) stop(sprintf(EMPTY_ERR, req))
+  if (length(content) == 0) stop(sprintf(REQ_FILE_EMPTY_ERR, req))
 
   additional_files = grep("^ *\\-r", content, value = TRUE)
   if (length(additional_files) > 0) {
@@ -38,11 +36,13 @@ capture_special_installs = function(content) {
 }
 
 capture_versioned_requirements = function(content) {
-  version_req = grep(paste(COMPS, collapse = "|"), content, value = TRUE)
-  tmp = strsplit(version_req, paste(COMPS, collapse = "|"))
-  pkg_name = vapply(tmp, `[[`, "pkg", 1)
-  version_req = version_req[legal_r_package_name(trimws(pkg_name))]
-  return(version_req)
+  versioned = vapply(content, identify_comparison_op, character(1))
+  version_req = names(versioned[!is.na(versioned)])
+  processed = lapply(version_req, process_versioned_requirement)
+  valid_packages = vapply(processed,
+                          function(x){legal_r_package_name(trimws(x$package))}, # nolint
+                          FUN.VALUE = logical(1))
+  return(version_req[valid_packages])
 }
 
 capture_local_requirements = function(content){
@@ -61,6 +61,7 @@ process_requirements_file = function(req){
 
   content = read_requirements_file(req)
   content = remove_comments_from_req(content)
+  if (length(content) == 0) stop(sprintf(REQ_FILE_EMPTY_ERR, req))
 
   output = capture_special_installs(content)
   content = content[!content %in% unlist(output)]
@@ -75,8 +76,7 @@ process_requirements_file = function(req){
   content = content[!content %in% output$unversioned]
 
   if (length(content) > 0) {
-    RESOLUTION_ERR = "Not all requirements are allowed: %s"  # nolint
-    stop(sprintf(RESOLUTION_ERR, paste(content, collapse = ", ")))
+    stop(sprintf(REQ_FILE_RESOLUTION_ERR, paste(content, collapse = ", ")))
   }
 
   return(output)

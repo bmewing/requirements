@@ -15,7 +15,7 @@ dplyr == 0.7.0
 
 Note that you must have spaces between package names, the comparison operator, and the version.
 
-`requirements()` will parse this file and check against installed packages if you need to install a different version. If a new version is needed, `devtools::install_version` is used to fetch it. There is an option to load all required packages to the namespace.
+`requirements()` will parse this file and check against installed packages if you need to install a different version. If a new version is needed, `remotes::install_version` is used to fetch it. There is an option to load all required packages to the namespace.
 
 ## But why?
 
