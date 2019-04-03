@@ -12,7 +12,7 @@ test_that("install_special_req", {
   #check failure message on git
   expect_message(fail_count <- install_special_req("git+https://github.com/bmewing/thiswillneverexist",
                                      GIT_REPLACE, devtools::install_git, FALSE, TRUE),
-                 regexp = sprintf(ERROR_OTHER_FAILURE, 'https://github\\.com/bmewing/thiswillneverexist'))
+                 regexp = sprintf(ERROR_OTHER_FAILURE, "https://github\\.com/bmewing/thiswillneverexist"))
   #check failure counts return properly
   expect_equal(fail_count, 1)
   #check success for svn
@@ -29,18 +29,42 @@ test_that("install_special_req", {
 })
 
 test_that("install_unversioned", {
-  expect_message(fail_count <- install_unversioned("dplyr", INST, TRUE, TRUE, "https://cran.rstudio.com"),
+  expect_message(fail_count <- install_unversioned(elem = "dplyr", 
+                                                   installed = INST, 
+                                                   dryrun = TRUE, 
+                                                   verbose = TRUE, 
+                                                   repo = "https://cran.rstudio.com"),
                  regexp = "dplyr")
   expect_equal(fail_count, 0)
-  expect_message(fail_count <- install_unversioned("2fun2quit", INST, FALSE, TRUE, "https://cran.rstudio.com"),
-               regexp = sprintf(ERROR_OTHER_FAILURE, '2fun2quit'))
+  expect_message(fail_count <- install_unversioned(elem = "2fun2quit", 
+                                                   installed = INST, 
+                                                   dryrun = FALSE, 
+                                                   verbose = TRUE, 
+                                                   repo = "https://cran.rstudio.com"),
+               regexp = sprintf(ERROR_NO_PACKAGE_EXISTS, "2fun2quit"))
+  expect_equal(fail_count, 1)
+})
+
+test_that("install_cran_package", {
+  expect_silent(fail_count <- install_cran_package(package = "mgsub", 
+                                                   version = "1.5.0", 
+                                                   repo = "https://cran.rstudio.com", 
+                                                   dryrun = FALSE))
+  expect_equal(fail_count, 0)
+  expect_silent(fail_count <- install_cran_package(package = "mgsub", 
+                                                   version = NULL, 
+                                                   repo = "https://cran.rstudio.com", 
+                                                   dryrun = FALSE))
+  expect_equal(fail_count, 0)
+  expect_message(fail_count <- install_cran_package(package = "2fun2quit", 
+                                                    version = NULL, 
+                                                    repo = "https://cran.rstudio.com", 
+                                                    dryrun = FALSE),
+                 regexp = "2fun2quit")
   expect_equal(fail_count, 1)
 })
 
 #TODO: Finish these tests
-# test_that("install_cran_package", {
-#   
-# })
 # 
 # test_that("process_versioned_requirement", {
 #   

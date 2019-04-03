@@ -34,15 +34,19 @@ install_unversioned = function(elem, installed, dryrun, verbose, repo){
   #' @return the number of failures
   failures = 0
 
-  if (length(elem) > 0) {
-    for (i in elem) {
-      if (is.na(installed[i])) {
-        available_versions = get_available_versions(i)
-        vmess(sprintf(NOTE_PACKAGE_NOT_INSTALLED, i), verbose)
-        version = tail(sort(available_versions), 1)
-        vmess(sprintf(NOTE_INSTALL_PACKAGE, i, sprintf(NOTE_INSTALL_PACKAGE_VERSION, version)), verbose)
-        install_cran_package(i, NULL, repo, dryrun)
-      }
+  for (i in elem) {
+    available_versions = get_available_versions(i)
+    if(is.null(available_versions)){
+      failures = failures + 1
+      vmess(sprintf(ERROR_NO_PACKAGE_EXISTS, i), TRUE)
+    } else if (is.na(installed[i])) {
+      vmess(sprintf(NOTE_PACKAGE_NOT_INSTALLED, i), verbose)
+      version = tail(sort(available_versions), 1)
+      vmess(sprintf(NOTE_INSTALL_PACKAGE, i, sprintf(NOTE_INSTALL_PACKAGE_VERSION, version)), verbose)
+      failures = failures + install_cran_package(package = i, 
+                                                 version = NULL, 
+                                                 repo = repo, 
+                                                 dryrun = dryrun)
     }
   }
 
@@ -53,7 +57,7 @@ install_cran_package = function(package, version, repo, dryrun){
   failures = 0
   if (!dryrun) {
     tryCatch(devtools::install_version(package,
-                                       version = latest_compatible,
+                                       version = version,
                                        repos = repo,
                                        quiet = TRUE),
              error = function(x){
@@ -90,7 +94,7 @@ install_if_compatible_available = function(available_compatibility, package, rep
   failures = 0
   if (!any(available_compatibility)) {
     failures = failures + 1
-    vmess(sprintf(ERROR_NO_PACKAGE_EXISTS, package), verbose)
+    vmess(sprintf(ERROR_NO_PACKAGE_EXISTS, package), TRUE)
   } else {
     latest_compatible = names(which.max(which(available_compatibility)))
     vmess(sprintf(NOTE_INSTALL_PACKAGE, package,
