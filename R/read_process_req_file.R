@@ -36,11 +36,13 @@ capture_special_installs = function(content) {
 }
 
 capture_versioned_requirements = function(content) {
-  version_req = grep(paste(COMPS, collapse = "|"), content, value = TRUE)
-  tmp = strsplit(version_req, paste(COMPS, collapse = "|"))
-  pkg_name = vapply(tmp, `[[`, "pkg", 1)
-  version_req = version_req[legal_r_package_name(trimws(pkg_name))]
-  return(version_req)
+  versioned = vapply(content,identify_comparison_op,character(1))
+  version_req = names(versioned[!is.na(versioned)])
+  processed = lapply(version_req, process_versioned_requirement)
+  valid_packages = vapply(processed, 
+                          function(x){legal_r_package_name(trimws(x$package))},
+                          FUN.VALUE = logical(1))
+  return(version_req[valid_packages])
 }
 
 capture_local_requirements = function(content){

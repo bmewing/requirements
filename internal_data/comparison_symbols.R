@@ -13,8 +13,8 @@ COMP_EQUALITY = c(COMP_EXACTLY_EQUAL,
 
 COMPS = c(COMP_EXACTLY_EQUAL,
           COMP_LTE,
-          COMP_LT,
           COMP_GTE,
-          COMP_GT,
           COMP_COMPATIBLE,
-          COMP_NOT_EQUAL)
+          COMP_NOT_EQUAL,
+          COMP_LT,
+          COMP_GT)

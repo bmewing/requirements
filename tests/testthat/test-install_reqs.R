@@ -167,3 +167,16 @@ test_that("install_reqs", {
                             dummy = INST),
                regexp = "There were 2 package")
 })
+
+test_that("identify_comparison_op", {
+  expect_equal(identify_comparison_op("mgsub=1.5"),  "=")
+  expect_equal(identify_comparison_op("mgsub==1.5"), "==")
+  expect_equal(identify_comparison_op("mgsub>=1.5"), ">=")
+  expect_equal(identify_comparison_op("mgsub<=1.5"), "<=")
+  expect_equal(identify_comparison_op("mgsub<1.5"),  "<")
+  expect_equal(identify_comparison_op("mgsub>1.5"),  ">")
+  expect_equal(identify_comparison_op("mgsub!=1.5"), "!=")
+  expect_equal(identify_comparison_op("mgsub~=1.5"), "~=")
+  expect_equal(identify_comparison_op("mgsub"), NA_character_)
+})
+  
