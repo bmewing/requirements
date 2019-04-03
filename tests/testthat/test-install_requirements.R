@@ -6,7 +6,7 @@ test_that("install_requirements", {
                                       dryrun = TRUE,
                                       verbose = FALSE),
                  regexp = "NOTE: This was just a dry run. No packages have been installed.")
-  expect_error(install_requirements(file.path(TMP_DIR,"fake_requirements.txt"),
+  expect_error(install_requirements(file.path(TMP_DIR, "fake_requirements.txt"),
                                       packrat = FALSE,
                                       dryrun = TRUE,
                                       verbose = FALSE),
