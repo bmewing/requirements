@@ -43,9 +43,16 @@ read_reqs_from_lockfile = function(lockfile_path = "packrat/packrat.lock", eq_sy
   lockfile_lines = readLines(lockfile_path)
 
   package_names = extract_lockfile_info(lockfile_lines, "Package")
-  if (is.null(eq_sym)) return(package_names)
+
+  if (is.null(eq_sym) | length(package_names) == 0) return(package_names)
+  eq_sym = validate_eq_sym(eq_sym)
 
   version_numbers = extract_lockfile_info(lockfile_lines, "Version")
+
+  if (length(package_names) != length(version_numbers)) {
+    stop("Malformed lockfile.  Each package listed in lockfile must also have a version.")
+  }
+
   mapply(paste0, package_names, eq_sym, version_numbers, USE.NAMES = FALSE)
 }
 
