@@ -51,6 +51,30 @@ test_that("read_package_lines_from_files", {
   expect_equal(read_package_lines_from_files(FILES), PACKAGE_LINES_ALL)
 })
 
+test_that("str_match_all", {
+  expect_equal(
+    str_match_all("test", "test"),
+    list(structure("test", .Dim = c(1L, 1L)))
+  )
+
+  expect_equal(
+    str_match_all(c("test", "best"), "(.)est"),
+    list(structure(c("test", "t"), .Dim = 1:2),
+         structure(c("best", "b"), .Dim = 1:2))
+  )
+
+  expect_equal(
+    str_match_all(c("test", "nope"), "(.)est"),
+    list(structure(c("test", "t"), .Dim = 1:2),
+         structure(character(0), .Dim = c(0L, 2L)))
+  )
+
+  expect_equal(
+    str_match_all(c("nope"), "(.)est"),
+    list(structure(character(0), .Dim = 0:1))
+  )
+})
+
 test_that("match_packages", {
   expect_equal(match_packages(character(0), PACKAGE_RES), character(0))
 
