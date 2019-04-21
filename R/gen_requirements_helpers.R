@@ -1,4 +1,62 @@
 
+extract_lockfile_info = function(lockfile_lines, field_name) {
+  #' @keywords internal
+  #' Extract values of all fields in lockfile matching a given field name
+  #'
+  #' @param lockfile_lines output of readLines applied to a packrat lockfile
+  #' @param field_name name of field to extract information from.
+  #'   Use just the bare name. Do NOT include regex nor colon nor space; this will be added in this function.
+  #' @return character vector of all values found matching the given field name
+  #'
+  #' @examples
+  #' \dontrun {
+  #'  lockfile_lines = readLines("packrat/packrat.lock")
+  #'  extract_lockfile_info(lockfile_lines, 'Package')
+  #'  # [1] "BH" "DT"
+  #'
+  #'  extract_lockfile_info(lockfile_lines, 'Version')
+  #'  # [1] "1.62.0-1" "0.2"
+  #' }
+  field_name_re = paste0("^", field_name, ": ")
+  field_lines = grep(field_name_re, lockfile_lines, value = TRUE)
+  field_values = gsub(field_name_re, "", field_lines)
+
+  return(field_values)
+}
+
+
+read_reqs_from_lockfile = function(lockfile_path = "packrat/packrat.lock", eq_sym = ">=") {
+  #' @keywords internal
+  #' Read packrat lockfile and extract package names & versions from data
+  #'
+  #' @param lockfile_path path to packrat lockfile
+  #' @param eq_sym The equality symbol to be used when writing requirements (i.e. package>=1.0.0).
+  #'   Use \code{NULL} to not include package versions in your requirements file.
+  #' @return character vector of requirements
+  #'
+  #' @examples
+  #' read_packages_from_lockfile()
+  #' [1] "BH>=1.62.0-1" "DT>=0.2"
+  #'
+  #' read_packages_from_lockfile(eq_sym = NULL)
+  #' [1] "BH" "DT"
+  lockfile_lines = readLines(lockfile_path)
+
+  package_names = extract_lockfile_info(lockfile_lines, "Package")
+
+  if (is.null(eq_sym) | length(package_names) == 0) return(package_names)
+  eq_sym = validate_eq_sym(eq_sym)
+
+  version_numbers = extract_lockfile_info(lockfile_lines, "Version")
+
+  if (length(package_names) != length(version_numbers)) {
+    stop("Malformed lockfile.  Each package listed in lockfile must also have a version.")
+  }
+
+  mapply(paste0, package_names, eq_sym, version_numbers, USE.NAMES = FALSE)
+}
+
+
 read_package_lines_from_file = function(file_path, filter_words) {
   #' @keywords internal
   #' Pull package referencing lines from R file
@@ -137,6 +195,7 @@ safe_package_version = function(pkg) {
     }
   )
 }
+
 
 validate_eq_sym = function(eq_sym) {
   #' @keywords internal

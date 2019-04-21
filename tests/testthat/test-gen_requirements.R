@@ -5,6 +5,8 @@ TMP_DIR = tempdir()
 FILE_1 = file.path(TMP_DIR, "file_1.R")
 FILE_2 = file.path(TMP_DIR, "file_2.R")
 FILE_3 = file.path(TMP_DIR, "file_3.R")
+LOCKFILE = file.path(TMP_DIR, "test_packrat.lock")
+LOCKFILE_MALFORMED = file.path(TMP_DIR, "test_malformed_packrat.lock")
 
 FILE_TEXT_1 = c(
   "library(fake.package, quietly = TRUE)",
@@ -19,6 +21,41 @@ FILE_TEXT_1 = c(
 FILE_TEXT_2 = c("library(packrat)",
                 "library(fake_package)\n")
 FILE_TEXT_3 = ""
+
+LOCKFILE_TEXT =
+"PackratFormat: 1.4
+PackratVersion: 0.4.8.1
+RVersion: 3.3.0
+Repos: CRAN=https://cran.rstudio.com/
+
+Package: BH
+Source: CRAN
+Version: 1.62.0-1
+Hash: 14dfb3e8ffe20996118306ff4de1fab2
+
+Package: DT
+Source: CRAN
+Version: 0.2
+Hash: 36b032203797956fedad5a25055016a9
+Requires: htmltools, htmlwidgets, magrittr
+"
+
+LOCKFILE_MALFORMED_TEXT =
+"PackratFormat: 1.4
+PackratVersion: 0.4.8.1
+RVersion: 3.3.0
+Repos: CRAN=https://cran.rstudio.com/
+
+Package: BH
+Source: CRAN
+Hash: 14dfb3e8ffe20996118306ff4de1fab2
+
+Package: DT
+Source: CRAN
+Version: 0.2
+Hash: 36b032203797956fedad5a25055016a9
+Requires: htmltools, htmlwidgets, magrittr
+"
 
 FILES = c(FILE_1, FILE_2, FILE_3)
 FILE_TEXTS = list(FILE_TEXT_1, FILE_TEXT_2, FILE_TEXT_3)
@@ -39,6 +76,8 @@ setup({
   invisible(
     mapply(writeLines, text = FILE_TEXTS, con = FILES)
   )
+  write(LOCKFILE_TEXT, LOCKFILE)
+  write(LOCKFILE_MALFORMED_TEXT, LOCKFILE_MALFORMED)
 })
 
 teardown({
@@ -72,6 +111,28 @@ test_that("str_match_all", {
   expect_equal(
     str_match_all(c("nope"), "(.)est"),
     list(structure(character(0), .Dim = 0:1))
+  )
+})
+
+test_that("read_reqs_from_lockfile", {
+  expect_equal(
+    read_reqs_from_lockfile(lockfile_path = LOCKFILE),
+    c("BH>=1.62.0-1", "DT>=0.2")
+  )
+
+  expect_equal(
+    read_reqs_from_lockfile(lockfile_path = LOCKFILE, eq_sym = "="),
+    c("BH==1.62.0-1", "DT==0.2")
+  )
+
+  expect_equal(
+    read_reqs_from_lockfile(lockfile_path = LOCKFILE, eq_sym = NULL),
+    c("BH", "DT")
+  )
+
+  expect_error(
+    read_reqs_from_lockfile(lockfile_path = LOCKFILE_MALFORMED),
+    regexp = "Malformed lockfile"
   )
 })
 
