@@ -20,6 +20,8 @@ read_requirements_file = function(req){
 remove_comments_from_req = function(content) {
   content = content[!grepl("^ *#", content)]
   content = content[!grepl("^ *\\-r", content)]
+  content = gsub("#.*$", "", content)
+  content = trimws(content, which = 'both')
   return(content)
 }
 
