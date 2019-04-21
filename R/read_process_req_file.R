@@ -42,13 +42,13 @@ validate_versioning = function(req){
 capture_versioned_requirements = function(content) {
   versioned = vapply(content, identify_comparison_op, character(1))
   versioned = versioned[!is.na(versioned)]
-  if(!all(versioned %in% COMPS)){
+  if (!all(versioned %in% COMPS)){
     first_error = which(!versioned %in% COMPS)[1]
     illegal_comp = versioned[first_error]
     stop(sprintf(REQ_FILE_INVALID_COMP,
-                 content[first_error], 
+                 content[first_error],
                  illegal_comp,
-                 agrep(illegal_comp, COMPS, value=TRUE)[1]))
+                 agrep(illegal_comp, COMPS, value = TRUE)[1]))
   }
   version_req = names(versioned[!is.na(versioned)])
   processed = lapply(version_req, process_versioned_requirement)
