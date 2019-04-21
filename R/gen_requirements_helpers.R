@@ -222,10 +222,10 @@ write_requirements_file = function(package_requirements, file_path="requirements
   #'               Overwrites \code{file_path} if \code{FALSE}.
   if (length(package_requirements) == 0) message("No dependencies found. Writing a blank requirements file.")
 
-  if (append) {
-    write(x = package_requirements, file = file_path, append = TRUE)
-  } else {
-    requirements_file_contents = c(AUTO_GEN_COMMENTS, package_requirements)
-    write(x = requirements_file_contents, file = file_path, append = FALSE)
+  # Only add comments about auto-generation if creating a new file
+  if (!file.exists(file_path) | !append) {
+    package_requirements = c(AUTO_GEN_COMMENTS, package_requirements)
   }
+
+  write(x = package_requirements, file = file_path, append = append)
 }
