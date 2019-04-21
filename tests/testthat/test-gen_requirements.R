@@ -175,6 +175,20 @@ test_that("write_requirements_file", {
     write_requirements_file(character(0), test_requirements_file),
     regexp = "Writing a blank requirements file"
   )
+
+  expect_equal({
+    write_requirements_file("test_req", test_requirements_file)
+    readLines(test_requirements_file)
+  },
+  c(AUTO_GEN_COMMENTS, "test_req")
+  )
+
+  expect_equal({
+    write_requirements_file("test_req2", test_requirements_file, append = TRUE)
+    readLines(test_requirements_file)
+  },
+  c(AUTO_GEN_COMMENTS, "test_req", "test_req2")
+  )
 })
 
 test_that("generate_requirements", {

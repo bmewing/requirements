@@ -210,7 +210,7 @@ append_version_requirements = function(package_names, eq_sym=COMP_GTE, rm_missin
 }
 
 
-write_requirements_file = function(package_requirements, file_path="requirements.txt") {
+write_requirements_file = function(package_requirements, file_path="requirements.txt", append=FALSE) {
   #' @keywords internal
   #' Helper for writing requirements to file
   #'
@@ -218,9 +218,14 @@ write_requirements_file = function(package_requirements, file_path="requirements
   #'
   #' @param package_requirements Character vector of requirements to write to file.
   #' @param file_path Path to write requirements to.
+  #' @param append Should \code{package_requirements} be appended to end of \code{file_path}?
+  #'               Overwrites \code{file_path} if \code{FALSE}.
   if (length(package_requirements) == 0) message("No dependencies found. Writing a blank requirements file.")
 
-  requirements_file_contents = c(AUTO_GEN_COMMENTS, package_requirements)
-
-  writeLines(requirements_file_contents, file_path)
+  if (append) {
+    write(x = package_requirements, file = file_path, append = TRUE)
+  } else {
+    requirements_file_contents = c(AUTO_GEN_COMMENTS, package_requirements)
+    write(x = requirements_file_contents, file = file_path, append = FALSE)
+  }
 }
