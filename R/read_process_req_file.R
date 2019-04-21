@@ -14,6 +14,8 @@ read_requirements_file = function(req){
       content = c(content, tmp)
     }
   }
+
+  content = remove_comments_from_req(content)
   return(content)
 }
 
@@ -21,7 +23,7 @@ remove_comments_from_req = function(content) {
   content = content[!grepl("^ *#", content)]
   content = content[!grepl("^ *\\-r", content)]
   content = gsub("#.*$", "", content)
-  content = trimws(content, which = 'both')
+  content = trimws(content, which = "both")
   return(content)
 }
 
@@ -85,7 +87,6 @@ process_requirements_file = function(req){
   #' @return list with all supported requirement types
 
   content = read_requirements_file(req)
-  content = remove_comments_from_req(content)
   if (length(content) == 0) stop(sprintf(REQ_FILE_EMPTY_ERR, req))
 
   output = capture_special_installs(content)
