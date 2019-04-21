@@ -1,5 +1,5 @@
 #' @export
-install_requirements <- function(requirements = "requirements.txt",
+install_requirements = function(requirements = "requirements.txt",
                                  packrat = FALSE, dryrun = FALSE,
                                  verbose = dryrun, repo = options()$repo[1],
                                  gen = !file.exists(requirements),

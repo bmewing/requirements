@@ -16,7 +16,6 @@ LazyData: true
 Imports:
   remotes (>= 2.0.2),
   packrat (>= 0.4.9),
-  stringr,
   httr
 Depends: R (>= 2.10)
 RoxygenNote: 6.1.1

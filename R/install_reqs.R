@@ -15,7 +15,7 @@ install_special_req = function(elem, pattern, f, dryrun, verbose){
       if (!dryrun) {
         tryCatch(f(url),
                  error = function(x) {
-                   failures <<- failures + 1
+                   failures <<- failures + 1 # nolint
                    message(sprintf(ERROR_OTHER_FAILURE, url))
                  })
       }
@@ -61,7 +61,7 @@ install_cran_package = function(package, version, repo, dryrun){
                                        repos = repo,
                                        quiet = TRUE),
              error = function(x){
-               failures <<- failures + 1
+               failures <<- failures + 1 # nolint
                message(sprintf(ERROR_OTHER_FAILURE, package))
              })
   }
