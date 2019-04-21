@@ -35,14 +35,37 @@ capture_special_installs = function(content) {
   return(output)
 }
 
+validate_versioning = function(req){
+  return(grepl(VALID_REQ, req))
+}
+
 capture_versioned_requirements = function(content) {
   versioned = vapply(content, identify_comparison_op, character(1))
+  versioned = versioned[!is.na(versioned)]
+  if (!all(versioned %in% COMPS)){
+    first_error = which(!versioned %in% COMPS)[1]
+    illegal_comp = versioned[first_error]
+    stop(sprintf(REQ_FILE_INVALID_COMP,
+                 content[first_error],
+                 illegal_comp,
+                 agrep(illegal_comp, COMPS, value = TRUE)[1]))
+  }
   version_req = names(versioned[!is.na(versioned)])
   processed = lapply(version_req, process_versioned_requirement)
   valid_packages = vapply(processed,
                           function(x){legal_r_package_name(trimws(x$package))}, # nolint
                           FUN.VALUE = logical(1))
   return(version_req[valid_packages])
+}
+
+identify_comparison_op = function(req){
+  comp = gsub(pattern = COMP_EXTRACTOR,
+              replacement = "\\1",
+              x = req)
+  if (comp == req){
+    comp = NA_character_
+  }
+  return(comp)
 }
 
 capture_local_requirements = function(content){

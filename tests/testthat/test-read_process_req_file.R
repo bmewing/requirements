@@ -27,6 +27,8 @@ test_that("read_requirements_file", {
 })
 
 test_that("process_requirements_file", {
+  expect_error(process_requirements_file("testdata/requirements_0.txt"),
+               sprintf(REQ_FILE_INVALID_COMP, "lexRankr = 0.4.*", "=", "=="))
   expect_type(req1 <- process_requirements_file("testdata/requirements_1.txt"), "list") # nolint
   expect_length(process_requirements_file("testdata/requirements_1.txt"), 7)
   expect_length(process_requirements_file("testdata/requirements_1.txt")[["url"]], 0)
@@ -71,4 +73,24 @@ test_that("capture_versioned_requirements", {
 test_that("capture_local_requirements", {
   expect_equal(capture_local_requirements(read_requirements_file("testdata/requirements_3.txt")),
                c("testdata/dummy_package.zip"))
+})
+
+test_that("validate_versioning", {
+  expect_true(validate_versioning("mgsub >= 1.4"))
+  expect_true(validate_versioning("mgsub> 1.4"))
+  expect_true(validate_versioning("mgsub <=1.4"))
+  expect_true(validate_versioning("mgsub<1.4"))
+  expect_true(validate_versioning("mgsub==1.4"))
+  expect_false(validate_versioning("mgsub=1.4"))
+  expect_true(validate_versioning("mgsub!=1.4"))
+  expect_true(validate_versioning("mgsub~=1.4"))
+  expect_true(validate_versioning("mgsub==1.*"))
+  expect_true(validate_versioning("mgsub==1.*.1.0.15.*"))
+  expect_true(validate_versioning("mgsub==994.*.181.0.15.*"))
+  expect_false(validate_versioning("mgsub>>1.4"))
+  expect_false(validate_versioning("mgsub=*=1.4"))
+  expect_true(validate_versioning("mgsub>=1"))
+  expect_false(validate_versioning("mgsub>"))
+  expect_false(validate_versioning("mgsub"))
+  expect_false(validate_versioning("mgsub>=1.4..5"))
 })
