@@ -3,21 +3,19 @@ context("read_process_req_file.R")
 test_that("read_requirements_file", {
   expect_type(read_requirements_file("testdata/requirements_1.txt"), "character")
   expect_equal(read_requirements_file("testdata/requirements_1.txt"),
-               c("# to test a mix of possible and impossible",
-                 "mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice < 1.0",
+               c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice < 1.0",
                  "whitechapelR >= 0.3"))
   expect_equal(read_requirements_file("testdata/requirements_2.txt"),
-               c("# to test comlete set of comparison operators",
-                 "mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice ~= 0.0",
+               c("mgsub >= 1.5.0", "lexRankr == 0.4.*",
+                 "readOffice ~= 0.0",
                  "whitechapelR >= 0.3", "dplyr != 0.7.*"))
   expect_equal(read_requirements_file("testdata/requirements_3.txt"),
-               c("# to test other forms of requirements",
-                 "-r testdata/requirements_2.txt", "tidyr",
+               c("tidyr",
                  "git+https://github.com/bmewing/requirements",
                  "svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/",
                  "bioc+release/SummarizedExperiment",
                  "https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz",
-                 "testdata/dummy_package.zip", "# to test comlete set of comparison operators",
+                 "testdata/dummy_package.zip",
                  "mgsub >= 1.5.0", "lexRankr == 0.4.*",
                  "readOffice ~= 0.0", "whitechapelR >= 0.3", "dplyr != 0.7.*"))
   expect_error(read_requirements_file("testdata/requirements_4.txt"),
