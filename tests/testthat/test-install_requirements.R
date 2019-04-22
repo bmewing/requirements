@@ -10,7 +10,7 @@ test_that("install_requirements", {
                                       packrat = FALSE,
                                       dryrun = TRUE,
                                       verbose = FALSE),
-                 regexp = "Not all requirements are allowed")
+                 regexp = "could not be installed")
 })
 
 INST = c("mgsub" = "1.5.1.3", "lexRankr" = "0.4.1", "readOffice" = "0.2.2")  # nolint
