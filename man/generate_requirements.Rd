@@ -6,7 +6,7 @@
 \usage{
 generate_requirements(glob_paths = "*.R",
   output_path = "requirements.txt", eq_sym = ">=",
-  packrat_lock_path = NULL, rm_missing = FALSE)
+  rm_missing = FALSE)
 }
 \arguments{
 \item{glob_paths}{Character vector of patterns for relative or absolute filepaths. Missing values will be ignored.
@@ -16,9 +16,6 @@ See \code{?Sys.glob} for more details.}
 
 \item{eq_sym}{The equality symbol to be used when writing requirements (i.e. package>=1.0.0).
 Use \code{NULL} to not include package versions in your requirements file.}
-
-\item{packrat_lock_path}{If not \code{NULL}, then requirements will be pulled from
-the \code{packrat.lock} at this location and appended to the final \code{requirements.txt} output.}
 
 \item{rm_missing}{Should packages not installed locally be excluded from output?}
 }
@@ -59,9 +56,10 @@ Matching will fail if:
 \examples{
 
 \dontrun{
+
 generate_requirements("R/*.R")
 generate_requirements("R/*.R", output_path = "my_requirements.txt")
-generate_requirements("R/*.R", output_path = "equal_to_requirements.txt", eq_sym = "==")
+generate_requirements("R/*.R", output_path = "equal_to_requirements.txt", eq_sym = ">=")
 generate_requirements("R/*.R", output_path = "versionless_requirements.txt", eq_sym = NULL)
 generate_requirements("R/*.R", output_path = "installed_requirements.txt", rm_missing = TRUE)
 }
