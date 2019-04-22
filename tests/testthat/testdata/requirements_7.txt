@@ -1,6 +1,7 @@
 # testing blank lines and conflicting requirements
 
-readOffice < 1.0
+readOffice > 1.0
 
 readOffice == 1
 
+-r testdata/requirements_7b.txt

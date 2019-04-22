@@ -1,31 +1,58 @@
 context("read_process_req_file.R")
 
 test_that("read_requirements_file", {
-  expect_type(read_requirements_file("testdata/requirements_1.txt"), "character")
+  expect_is(read_requirements_file("testdata/requirements_1.txt"), "data.frame")
   expect_equal(read_requirements_file("testdata/requirements_1.txt"),
-               c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice < 1.0",
-                 "whitechapelR >= 0.3"))
-  expect_equal(read_requirements_file("testdata/requirements_2.txt"),
-               c("mgsub >= 1.5.0", "lexRankr == 0.4.*",
-                 "readOffice ~= 0.0",
-                 "whitechapelR >= 0.3", "dplyr != 0.7.*"))
+               data.frame(content = c("# to test a mix of possible and impossible",
+                                      "mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice < 1.0",
+                                      "whitechapelR >= 0.3"),
+                          line = 1:5,
+                          file = c("testdata/requirements_1.txt", "testdata/requirements_1.txt",
+                                   "testdata/requirements_1.txt", "testdata/requirements_1.txt",
+                                   "testdata/requirements_1.txt"),
+                          stringsAsFactors = FALSE)
+               )
   expect_equal(read_requirements_file("testdata/requirements_3.txt"),
-               c("tidyr",
-                 "git+https://github.com/bmewing/requirements",
-                 "svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/",
-                 "bioc+release/SummarizedExperiment",
-                 "https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz",
-                 "testdata/dummy_package.zip",
-                 "mgsub >= 1.5.0", "lexRankr == 0.4.*",
-                 "readOffice ~= 0.0", "whitechapelR >= 0.3", "dplyr != 0.7.*"))
+               data.frame(content = c("# to test other forms of requirements",
+                                      "-r testdata/requirements_2.txt", "tidyr",
+                                      "git+https://github.com/bmewing/requirements",
+                                      "svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/",
+                                      "bioc+release/SummarizedExperiment",
+                                      "https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz",
+                                      "testdata/dummy_package.zip", "# to test comlete set of comparison operators",
+                                      "mgsub >= 1.5.0", "lexRankr == 0.4.* #test inline comment",
+                                      "readOffice ~= 0.0  ",
+                                      "whitechapelR >= 0.3", "dplyr != 0.7.*"),
+                          line = c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 1L, 2L, 3L, 4L, 5L, 6L),
+                          file = c("testdata/requirements_3.txt", "testdata/requirements_3.txt",
+                                   "testdata/requirements_3.txt", "testdata/requirements_3.txt",
+                                   "testdata/requirements_3.txt", "testdata/requirements_3.txt",
+                                   "testdata/requirements_3.txt", "testdata/requirements_3.txt",
+                                   "testdata/requirements_2.txt", "testdata/requirements_2.txt",
+                                   "testdata/requirements_2.txt", "testdata/requirements_2.txt",
+                                   "testdata/requirements_2.txt", "testdata/requirements_2.txt"),
+                          stringsAsFactors = FALSE)
+               )
+  expect_equal(read_requirements_file("testdata/requirements_7.txt"),
+               data.frame(content = c("# testing blank lines and conflicting requirements",
+                                      "", "readOffice > 1.0", "", "readOffice == 1", "",
+                                      "-r testdata/requirements_7b.txt", 
+                                      "# testing blank lines and conflicting requirements",
+                                      "", "readOffice < 1.0", "", "mgsub == 1", ""),
+                          line = c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 1L, 2L, 3L, 4L, 5L, 6L),
+                          file = c("testdata/requirements_7.txt", "testdata/requirements_7.txt",
+                                   "testdata/requirements_7.txt", "testdata/requirements_7.txt",
+                                   "testdata/requirements_7.txt", "testdata/requirements_7.txt",
+                                   "testdata/requirements_7.txt", "testdata/requirements_7b.txt",
+                                   "testdata/requirements_7b.txt", "testdata/requirements_7b.txt",
+                                   "testdata/requirements_7b.txt", "testdata/requirements_7b.txt",
+                                   "testdata/requirements_7b.txt"),
+                          stringsAsFactors = FALSE)
+               )
   expect_error(read_requirements_file("testdata/requirements_4.txt"),
                regexp = "is empty")
   expect_error(read_requirements_file("testdata/requirements_fake.txt"),
                regexp = sprintf(REQ_FILE_EXIST_ERR, "testdata/requirements_fake.txt"))
-  expect_error(read_requirements_file("testdata/requirements_7.txt"),
-               regexp = "Double requirement given")
-  expect_equal(read_requirements_file("testdata/requirements_7b.txt"),
-               c("readOffice < 1.0", "mgsub == 1"))
 })
 
 test_that("process_requirements_file", {
@@ -53,14 +80,46 @@ test_that("process_requirements_file", {
   expect_error(process_requirements_file("testdata/requirements_6.txt"),
                regexp = sprintf(REQ_FILE_RESOLUTION_ERR, paste("dummy_package", collapse = ", ")))
 })
-
+# TODO: Add more tests here
 test_that("remove_comments_from_req", {
-  expect_equal(remove_comments_from_req(c("mgsub >= 1.5", "-r extra_reqs.txt", "#What a world", "## We live in!")),
-               c("mgsub >= 1.5"))
+  expect_equal(
+    remove_comments_from_req(
+      data.frame(content=c("mgsub >= 1.5", "-r extra_reqs.txt", "#What a world", "## We live in!"),
+                 line = 1:4,
+                 file = "requirements.txt",
+                 stringsAsFactors = FALSE)
+      ),c("mgsub >= 1.5")
+  )
+  expect_equal(
+    remove_comments_from_req(
+      data.frame(content=c("mgsub >= 1.5", "-r extra_reqs.txt #inline comment",
+                           "", "#What a world", "## We live in!", "   "),
+                 line = 1:6,
+                 file = "requirements.txt",
+                 stringsAsFactors = FALSE)
+    ),c("mgsub >= 1.5")
+  )
+  expect_error(
+    remove_comments_from_req(
+      data.frame(content=c("mgsub >= 1.5", "-r extra_reqs.txt #inline comment",
+                           "", "#What a world", "## We live in!", "   ",
+                           " mgsub"),
+                 line = 1:7,
+                 file = "requirements.txt",
+                 stringsAsFactors = FALSE)
+    ),regex = "Double requirement given"
+  )
+  expect_equal(tmp <<- remove_comments_from_req(read_requirements_file("testdata/requirements_3.txt")), #nolint
+               c("tidyr", "git+https://github.com/bmewing/requirements", 
+                 "svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/", 
+                 "bioc+release/SummarizedExperiment", 
+                 "https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz", 
+                 "testdata/dummy_package.zip", "mgsub >= 1.5.0", "lexRankr == 0.4.*", 
+                 "readOffice ~= 0.0", "whitechapelR >= 0.3", "dplyr != 0.7.*"))
 })
 
 test_that("capture_special_installs", {
-  expect_equal(capture_special_installs(read_requirements_file("testdata/requirements_3.txt")),
+  expect_equal(capture_special_installs(tmp),
                list(git = "git+https://github.com/bmewing/requirements",
                     svn = "svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/",
                     bioc = "bioc+release/SummarizedExperiment",
@@ -68,12 +127,12 @@ test_that("capture_special_installs", {
 })
 
 test_that("capture_versioned_requirements", {
-  expect_equal(capture_versioned_requirements(read_requirements_file("testdata/requirements_3.txt")),
+  expect_equal(capture_versioned_requirements(tmp),
                c("mgsub >= 1.5.0", "lexRankr == 0.4.*", "readOffice ~= 0.0", "whitechapelR >= 0.3", "dplyr != 0.7.*"))
 })
 
 test_that("capture_local_requirements", {
-  expect_equal(capture_local_requirements(read_requirements_file("testdata/requirements_3.txt")),
+  expect_equal(capture_local_requirements(tmp),
                c("testdata/dummy_package.zip"))
 })
 
