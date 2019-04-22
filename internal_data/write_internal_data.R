@@ -28,9 +28,11 @@ usethis::use_data(
   REQ_FILE_EMPTY_ERR,           # Error message for empty requirements file
   REQ_FILE_RESOLUTION_ERR,      # Error message for non-resolvable requirements requirements file
   REQ_FILE_INVALID_COMP,        # Error message for invalid comparison operator
+  REQ_FILE_DUPLICATE_REQ,       # Error message for duplicated requirements
   VALID_REQ,                    # Pattern for validating versioned requirements
   COMP_EXTRACTOR,               # Pattern for extracting comparison operator
-  CANONICAL_PACKAGE_NAME_RE_STANDALONE,  # String contain regex to match valid package names by CRAN standards
+  CANONICAL_PACKAGE_NAME_RE_STANDALONE,  # String containing regex to match valid package names by CRAN standards
+  CANONICAL_PACKAGE_NAME_RE_EXTRACT,     # String containing regex to extract valid package names by CRAN standards
   PACKAGE_RES,                # Character vector of regexes to match package names used in code (i.e. `library(name)`)
   AUTO_GEN_COMMENTS,          # Comments to be placed at the top of auto-generated requirements files
   internal = TRUE,
