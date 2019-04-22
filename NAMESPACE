@@ -1,5 +1,6 @@
 export("install_requirements")
 export("generate_requirements")
+export("packrat_to_requirements")
 importFrom("utils", "installed.packages", "packageVersion", "install.packages")
 importFrom("utils", "tail")
 importFrom("utils", "glob2rx")
