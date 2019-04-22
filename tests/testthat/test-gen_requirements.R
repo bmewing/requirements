@@ -98,7 +98,7 @@ test_that("read_reqs_from_lockfile", {
   )
 
   expect_equal(
-    read_reqs_from_lockfile(lockfile_path = LOCKFILE, eq_sym = "="),
+    read_reqs_from_lockfile(lockfile_path = LOCKFILE, eq_sym = "=="),
     c("BH==1.62.0-1", "DT==0.2")
   )
 
@@ -201,6 +201,24 @@ test_that("generate_requirements", {
     readLines(test_requirements_file),
     c(AUTO_GEN_COMMENTS, sort(PACKAGES_ALL))
   )
+
+  generate_requirements(test_glob, test_requirements_file, eq_sym = NULL, packrat_lock_path = LOCKFILE)
+
+  expect_equal(
+    readLines(test_requirements_file),
+    c(AUTO_GEN_COMMENTS, sort(PACKAGES_ALL), "BH", "DT")
+  )
+})
+
+test_that("packrat_to_requirements", {
+  test_requirements_file = file.path(TMP_DIR, "requirements.txt")
+
+  packrat_to_requirements(LOCKFILE, test_requirements_file, append = FALSE)
+
+  expect_equal(
+    readLines(test_requirements_file),
+    c(AUTO_GEN_COMMENTS, "BH>=1.62.0-1", "DT>=0.2")
+  )
 })
 
 test_that("validate_eq_sym", {
@@ -209,8 +227,12 @@ test_that("validate_eq_sym", {
     regexp = "'42'"
   )
 
+  expect_error(
+    validate_eq_sym("="),
+    regexp = "not a valid comparison operator"
+  )
+
   expect_equal(validate_eq_sym("=="), "==")
-  expect_equal(validate_eq_sym("="), "==")
 
   expect_error(
     validate_eq_sym(c("==", "==")),
