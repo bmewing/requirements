@@ -1,10 +1,16 @@
 context("test parent wrapper installation function")
+TMP_DIR = tempdir()  #nolint
 test_that("install_requirements", {
   expect_message(install_requirements("testdata/requirements_2.txt",
                                       packrat = FALSE,
                                       dryrun = TRUE,
                                       verbose = FALSE),
                  regexp = "NOTE: This was just a dry run. No packages have been installed.")
+  expect_error(install_requirements(file.path(TMP_DIR, "fake_requirements.txt"),
+                                    packrat = FALSE,
+                                    dryrun = TRUE,
+                                    verbose = FALSE),
+               regexp = "Not all requirements are allowed")
 })
 
 INST = c("mgsub" = "1.5.1.3", "lexRankr" = "0.4.1", "readOffice" = "0.2.2")  # nolint
