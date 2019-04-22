@@ -65,7 +65,9 @@ test_that("install_cran_package", {
 })
 
 test_that("process_versioned_requirement", {
-  expect_type(process_versioned_requirement("mgsub==1.5"), "list")
+  expect_type(process_versioned_requirement("mgsub=1.5"), "list")
+  expect_equal(process_versioned_requirement("mgsub=1.5"),
+               list(package = "mgsub", version = "1.5", comp = COMP_EXACTLY_EQUAL))
   expect_equal(process_versioned_requirement("mgsub == 1.5"),
                list(package = "mgsub", version = "1.5", comp = COMP_EXACTLY_EQUAL))
   expect_equal(process_versioned_requirement("mgsub>=1.*"),
@@ -168,9 +170,7 @@ test_that("install_reqs", {
 
 test_that("identify_comparison_op", {
   expect_equal(identify_comparison_op("mgsub=1.5"),  "=")
-  expect_equal(identify_comparison_op("mgsub=*=1.5"),  "=*=")
   expect_equal(identify_comparison_op("mgsub==1.5"), "==")
-  expect_equal(identify_comparison_op("mgsub == 1.5"), "==")
   expect_equal(identify_comparison_op("mgsub>=1.5"), ">=")
   expect_equal(identify_comparison_op("mgsub<=1.5"), "<=")
   expect_equal(identify_comparison_op("mgsub<1.5"),  "<")

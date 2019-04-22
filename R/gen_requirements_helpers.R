@@ -95,61 +95,6 @@ read_package_lines_from_files = function(file_paths, filter_words=c("::", "libra
 }
 
 
-str_match_all = function(string, pattern) {
-  #' @keywords internal
-  #' Extract capture groups from vector of strings with regex (made to emulate stringr::str_match_all)
-  #'
-  #' @param string character vector to extract capture groups from
-  #' @param pattern len 1 character vector containing regex to use for matching/capture group extraction
-  #' @return character vector containing captured output found in string
-  #'
-  #' @examples
-  #' str_match_all(c('test', 'best'), '(.)est')
-  #' # [[1]]
-  #' #      [,1]   [,2]
-  #' # [1,] "test" "t"
-  #' #
-  #' # [[2]]
-  #' #      [,1]   [,2]
-  #' # [1,] "best" "b"
-  #'
-  #' str_match_all(c('test', 'best'), 'x')
-  #' # [[1]]
-  #' #      [,1]
-  #' #
-  #' # [[2]]
-  #' #      [,1]
-
-  # Below implementation taken from last example in ?grep documentation & modified
-  # > There is no gregexec() yet, but one can emulate it by running
-  # > regexec() on the regmatches obtained via gregexpr().
-  matches_list = lapply(regmatches(string, gregexpr(pattern, string)), function(e) {
-    matches = regmatches(e, regexec(pattern, e))
-
-    do.call(rbind, matches)
-  })
-
-  # Elements of string that weren't matched by pattern are NULL in matches_list.
-  # The below process replaces NULL elements with a row-less matrix that matches
-  # the column number non-NULL elements.
-  null_matches = vapply(matches_list, is.null, logical(1))
-  n_null_matches = sum(null_matches)
-
-  if (n_null_matches == 0) return(matches_list)
-
-  if (n_null_matches == length(matches_list)) {
-    null_matrix_placeholder = matrix(character(0), nrow = 0, ncol = 1)
-  } else {
-    non_null_n_col = max(vapply(matches_list[!null_matches], ncol, integer(1)))
-    null_matrix_placeholder = matrix(character(0), nrow = 0, ncol = non_null_n_col)
-  }
-
-  matches_list[null_matches] = rep(list(null_matrix_placeholder), n_null_matches)
-
-  return(matches_list)
-}
-
-
 match_package = function(candidate_lines, package_regex) {
   #' @keywords internal
   #' Match valid package names from character vector of lines of R code
@@ -158,7 +103,7 @@ match_package = function(candidate_lines, package_regex) {
   #' @param package_regex Regex as string to be used to match package references in code.
   #'
   #' @return Character vector of package names matched.
-  lib_matches_list = str_match_all(candidate_lines, package_regex)
+  lib_matches_list = stringr::str_match_all(candidate_lines, package_regex)
   lib_matches_str = unlist(lapply(lib_matches_list, function(m) m[, 2]))
   lib_matches_str = lib_matches_str[!is.na(lib_matches_str)]
 
@@ -199,6 +144,7 @@ safe_package_version = function(pkg) {
     }
   )
 }
+
 
 validate_eq_sym = function(eq_sym) {
   #' @keywords internal
