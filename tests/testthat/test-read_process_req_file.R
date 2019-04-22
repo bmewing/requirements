@@ -36,7 +36,7 @@ test_that("read_requirements_file", {
   expect_equal(read_requirements_file("testdata/requirements_7.txt"),
                data.frame(content = c("# testing blank lines and conflicting requirements",
                                       "", "readOffice > 1.0", "", "readOffice == 1", "",
-                                      "-r testdata/requirements_7b.txt", 
+                                      "-r testdata/requirements_7b.txt",
                                       "# testing blank lines and conflicting requirements",
                                       "", "readOffice < 1.0", "", "mgsub == 1", ""),
                           line = c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 1L, 2L, 3L, 4L, 5L, 6L),
@@ -84,37 +84,37 @@ test_that("process_requirements_file", {
 test_that("remove_comments_from_req", {
   expect_equal(
     remove_comments_from_req(
-      data.frame(content=c("mgsub >= 1.5", "-r extra_reqs.txt", "#What a world", "## We live in!"),
+      data.frame(content = c("mgsub >= 1.5", "-r extra_reqs.txt", "#What a world", "## We live in!"),
                  line = 1:4,
                  file = "requirements.txt",
                  stringsAsFactors = FALSE)
-      ),c("mgsub >= 1.5")
+      ), c("mgsub >= 1.5")
   )
   expect_equal(
     remove_comments_from_req(
-      data.frame(content=c("mgsub >= 1.5", "-r extra_reqs.txt #inline comment",
+      data.frame(content = c("mgsub >= 1.5", "-r extra_reqs.txt #inline comment",
                            "", "#What a world", "## We live in!", "   "),
                  line = 1:6,
                  file = "requirements.txt",
                  stringsAsFactors = FALSE)
-    ),c("mgsub >= 1.5")
+    ), c("mgsub >= 1.5")
   )
   expect_error(
     remove_comments_from_req(
-      data.frame(content=c("mgsub >= 1.5", "-r extra_reqs.txt #inline comment",
+      data.frame(content = c("mgsub >= 1.5", "-r extra_reqs.txt #inline comment",
                            "", "#What a world", "## We live in!", "   ",
                            " mgsub"),
                  line = 1:7,
                  file = "requirements.txt",
                  stringsAsFactors = FALSE)
-    ),regex = "Double requirement given"
+    ), regex = "Double requirement given"
   )
   expect_equal(tmp <<- remove_comments_from_req(read_requirements_file("testdata/requirements_3.txt")), #nolint
-               c("tidyr", "git+https://github.com/bmewing/requirements", 
-                 "svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/", 
-                 "bioc+release/SummarizedExperiment", 
-                 "https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz", 
-                 "testdata/dummy_package.zip", "mgsub >= 1.5.0", "lexRankr == 0.4.*", 
+               c("tidyr", "git+https://github.com/bmewing/requirements",
+                 "svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/",
+                 "bioc+release/SummarizedExperiment",
+                 "https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz",
+                 "testdata/dummy_package.zip", "mgsub >= 1.5.0", "lexRankr == 0.4.*",
                  "readOffice ~= 0.0", "whitechapelR >= 0.3", "dplyr != 0.7.*"))
 })
 
