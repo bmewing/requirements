@@ -1,0 +1,6 @@
+# testing blank lines and conflicting requirements
+
+readOffice < 1.0
+
+mgsub == 1
+

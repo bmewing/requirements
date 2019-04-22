@@ -24,6 +24,7 @@ remove_comments_from_req = function(content) {
   content = content[!grepl("^ *\\-r", content)]
   content = gsub("#.*$", "", content)
   content = trimws(content, which = "both")
+  content = content[nchar(content) > 0]
   return(content)
 }
 
