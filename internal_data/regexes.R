@@ -4,6 +4,7 @@
 # > have at least two characters and start with a letter and not end in a dot.
 CANONICAL_PACKAGE_NAME_RE = '[a-zA-Z]{1}[a-zA-Z0-9\\.]*[a-zA-Z0-9]{1,}'
 CANONICAL_PACKAGE_NAME_RE_STANDALONE = paste0('^',CANONICAL_PACKAGE_NAME_RE,'$')
+CANONICAL_PACKAGE_NAME_RE_EXTRACT = paste0("^(",CANONICAL_PACKAGE_NAME_RE,").*$")
 LIB_RE   = sprintf('library\\([\'"]?(%s)[\'"]?[\\),]', CANONICAL_PACKAGE_NAME_RE)
 REQ_RE   = sprintf('require\\([\'"]?(%s)[\'"]?[\\),]', CANONICAL_PACKAGE_NAME_RE)
 PAC_RE   = sprintf('p_load\\([\'"]?(%s)[\'"]?[\\),]',  CANONICAL_PACKAGE_NAME_RE)

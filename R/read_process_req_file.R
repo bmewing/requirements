@@ -1,33 +1,83 @@
 read_requirements_file = function(req){
   #' @param req path to requirements file
-  #' @return vector of requirements to be processed
+  #' @return dataframe of requirements file contents plus line numbers and source file reference
 
   if (!file.exists(req)) stop(sprintf(REQ_FILE_EXIST_ERR, req))
-
   content = readLines(req)
   if (length(content) == 0) stop(sprintf(REQ_FILE_EMPTY_ERR, req))
+  output = data.frame(content = content,
+                      line = seq_along(content),
+                      file = req,
+                      stringsAsFactors = FALSE)
 
   additional_files = grep("^ *\\-r", content, value = TRUE)
   if (length(additional_files) > 0) {
     for (af in additional_files) {
       tmp = read_requirements_file(sub("^ *\\-r *", "", af))
-      content = c(content, tmp)
+      output = rbind(output, tmp)
     }
   }
 
-  content = remove_comments_from_req(content)
-  return(content)
+  return(output)
 }
 
-remove_comments_from_req = function(content) {
-  content = content[!grepl("^ *#", content)]
-  content = content[!grepl("^ *\\-r", content)]
-  content = gsub("#.*$", "", content)
-  content = trimws(content, which = "both")
-  return(content)
+identify_duplicate_reqs = function(content_df){
+  #' @param content_df dataframe of requirements with three columns
+  #' @return content_df untouched
+  #' @details content_df$content is the requirement line
+  #'          content_df$line is the line number
+  #'          content_df$file is the file the content originated from
+  #'  If there are any duplicated requirements (other than exact duplicates, e.g. mgsub < 1 and mgsub > 0)
+  #'  it throws a verbose error.
+
+  content_dup = content_df[grepl(CANONICAL_PACKAGE_NAME_RE_EXTRACT, content_df$content), ]
+  content_dup$package = gsub(CANONICAL_PACKAGE_NAME_RE_EXTRACT, "\\1", content_dup$content)
+
+  dups = duplicated(content_dup$package)
+  if (!any(dups)){
+    return(content_df)
+  } else {
+    error = ""
+    for (i in which(dups)){
+      first_occur = which(content_dup$package == content_dup[2, "package"])[1]
+      error = paste0(error,
+                     sprintf(REQ_FILE_DUPLICATE_REQ,
+                             content_dup$content[i],
+                             content_dup$file[i],
+                             content_dup$line[i],
+                             content_dup$content[first_occur],
+                             content_dup$file[first_occur],
+                             content_dup$line[first_occur],
+                             content_dup$package[i]))
+    }
+    stop(error)
+  }
+}
+
+remove_comments_from_req = function(content_df) {
+  #' @param content_df dataframe of requirements with three columns
+  #' @return vector of requirements to be processed
+  #' @details content_df$content is the requirement line
+  #'          content_df$line is the line number
+  #'          content_df$file is the file the content originated from
+  #' Removes all full line comments and references to additional requirements files
+  #' Trims whitespace from lines and removes in-line comments
+  #' Checks for duplicated requirements
+  content_df = content_df[!grepl("^ *#", content_df$content), ]
+  content_df = content_df[!grepl("^ *\\-r", content_df$content), ]
+  content_df$content = gsub("#.*$", "", content_df$content)
+  content_df$content = trimws(content_df$content, which = "both")
+  content_df = content_df[nchar(content_df$content) > 0, ]
+  #remove identical duplicates
+  content_df = content_df[!duplicated(content_df$content), ]
+  content_df = identify_duplicate_reqs(content_df)
+  return(content_df$content)
 }
 
 capture_special_installs = function(content) {
+  #' @param content vector of requirements to be processed
+  #' @return list of all special installs needed
+
   git_req = grep(GIT_EXTRACT, content, value = TRUE)
   svn_req = grep(SVN_EXT_REP, content, value = TRUE)
   bio_req = grep(BIO_EXT_REP, content, value = TRUE)
@@ -40,6 +90,9 @@ capture_special_installs = function(content) {
 }
 
 validate_versioning = function(req){
+  #' @param req a requirement to be checked
+  #' @return logical indicating if the versioned requirement is valid (including valid comparison operator)
+
   return(grepl(VALID_REQ, req))
 }
 
@@ -87,6 +140,7 @@ process_requirements_file = function(req){
   #' @return list with all supported requirement types
 
   content = read_requirements_file(req)
+  content = remove_comments_from_req(content)
   if (length(content) == 0) stop(sprintf(REQ_FILE_EMPTY_ERR, req))
 
   output = capture_special_installs(content)
