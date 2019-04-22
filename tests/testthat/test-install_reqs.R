@@ -5,13 +5,13 @@ INST = c("mgsub" = "1.5.1.3", "lexRankr" = "0.4.1", "readOffice" = "0.2.2")  # n
 test_that("install_special_req", {
   #check working fine message on git
   expect_message(fail_count <- install_special_req("git+https://github.com/bmewing/mgsub", # nolint
-                                     GIT_REPLACE, remotes::install_git, TRUE, TRUE),
+                                                   GIT_REPLACE, remotes::install_git, TRUE, TRUE),
                  regexp = "https://github\\.com/bmewing/mgsub")
   #check git working fine
   expect_equal(fail_count, 0)
   #check failure message on git
   expect_message(fail_count <- install_special_req("git+https://github.com/bmewing/thiswillneverexist", # nolint
-                                     GIT_REPLACE, remotes::install_git, FALSE, TRUE),
+                                                   GIT_REPLACE, remotes::install_git, FALSE, TRUE),
                  regexp = sprintf(ERROR_OTHER_FAILURE, "https://github\\.com/bmewing/thiswillneverexist"))
   #check failure counts return properly
   expect_equal(fail_count, 1)
@@ -41,7 +41,7 @@ test_that("install_unversioned", {
                                                    dryrun = FALSE,
                                                    verbose = TRUE,
                                                    repo = "https://cran.rstudio.com"),
-               regexp = sprintf(ERROR_NO_PACKAGE_EXISTS, "2fun2quit"))
+                 regexp = sprintf(ERROR_NO_PACKAGE_EXISTS, "2fun2quit"))
   expect_equal(fail_count, 1)
 })
 
@@ -84,17 +84,17 @@ test_that("process_versioned_requirement", {
 
 test_that("is_versioned_install_needed", {
   expect_message(res <- is_versioned_install_needed(package = "dplyr", # nolint
-                                             version = "*",
-                                             comp = "==",
-                                             installed = INST,
-                                             verbose = TRUE),
-                 regexp = sprintf(NOTE_PACKAGE_NOT_INSTALLED, "dplyr"))
-  expect_true(res)
-  expect_silent(res <- is_versioned_install_needed(package = "mgsub", # nolint
                                                     version = "*",
                                                     comp = "==",
                                                     installed = INST,
-                                                    verbose = TRUE))
+                                                    verbose = TRUE),
+                 regexp = sprintf(NOTE_PACKAGE_NOT_INSTALLED, "dplyr"))
+  expect_true(res)
+  expect_silent(res <- is_versioned_install_needed(package = "mgsub", # nolint
+                                                   version = "*",
+                                                   comp = "==",
+                                                   installed = INST,
+                                                   verbose = TRUE))
   expect_false(res)
   expect_true(is_versioned_install_needed(package = "mgsub",
                                           version = "2.0",
@@ -125,10 +125,10 @@ test_that("install_if_compat_available", {
 
 test_that("install_versioned", {
   expect_message(fail_count <- install_versioned(elem = "mgsub <= 1.5", # nolint
-                                   installed = INST,
-                                   dryrun = TRUE,
-                                   verbose = TRUE,
-                                   repo = "https://cran.rstudio.com"),
+                                                 installed = INST,
+                                                 dryrun = TRUE,
+                                                 verbose = TRUE,
+                                                 repo = "https://cran.rstudio.com"),
                  regexp = sprintf(NOTE_BAD_PACKAGE_VERSION, "mgsub", INST["mgsub"]))
   expect_equal(fail_count, 0)
   expect_equal(install_versioned(elem = "mgsub >= 1.5",

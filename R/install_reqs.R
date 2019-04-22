@@ -57,9 +57,9 @@ install_cran_package = function(package, version, repo, dryrun){
   failures = 0
   if (!dryrun) {
     tryCatch(remotes::install_version(package,
-                                       version = version,
-                                       repos = repo,
-                                       quiet = TRUE),
+                                      version = version,
+                                      repos = repo,
+                                      quiet = TRUE),
              error = function(x){
                failures <<- failures + 1 # nolint
                message(sprintf(ERROR_OTHER_FAILURE, package))
