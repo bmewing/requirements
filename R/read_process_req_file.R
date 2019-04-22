@@ -24,16 +24,16 @@ identify_duplicate_reqs = function(content_df){
   #' @details content_df$content is the requirement line
   #'          content_df$line is the line number
 
-  content_dup = content_df[grepl(CANONICAL_PACKAGE_NAME_RE_EXTRACT, content_df$content),]
-  content_dup$package = gsub(CANONICAL_PACKAGE_NAME_RE_EXTRACT,"\\1",content_dup$content)
+  content_dup = content_df[grepl(CANONICAL_PACKAGE_NAME_RE_EXTRACT, content_df$content), ]
+  content_dup$package = gsub(CANONICAL_PACKAGE_NAME_RE_EXTRACT, "\\1", content_dup$content)
 
   dups = duplicated(content_dup$package)
-  if(!any(dups)){
+  if (!any(dups)){
     return(content_df)
   } else {
     error = ""
-    for(i in which(dups)){
-      first_occur = which(content_dup$package == content_dup[2,"package"])[1]
+    for (i in which(dups)){
+      first_occur = which(content_dup$package == content_dup[2, "package"])[1]
       error = paste0(error,
                      sprintf(REQ_FILE_DUPLICATE_REQ,
                              content_dup$content[i],
@@ -47,13 +47,13 @@ identify_duplicate_reqs = function(content_df){
 
 remove_comments_from_req = function(content) {
   content_df = data.frame(content = content, line = seq_along(content))
-  content_df = content_df[!grepl("^ *#", content_df$content),]
-  content_df = content_df[!grepl("^ *\\-r", content_df$content),]
+  content_df = content_df[!grepl("^ *#", content_df$content), ]
+  content_df = content_df[!grepl("^ *\\-r", content_df$content), ]
   content_df$content = gsub("#.*$", "", content_df$content)
   content_df$content = trimws(content_df$content, which = "both")
-  content_df = content_df[nchar(content_df$content) > 0,]
+  content_df = content_df[nchar(content_df$content) > 0, ]
   #remove identical duplicates
-  content_df = content_df[!duplicated(content_df$content),]
+  content_df = content_df[!duplicated(content_df$content), ]
   content_df = identify_duplicate_reqs(content_df)
   return(content_df$content)
 }

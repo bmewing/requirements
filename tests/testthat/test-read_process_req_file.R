@@ -25,7 +25,7 @@ test_that("read_requirements_file", {
   expect_error(read_requirements_file("testdata/requirements_7.txt"),
                regexp = "Double requirement given")
   expect_equal(read_requirements_file("testdata/requirements_7b.txt"),
-               c("readOffice < 1.0","mgsub == 1"))
+               c("readOffice < 1.0", "mgsub == 1"))
 })
 
 test_that("process_requirements_file", {
