@@ -154,8 +154,6 @@ validate_eq_sym = function(eq_sym) {
   #' @return None; exception is raised if invalid symbol
   stopifnot(length(eq_sym) == 1)
 
-  if (eq_sym == "=") return(COMP_EXACTLY_EQUAL)
-
   if (!(eq_sym %in% COMPS)) {
     comps_str = paste(COMPS, collapse = "', '")
     error_msg = "'%s' is not a valid comparison operator; valid operators are: '%s'"
