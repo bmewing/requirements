@@ -68,9 +68,24 @@ install_cran_package = function(package, version, repo, dryrun){
   return(failures)
 }
 
+identify_comparison_op = function(req){
+  comp_match = vapply(c(COMPS, "="),
+                      grepl,
+                      x = req,
+                      fixed = TRUE,
+                      FUN.VALUE = logical(1))
+  if (any(comp_match)){
+    comp = names(which.max(comp_match))
+  } else {
+    comp = NA_character_
+  }
+  return(comp)
+}
+
 process_versioned_requirement = function(req){
   comp = identify_comparison_op(req)
   split = strsplit(req, comp)[[1]]
+  if (comp == "=") comp = COMP_EXACTLY_EQUAL
   package = gsub(" *", "", split[1])
   version = gsub(" *", "", split[2])
   return(list(package = package,
