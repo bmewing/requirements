@@ -80,7 +80,7 @@ test_that("process_requirements_file", {
   expect_error(process_requirements_file("testdata/requirements_6.txt"),
                regexp = sprintf(REQ_FILE_RESOLUTION_ERR, paste("dummy_package", collapse = ", ")))
 })
-# TODO: Add more tests here
+
 test_that("remove_comments_dups_from_req", {
   expect_equal(
     remove_comments_dups_from_req(
@@ -154,4 +154,12 @@ test_that("validate_versioning", {
   expect_false(validate_versioning("mgsub>"))
   expect_false(validate_versioning("mgsub"))
   expect_false(validate_versioning("mgsub>=1.4..5"))
+})
+
+test_that("strip_comments", {
+  expect_equal(strip_comments(c("test-req::fake() ", " dplyr::mutate()",
+                                "-r req.text", " -r  req.txt",
+                                "# comment", " #comment", 
+                                "mgsub # because awesome", "mgsub > 1##because awesome")),
+               c("test-req::fake()", "dplyr::mutate()", "", "", "", "", "mgsub", "mgsub > 1"))
 })

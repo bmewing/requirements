@@ -54,15 +54,18 @@ identify_duplicate_reqs = function(content_df){
   }
 }
 
+
 strip_comments = function(content){
   #' @param content vector of characters
   #' @return vector of chracters without comments or -r and trimmed whitespace
   #' @details This was originally part of another function but was split out to be used
   #' in a few different places.
-  content = gsub("\\-r.*|#.*", "", content)
+  content = gsub("#.*", "", content)
+  content = gsub("^ *\\-r.*", "", content)
   content = trimws(content, which = "both")
   return(content)
 }
+
 
 remove_comments_dups_from_req = function(content_df) {
   #' @param content_df dataframe of requirements with three columns
