@@ -159,7 +159,7 @@ test_that("validate_versioning", {
 test_that("strip_comments", {
   expect_equal(strip_comments(c("test-req::fake() ", " dplyr::mutate()",
                                 "-r req.text", " -r  req.txt",
-                                "# comment", " #comment", 
+                                "# comment", " #comment",
                                 "mgsub # because awesome", "mgsub > 1##because awesome")),
                c("test-req::fake()", "dplyr::mutate()", "", "", "", "", "mgsub", "mgsub > 1"))
 })
