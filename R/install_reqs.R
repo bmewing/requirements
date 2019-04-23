@@ -1,5 +1,5 @@
-install_special_req = function(elem, pattern, f, dryrun, verbose){
-  #' @param elem list element to be worked on
+install_special_req = function(i, pattern, f, dryrun, verbose){
+  #' @param i single special requirement to be installed
   #' @param pattern regex pattern to match on
   #' @param f the function used to install
   #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
@@ -7,25 +7,20 @@ install_special_req = function(elem, pattern, f, dryrun, verbose){
   #'
   #' @return count of failures
   failures = 0
-
-  if (length(elem) > 0) {
-    for (i in elem) {
-      url = sub(pattern, "", i)
-      vmess(sprintf(NOTE_INSTALL_PACKAGE, url, ""), verbose)
-      if (!dryrun) {
-        tryCatch(f(url),
-                 error = function(x) {
-                   failures <<- failures + 1 # nolint
-                   message(sprintf(ERROR_OTHER_FAILURE, url))
-                 })
-      }
-    }
+  url = sub(pattern, "", i)
+  vmess(sprintf(NOTE_INSTALL_PACKAGE, url, ""), verbose)
+  if (!dryrun) {
+    tryCatch(f(url),
+             error = function(x) {
+               failures <<- failures + 1 # nolint
+               message(sprintf(ERROR_OTHER_FAILURE, url))
+             })
   }
   return(failures)
 }
 
-install_unversioned = function(elem, installed, dryrun, verbose, repo){
-  #' @param elem the list element of unversioned package requirements
+install_unversioned = function(i, installed, dryrun, verbose, repo){
+  #' @param i single unversioned package requirement (package name)
   #' @param installed list of installed packages
   #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
   #' @param verbose should the function be explicit about activities
@@ -33,23 +28,19 @@ install_unversioned = function(elem, installed, dryrun, verbose, repo){
   #'
   #' @return the number of failures
   failures = 0
-
-  for (i in elem) {
-    available_versions = get_available_versions(i)
-    if (is.null(available_versions)){
-      failures = failures + 1
-      vmess(sprintf(ERROR_NO_PACKAGE_EXISTS, i), TRUE)
-    } else if (is.na(installed[i])) {
-      vmess(sprintf(NOTE_PACKAGE_NOT_INSTALLED, i), verbose)
-      version = tail(sort(available_versions), 1)
-      vmess(sprintf(NOTE_INSTALL_PACKAGE, i, sprintf(NOTE_INSTALL_PACKAGE_VERSION, version)), verbose)
-      failures = failures + install_cran_package(package = i,
-                                                 version = NULL,
-                                                 repo = repo,
-                                                 dryrun = dryrun)
-    }
+  available_versions = get_available_versions(i)
+  if (is.null(available_versions)){
+    failures = failures + 1
+    vmess(sprintf(ERROR_NO_PACKAGE_EXISTS, i), TRUE)
+  } else if (is.na(installed[i])) {
+    vmess(sprintf(NOTE_PACKAGE_NOT_INSTALLED, i), verbose)
+    version = tail(sort(available_versions), 1)
+    vmess(sprintf(NOTE_INSTALL_PACKAGE, i, sprintf(NOTE_INSTALL_PACKAGE_VERSION, version)), verbose)
+    failures = failures + install_cran_package(package = i,
+                                               version = NULL,
+                                               repo = repo,
+                                               dryrun = dryrun)
   }
-
   return(failures)
 }
 
@@ -118,8 +109,8 @@ install_if_compat_available = function(processed_element, repo, verbose, dryrun)
   return(failures)
 }
 
-install_versioned = function(elem, installed, dryrun, verbose, repo){
-  #' @param elem the list element of unversioned package requirements
+install_versioned = function(i, installed, dryrun, verbose, repo){
+  #' @param i single versioned package requirements (package comp version)
   #' @param installed list of installed packages
   #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
   #' @param verbose should the function be explicit about activities
@@ -127,24 +118,33 @@ install_versioned = function(elem, installed, dryrun, verbose, repo){
   #'
   #' @return the number of failures
   failures = 0
+  processed_element = process_versioned_requirement(i)
+  package = processed_element$package
+  version = processed_element$version
+  comp = processed_element$comp
 
-  for (i in elem) {
-    processed_element = process_versioned_requirement(i)
-    package = processed_element$package
-    version = processed_element$version
-    comp = processed_element$comp
+  install_needed = is_versioned_install_needed(package, version, comp, installed, verbose)
+  if (!install_needed) return(0)
 
-    install_needed = is_versioned_install_needed(package, version, comp, installed, verbose)
-    if (!install_needed) next
-
-    if (!is.na(installed[package])) {
-      vmess(sprintf(NOTE_BAD_PACKAGE_VERSION, package, installed[package]), verbose)
-    }
-
-    package_failure = install_if_compat_available(processed_element, repo, verbose, dryrun)
-    failures = failures + package_failure
+  if (!is.na(installed[package])) {
+    vmess(sprintf(NOTE_BAD_PACKAGE_VERSION, package, installed[package]), verbose)
   }
+
+  package_failure = install_if_compat_available(processed_element, repo, verbose, dryrun)
+  failures = failures + package_failure
   return(failures)
+}
+
+
+count_failures = function(elem, func, ...){
+  #' @param elem the requirements to be installed
+  #' @param func the internal function used to handle installation
+  #' @param ... other arguments to pass to the internal function
+  if (length(elem) > 0){
+    return(sum(vapply(elem, func, FUN.VALUE = numeric(1), ...)))
+  } else {
+    return(0)
+  }
 }
 
 install_reqs = function(reqs, dryrun, verbose = dryrun,
@@ -162,13 +162,13 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
 
   # Install git
   failures = failures +
-    install_special_req(reqs$git, GIT_REPLACE, remotes::install_git, dryrun, verbose) +
-    install_special_req(reqs$svn, SVN_EXT_REP, remotes::install_svn, dryrun, verbose) +
-    install_special_req(reqs$bioc, BIO_EXT_REP, remotes::install_bioc, dryrun, verbose) +
-    install_special_req(reqs$url, "", remotes::install_url, dryrun, verbose) +
-    install_special_req(reqs$local, "", remotes::install_local, dryrun, verbose) +
-    install_unversioned(reqs$unversioned, installed, dryrun, verbose, repo) +
-    install_versioned(reqs$versioned, installed, dryrun, verbose, repo)
+    count_failures(reqs$git, install_special_req, GIT_REPLACE, remotes::install_git, dryrun, verbose) +
+    count_failures(reqs$svn, install_special_req, SVN_EXT_REP, remotes::install_svn, dryrun, verbose) +
+    count_failures(reqs$bioc, install_special_req, BIO_EXT_REP, remotes::install_bioc, dryrun, verbose) +
+    count_failures(reqs$url, install_special_req, "", remotes::install_url, dryrun, verbose) +
+    count_failures(reqs$local, install_special_req, "", remotes::install_local, dryrun, verbose) +
+    count_failures(reqs$unversioned, install_unversioned, installed, dryrun, verbose, repo) +
+    count_failures(reqs$versioned, install_versioned, installed, dryrun, verbose, repo)
 
   if (failures > 0) stop(sprintf(ERROR_FAILURE_COUNT, failures))
 

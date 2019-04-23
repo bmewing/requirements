@@ -29,14 +29,14 @@ test_that("install_special_req", {
 })
 
 test_that("install_unversioned", {
-  expect_message(fail_count <- install_unversioned(elem = "dplyr", # nolint
+  expect_message(fail_count <- install_unversioned(i = "dplyr", # nolint
                                                    installed = INST,
                                                    dryrun = TRUE,
                                                    verbose = TRUE,
                                                    repo = "https://cran.rstudio.com"),
                  regexp = "dplyr")
   expect_equal(fail_count, 0)
-  expect_message(fail_count <- install_unversioned(elem = "2fun2quit", # nolint
+  expect_message(fail_count <- install_unversioned(i = "2fun2quit", # nolint
                                                    installed = INST,
                                                    dryrun = FALSE,
                                                    verbose = TRUE,
@@ -124,33 +124,28 @@ test_that("install_if_compat_available", {
 })
 
 test_that("install_versioned", {
-  expect_message(fail_count <- install_versioned(elem = "mgsub <= 1.5", # nolint
+  expect_message(fail_count <- install_versioned(i = "mgsub <= 1.5", # nolint
                                                  installed = INST,
                                                  dryrun = TRUE,
                                                  verbose = TRUE,
                                                  repo = "https://cran.rstudio.com"),
                  regexp = sprintf(NOTE_BAD_PACKAGE_VERSION, "mgsub", INST["mgsub"]))
   expect_equal(fail_count, 0)
-  expect_equal(install_versioned(elem = "mgsub >= 1.5",
+  expect_equal(install_versioned(i = "mgsub >= 1.5",
                                  installed = INST,
                                  dryrun = TRUE,
                                  verbose = TRUE,
                                  repo = "https://cran.rstudio.com"), 0)
-  expect_equal(install_versioned(elem = "mgsub >= 1.7",
+  expect_equal(install_versioned(i = "mgsub >= 1.7",
                                  installed = INST,
                                  dryrun = TRUE,
                                  verbose = TRUE,
                                  repo = "https://cran.rstudio.com"), 0)
-  expect_equal(install_versioned(elem = "mgsub >= 2.0",
+  expect_equal(install_versioned(i = "mgsub >= 2.0",
                                  installed = INST,
                                  dryrun = TRUE,
                                  verbose = TRUE,
                                  repo = "https://cran.rstudio.com"), 1)
-  expect_equal(install_versioned(elem = NULL,
-                                 installed = INST,
-                                 dryrun = TRUE,
-                                 verbose = TRUE,
-                                 repo = "https://cran.rstudio.com"), 0)
 })
 
 #reqs, dryrun, verbose = dryrun, dummy=INST
