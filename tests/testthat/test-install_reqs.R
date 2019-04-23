@@ -112,7 +112,7 @@ test_that("install_if_compat_available", {
                                                            dryrun = TRUE),
                  regexp = sprintf(ERROR_NO_PACKAGE_EXISTS, "mgsub"))
   expect_equal(fail_count, 1)
-  
+
   expect_message(fail_count <- install_if_compat_available(list(package = "mgsub", # nolint
                                                                 version = "2.0",
                                                                 comp = "<"),

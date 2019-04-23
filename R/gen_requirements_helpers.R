@@ -70,6 +70,7 @@ read_package_lines_from_file = function(file_path, filter_words) {
   #'
   #' @return Character vector containing package referencing lines from \code{file_path}.
   all_file_lines = readLines(file_path)
+  all_file_lines = strip_comments(all_file_lines, remove_additional_file = FALSE)
 
   package_lines_re = paste(filter_words, collapse = "|")
   package_lines = all_file_lines[grep(package_lines_re, all_file_lines)]

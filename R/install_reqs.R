@@ -82,19 +82,19 @@ is_versioned_install_needed = function(package, version, comp, installed, verbos
 
 install_if_compat_available = function(processed_element, repo, verbose, dryrun){
   failures = 0
-  
+
   package = processed_element$package
   version = processed_element$version
   comp = processed_element$comp
-  
+
   available_versions = get_available_versions(package)
-  
+
   available_compatibility = vapply(available_versions,
                                    FUN = compare_version,
                                    FUN.VALUE = logical(1),
                                    target = version,
                                    comp = comp)
-  
+
   if (!any(available_compatibility)) {
     failures = failures + 1
     vmess(sprintf(ERROR_NO_PACKAGE_EXISTS, package), TRUE)
@@ -122,14 +122,14 @@ install_versioned = function(i, installed, dryrun, verbose, repo){
   package = processed_element$package
   version = processed_element$version
   comp = processed_element$comp
-  
+
   install_needed = is_versioned_install_needed(package, version, comp, installed, verbose)
   if (!install_needed) return(0)
-  
+
   if (!is.na(installed[package])) {
     vmess(sprintf(NOTE_BAD_PACKAGE_VERSION, package, installed[package]), verbose)
   }
-  
+
   package_failure = install_if_compat_available(processed_element, repo, verbose, dryrun)
   failures = failures + package_failure
   return(failures)
@@ -140,7 +140,7 @@ count_failures = function(elem, func, ...){
   #' @param elem the requirements to be installed
   #' @param func the internal function used to handle installation
   #' @param ... other arguments to pass to the internal function
-  if(length(elem) > 0){
+  if (length(elem) > 0){
     return(sum(vapply(elem, func, FUN.VALUE = numeric(1), ...)))
   } else {
     return(0)
@@ -155,11 +155,11 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
   #' @param repo what CRAN repository should be used?
   #' @param ... values to pass to get_installed
   #' @return data.frame of installed packages and their versions
-  
+
   installed = get_installed(...)
-  
+
   failures = 0
-  
+
   # Install git
   failures = failures +
     count_failures(reqs$git, install_special_req, GIT_REPLACE, remotes::install_git, dryrun, verbose) +
@@ -169,8 +169,8 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
     count_failures(reqs$local, install_special_req, "", remotes::install_local, dryrun, verbose) +
     count_failures(reqs$unversioned, install_unversioned, installed, dryrun, verbose, repo) +
     count_failures(reqs$versioned, install_versioned, installed, dryrun, verbose, repo)
-  
+
   if (failures > 0) stop(sprintf(ERROR_FAILURE_COUNT, failures))
-  
+
   return(0)
 }
