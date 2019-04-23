@@ -54,7 +54,23 @@ identify_duplicate_reqs = function(content_df){
   }
 }
 
-remove_comments_from_req = function(content_df) {
+
+strip_comments = function(content, remove_additional_file = TRUE){
+  #' @param content vector of characters
+  #' @param remove_additional_file should lines starting with -r be removed?
+  #' @return vector of chracters without comments or -r and trimmed whitespace
+  #' @details This was originally part of another function but was split out to be used
+  #' in a few different places.
+  content = gsub("#.*", "", content)
+  if (remove_additional_file){
+    content = gsub("^ *\\-r.*", "", content)
+  }
+  content = trimws(content, which = "both")
+  return(content)
+}
+
+
+remove_comments_dups_from_req = function(content_df) {
   #' @param content_df dataframe of requirements with three columns
   #' @return vector of requirements to be processed
   #' @details content_df$content is the requirement line
@@ -63,10 +79,7 @@ remove_comments_from_req = function(content_df) {
   #' Removes all full line comments and references to additional requirements files
   #' Trims whitespace from lines and removes in-line comments
   #' Checks for duplicated requirements
-  content_df = content_df[!grepl("^ *#", content_df$content), ]
-  content_df = content_df[!grepl("^ *\\-r", content_df$content), ]
-  content_df$content = gsub("#.*$", "", content_df$content)
-  content_df$content = trimws(content_df$content, which = "both")
+  content_df$content = strip_comments(content_df$content)
   content_df = content_df[nchar(content_df$content) > 0, ]
   #remove identical duplicates
   content_df = content_df[!duplicated(content_df$content), ]
@@ -97,6 +110,11 @@ validate_versioning = function(req){
 }
 
 capture_versioned_requirements = function(content) {
+  #' @param content vector of requirements
+  #' @return vector of requirements which include version numbers and valid comparison operators
+  #' @detail Part of the larger processing of the requirements file, this works on a subset of
+  #' all requirements to identify those that need to be checked for viability and have special
+  #' versions installed.
   versioned = vapply(content, identify_comparison_op, character(1))
   versioned = versioned[!is.na(versioned)]
   if (!all(versioned %in% COMPS)){
@@ -116,6 +134,9 @@ capture_versioned_requirements = function(content) {
 }
 
 identify_comparison_op = function(req){
+  #' @param req a single versioned requirement string
+  #' @return the comparison operator used
+  #' @detail if there is not a valid comparison operator it returns NA
   comp = gsub(pattern = COMP_EXTRACTOR,
               replacement = "\\1",
               x = req)
@@ -126,7 +147,11 @@ identify_comparison_op = function(req){
 }
 
 capture_local_requirements = function(content){
-  # local file can only be .tar.gz, .tgz, or .zip
+  #' @param content a vector of requirements
+  #' @return vector of local file requirements
+  #' @detail while there may be more legal file types, it checks to see if the requirement
+  #' looks like a local file. Because it is part of the larger processing of the requirements
+  #' file, this step occurs after URLs are removed and so doesn't need to worry about that.
   local_source_req = grep("\\.tar\\.gz$", content, value = TRUE)
   local_win_req = grep("\\.zip$", content, value = TRUE)
   local_mac_req = grep("\\.tgz$", content, value = TRUE)
@@ -140,7 +165,7 @@ process_requirements_file = function(req){
   #' @return list with all supported requirement types
 
   content = read_requirements_file(req)
-  content = remove_comments_from_req(content)
+  content = remove_comments_dups_from_req(content)
   if (length(content) == 0) stop(sprintf(REQ_FILE_EMPTY_ERR, req))
 
   output = capture_special_installs(content)

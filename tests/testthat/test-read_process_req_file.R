@@ -21,7 +21,7 @@ test_that("read_requirements_file", {
                                       "https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz",
                                       "testdata/dummy_package.zip", "# to test comlete set of comparison operators",
                                       "mgsub >= 1.5.0", "lexRankr == 0.4.* #test inline comment",
-                                      "readOffice ~= 0.0  ",
+                                      "readOffice ~= 0.0 ",
                                       "whitechapelR >= 0.3", "dplyr != 0.7.*"),
                           line = c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 1L, 2L, 3L, 4L, 5L, 6L),
                           file = c("testdata/requirements_3.txt", "testdata/requirements_3.txt",
@@ -80,10 +80,10 @@ test_that("process_requirements_file", {
   expect_error(process_requirements_file("testdata/requirements_6.txt"),
                regexp = sprintf(REQ_FILE_RESOLUTION_ERR, paste("dummy_package", collapse = ", ")))
 })
-# TODO: Add more tests here
-test_that("remove_comments_from_req", {
+
+test_that("remove_comments_dups_from_req", {
   expect_equal(
-    remove_comments_from_req(
+    remove_comments_dups_from_req(
       data.frame(content = c("mgsub >= 1.5", "-r extra_reqs.txt", "#What a world", "## We live in!"),
                  line = 1:4,
                  file = "requirements.txt",
@@ -91,7 +91,7 @@ test_that("remove_comments_from_req", {
       ), c("mgsub >= 1.5")
   )
   expect_equal(
-    remove_comments_from_req(
+    remove_comments_dups_from_req(
       data.frame(content = c("mgsub >= 1.5", "-r extra_reqs.txt #inline comment",
                            "", "#What a world", "## We live in!", "   "),
                  line = 1:6,
@@ -100,7 +100,7 @@ test_that("remove_comments_from_req", {
     ), c("mgsub >= 1.5")
   )
   expect_error(
-    remove_comments_from_req(
+    remove_comments_dups_from_req(
       data.frame(content = c("mgsub >= 1.5", "-r extra_reqs.txt #inline comment",
                            "", "#What a world", "## We live in!", "   ",
                            " mgsub"),
@@ -109,7 +109,7 @@ test_that("remove_comments_from_req", {
                  stringsAsFactors = FALSE)
     ), regex = "Double requirement given"
   )
-  expect_equal(tmp <<- remove_comments_from_req(read_requirements_file("testdata/requirements_3.txt")), #nolint
+  expect_equal(tmp <<- remove_comments_dups_from_req(read_requirements_file("testdata/requirements_3.txt")), #nolint
                c("tidyr", "git+https://github.com/bmewing/requirements",
                  "svn+ssh://developername@svn.r-forge.r-project.org/svnroot/robast/",
                  "bioc+release/SummarizedExperiment",
@@ -154,4 +154,19 @@ test_that("validate_versioning", {
   expect_false(validate_versioning("mgsub>"))
   expect_false(validate_versioning("mgsub"))
   expect_false(validate_versioning("mgsub>=1.4..5"))
+})
+
+test_that("strip_comments", {
+  expect_equal(strip_comments(c("test-req::fake() ", " dplyr::mutate()", "-random::randomNumber()",
+                                "-r req.text", " -r  req.txt",
+                                "# comment", " #comment",
+                                "mgsub # because awesome", "mgsub > 1##because awesome")),
+               c("test-req::fake()", "dplyr::mutate()", "", "", "", "", "", "mgsub", "mgsub > 1"))
+  expect_equal(strip_comments(c("test-req::fake() ", " dplyr::mutate()", "-random::randomNumber()",
+                               "-r req.text", " -r  req.txt",
+                               "# comment", " #comment",
+                               "mgsub # because awesome", "mgsub > 1##because awesome"),
+                              remove_additional_file = FALSE),
+  c("test-req::fake()", "dplyr::mutate()", "-random::randomNumber()", "-r req.text", "-r  req.txt",
+    "", "", "mgsub", "mgsub > 1"))
 })
