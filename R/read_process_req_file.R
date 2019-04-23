@@ -55,13 +55,16 @@ identify_duplicate_reqs = function(content_df){
 }
 
 
-strip_comments = function(content){
+strip_comments = function(content, remove_additional_file = TRUE){
   #' @param content vector of characters
+  #' @param remove_additional_file should lines starting with -r be removed?
   #' @return vector of chracters without comments or -r and trimmed whitespace
   #' @details This was originally part of another function but was split out to be used
   #' in a few different places.
   content = gsub("#.*", "", content)
-  content = gsub("^ *\\-r.*", "", content)
+  if (remove_additional_file){
+    content = gsub("^ *\\-r.*", "", content)
+  }
   content = trimws(content, which = "both")
   return(content)
 }
