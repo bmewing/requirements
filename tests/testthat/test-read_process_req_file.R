@@ -157,9 +157,16 @@ test_that("validate_versioning", {
 })
 
 test_that("strip_comments", {
-  expect_equal(strip_comments(c("test-req::fake() ", " dplyr::mutate()",
+  expect_equal(strip_comments(c("test-req::fake() ", " dplyr::mutate()", "-random::randomNumber()",
                                 "-r req.text", " -r  req.txt",
                                 "# comment", " #comment",
                                 "mgsub # because awesome", "mgsub > 1##because awesome")),
-               c("test-req::fake()", "dplyr::mutate()", "", "", "", "", "mgsub", "mgsub > 1"))
+               c("test-req::fake()", "dplyr::mutate()", "", "", "", "", "", "mgsub", "mgsub > 1"))
+  expect_equal(strip_comments(c("test-req::fake() ", " dplyr::mutate()", "-random::randomNumber()",
+                               "-r req.text", " -r  req.txt",
+                               "# comment", " #comment",
+                               "mgsub # because awesome", "mgsub > 1##because awesome"),
+                              remove_additional_file = FALSE),
+  c("test-req::fake()", "dplyr::mutate()", "-random::randomNumber()", "-r req.text", "-r  req.txt",
+    "", "", "mgsub", "mgsub > 1"))
 })
