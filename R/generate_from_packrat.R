@@ -22,6 +22,8 @@ packrat_to_requirements = function(packrat_lock_path = "packrat/packrat.lock",
   #' }
   #' @export
   matched_packages_df = read_reqs_from_lockfile(packrat_lock_path, eq_sym)
+  matched_packages_df = rm_dup_matched_packages(matched_packages_df)
+
   requirements_vector = unique(append_version_requirements(matched_packages_df, eq_sym))
 
   write_requirements_file(requirements_vector, output_path, append)

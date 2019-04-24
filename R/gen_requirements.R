@@ -79,7 +79,9 @@ generate_requirements = function(glob_paths = "*.R",
     matched_packages_df = matched_packages_df[!is.na(matched_packages_df[["version"]]), ]
   }
 
-  requirements_vector = unique(append_version_requirements(matched_packages_df, eq_sym))
+  matched_packages_df = rm_dup_matched_packages(matched_packages_df)
+
+  requirements_vector = append_version_requirements(matched_packages_df, eq_sym)
 
   write_requirements_file(requirements_vector, output_path)
 }
