@@ -21,6 +21,8 @@ packrat_to_requirements = function(packrat_lock_path = "packrat/packrat.lock",
   #' packrat_to_requirements(output_path = "overwrite_requirements.txt", append = FALSE)
   #' }
   #' @export
-  lockfile_requirements = read_reqs_from_lockfile(packrat_lock_path, eq_sym)
-  write_requirements_file(lockfile_requirements, output_path, append)
+  matched_packages_df = read_reqs_from_lockfile(packrat_lock_path, eq_sym)
+  requirements_vector = unique(append_version_requirements(matched_packages_df, eq_sym))
+
+  write_requirements_file(requirements_vector, output_path, append)
 }

@@ -28,9 +28,9 @@ PackratVersion: 0.4.8.1
 RVersion: 3.3.0
 Repos: CRAN=https://cran.rstudio.com/
 
-Package: BH
+Package: testthat
 Source: CRAN
-Version: 1.62.0-1
+Version: 0.0.0
 Hash: 14dfb3e8ffe20996118306ff4de1fab2
 
 Package: DT
@@ -115,19 +115,20 @@ test_that("str_match_all", {
 })
 
 test_that("read_reqs_from_lockfile", {
-  expect_equal(
-    read_reqs_from_lockfile(lockfile_path = LOCKFILE),
-    c("BH>=1.62.0-1", "DT>=0.2")
-  )
+  expected_matched_package_df = data.frame(name = c("testthat", "DT"),
+                                           version = c("0.0.0", "0.2"),
+                                           stringsAsFactors = FALSE)
 
   expect_equal(
-    read_reqs_from_lockfile(lockfile_path = LOCKFILE, eq_sym = "=="),
-    c("BH==1.62.0-1", "DT==0.2")
+    read_reqs_from_lockfile(lockfile_path = LOCKFILE),
+    expected_matched_package_df
   )
+
+  expected_matched_package_df[["version"]] = NA_character_
 
   expect_equal(
     read_reqs_from_lockfile(lockfile_path = LOCKFILE, eq_sym = NULL),
-    c("BH", "DT")
+    expected_matched_package_df
   )
 
   expect_error(
@@ -154,40 +155,28 @@ test_that("safe_package_version", {
 
   expect_equal(
     safe_package_version("testthat"),
-    packageVersion("testthat"),
+    as.character(packageVersion("testthat")),
     label = "defaults"
   )
 })
 
 test_that("append_version_requirements", {
+  expected_matched_package_df = data.frame(name = c("testthat", "DT"),
+                                           version = c(NA, "0.2"),
+                                           stringsAsFactors = FALSE)
   expect_equal(
-    append_version_requirement("testthat"),
-    paste0("testthat>=", packageVersion("testthat")),
-    label = "defaults"
+    append_version_requirements(expected_matched_package_df, eq_sym = ">="),
+    c("DT>=0.2", "testthat")
   )
 
   expect_equal(
-    append_version_requirement("testthat", eq_sym = COMP_EXACTLY_EQUAL),
-    paste0("testthat==", packageVersion("testthat")),
-    label = "change eq_sym"
+    append_version_requirements(expected_matched_package_df, eq_sym = "=="),
+    c("DT==0.2", "testthat")
   )
 
   expect_equal(
-    append_version_requirement("f", rm_missing = TRUE),
-    NA_character_,
-    label = "single fake package rm_missing = TRUE (return NA)"
-  )
-
-  expect_equal(
-    append_version_requirements(c("*", "testthat"), rm_missing = TRUE),
-    paste0("testthat>=", packageVersion("testthat")),
-    label = "fake package rm_missing = TRUE"
-  )
-
-  expect_equal(
-    append_version_requirements(c("*", "testthat"), rm_missing = FALSE),
-    c("*", paste0("testthat>=", packageVersion("testthat"))),
-    label = "fake package rm_missing = FALSE"
+    append_version_requirements(expected_matched_package_df, eq_sym = NULL),
+    c("DT", "testthat")
   )
 })
 
@@ -218,18 +207,18 @@ test_that("generate_requirements", {
   test_requirements_file = file.path(TMP_DIR, "requirements.txt")
   test_glob = file.path(TMP_DIR, "file_*.R")
 
-  generate_requirements(test_glob, test_requirements_file, eq_sym = NULL)
+  generate_requirements(FILE_3, test_requirements_file, rm_missing = TRUE)
 
   expect_equal(
     readLines(test_requirements_file),
-    c(AUTO_GEN_COMMENTS, sort(PACKAGES_ALL))
+    c(AUTO_GEN_COMMENTS)
   )
 
   generate_requirements(test_glob, test_requirements_file, eq_sym = NULL, packrat_lock_path = LOCKFILE)
 
   expect_equal(
     readLines(test_requirements_file),
-    c(AUTO_GEN_COMMENTS, sort(PACKAGES_ALL), "BH", "DT")
+    c(AUTO_GEN_COMMENTS, sort(unique(c(PACKAGES_ALL, "testthat", "DT"))))
   )
 })
 
@@ -240,7 +229,7 @@ test_that("packrat_to_requirements", {
 
   expect_equal(
     readLines(test_requirements_file),
-    c(AUTO_GEN_COMMENTS, "BH>=1.62.0-1", "DT>=0.2")
+    c(AUTO_GEN_COMMENTS, "DT>=0.2", "testthat>=0.0.0")
   )
 })
 
