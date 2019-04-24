@@ -249,6 +249,55 @@ append_version_requirements = function(matched_packages_df, eq_sym=COMP_GTE) {
 }
 
 
+rm_dup_matched_packages = function(matched_packages_df) {
+  #' @keywords internal
+  #' Remove duplicated packages from a matched_packages_df
+  #'
+  #' @details Duplicated packages occur when detecting packages from R files and packrat.lock file.
+  #' If duplicated packages with conflicting version numbers are found then the older version numbers will be dropped.
+  #' A warning will be displayed if a conflicting version number scenario occurs.
+  #'
+  #' @param matched_packages_df data.frame with columns c("name", "version")
+  #'
+  #' @return A data.frame of same structure as input `matched_packages_df` but with duplicates dropped
+  #'
+  #' @examples
+  #' matched_packages_df = data.frame(name = c("testthat", "testthat", "DT", "DT", "mgsub"),
+  #'                                  version = c("0.0.0", "1.0.0", "42.0.0", "3.0.0", "1.0.0"),
+  #'                                  stringsAsFactors = FALSE)
+  #' (matched_packages_df = rm_dup_matched_packages(matched_packages_df))
+  #' #       name version
+  #' # 1       DT  42.0.0
+  #' # 2    mgsub   1.0.0
+  #' # 3 testthat   1.0.0
+  matched_packages_df = unique(matched_packages_df)
+
+  # Exit early if no dups found
+  if (!any(duplicated(matched_packages_df[["name"]]))) {
+    row.names(matched_packages_df) = NULL
+    return(matched_packages_df)
+  }
+
+  # Sort by version number and drop `duplicated()` names to avoid having to split/apply/recombine
+  package_versions = package_version(matched_packages_df[["version"]])
+  sorted_packages_df = matched_packages_df[order(package_versions, decreasing = TRUE), ]
+
+  dups = duplicated(sorted_packages_df[["name"]])
+  deduped_packages_df = sorted_packages_df[!dups, ]
+
+  # Warn about packages involved conflict resolution
+  dup_package_names = sort(unique(sorted_packages_df[["name"]][dups]))
+  warn_msg =
+    "packrat.lock version and installed version conlficted for the following packages: %s\n"
+  warning(sprintf(warn_msg, paste0(dup_package_names, collapse = ", ")),
+          "The most recent versions of these packages will be used.")
+
+  deduped_packages_df = deduped_packages_df[order(deduped_packages_df[["name"]]), ]
+  row.names(deduped_packages_df) = NULL
+  return(deduped_packages_df)
+}
+
+
 write_requirements_file = function(package_requirements, file_path="requirements.txt", append=FALSE) {
   #' @keywords internal
   #' Helper for writing requirements to file

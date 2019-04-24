@@ -253,19 +253,24 @@ test_that("validate_eq_sym", {
 })
 
 test_that("rm_dup_matched_packages", {
-  input_df = data.frame(name = "testthat",
-                        version = c("0.0.0", "1.0.0"),
+  input_df = data.frame(name = c("testthat", "testthat", "testthat", "DT", "DT", "mgsub", "mgsub", "BH"),
+                        version = c("0.0.0", "2.0.0", "1.0.0", "42.0.0", "3.0.0", "1.0.0", "1.0.0", "1.0.0"),
                         stringsAsFactors = FALSE)
 
-  expected_output_df = input_df[2, ]
+  expected_output_df = input_df[c(8, 4, 7, 2), ]
+  row.names(expected_output_df) = NULL
 
   expect_equal(
-    rm_dup_matched_packages(input_df),
+    suppressWarnings(rm_dup_matched_packages(input_df)),
     expected_output_df
   )
 
   expect_warning(
     rm_dup_matched_packages(input_df),
-    regexp = "testthat"
+    regexp = "DT, testthat"
+  )
+
+  expect_silent(
+    rm_dup_matched_packages(input_df[6:7, ])
   )
 })
