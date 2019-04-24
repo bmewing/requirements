@@ -60,13 +60,28 @@ generate_requirements = function(glob_paths = "*.R",
   package_text_lines = read_package_lines_from_files(file_paths)
 
   matched_packages = match_packages(package_text_lines, PACKAGE_RES)
-  sorted_matched_packages = sort(matched_packages)
+  matched_packages_df = data.frame(name = matched_packages,
+                                   version = rep(NA_character_, length(matched_packages)),
+                                   stringsAsFactors = FALSE)
 
-  versioned_matched_packages = append_version_requirements(sorted_matched_packages, eq_sym, rm_missing)
-
-  write_requirements_file(versioned_matched_packages, output_path)
+  if (!is.null(eq_sym)) {
+    matched_packages_df[["version"]] = vapply(matched_packages_df[["name"]], safe_package_version, character(1))
+  }
 
   if (!is.null(packrat_lock_path)) {
-    packrat_to_requirements(packrat_lock_path, output_path, eq_sym, append = TRUE)
+    matched_packages_df = rbind(
+      matched_packages_df,
+      read_reqs_from_lockfile(packrat_lock_path, eq_sym)
+    )
   }
+
+  if (rm_missing) {
+    matched_packages_df = matched_packages_df[!is.na(matched_packages_df[["version"]]), ]
+  }
+
+  matched_packages_df = rm_dup_matched_packages(matched_packages_df)
+
+  requirements_vector = append_version_requirements(matched_packages_df, eq_sym)
+
+  write_requirements_file(requirements_vector, output_path)
 }

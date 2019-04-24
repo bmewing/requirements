@@ -40,11 +40,16 @@ read_reqs_from_lockfile = function(lockfile_path = "packrat/packrat.lock", eq_sy
   #'
   #' read_packages_from_lockfile(eq_sym = NULL)
   #' [1] "BH" "DT"
-  lockfile_lines = readLines(lockfile_path)
+  lockfile_lines = trimws(readLines(lockfile_path))
 
   package_names = extract_lockfile_info(lockfile_lines, "Package")
 
-  if (is.null(eq_sym) | length(package_names) == 0) return(package_names)
+  matched_packages_df = data.frame(name = package_names,
+                                   version = rep(NA_character_, length(package_names)),
+                                   stringsAsFactors = FALSE)
+
+  if (is.null(eq_sym) | nrow(matched_packages_df) == 0) return(matched_packages_df)
+
   eq_sym = validate_eq_sym(trimws(eq_sym))
 
   version_numbers = extract_lockfile_info(lockfile_lines, "Version")
@@ -53,11 +58,9 @@ read_reqs_from_lockfile = function(lockfile_path = "packrat/packrat.lock", eq_sy
     stop("Malformed lockfile.  Each package listed in lockfile must also have a version.")
   }
 
-  mapply(paste0,
-         trimws(package_names),
-         eq_sym,
-         trimws(version_numbers),
-         USE.NAMES = FALSE)
+  matched_packages_df[["version"]] = version_numbers
+
+  return(matched_packages_df)
 }
 
 
@@ -70,7 +73,6 @@ read_package_lines_from_file = function(file_path, filter_words) {
   #'
   #' @return Character vector containing package referencing lines from \code{file_path}.
   all_file_lines = readLines(file_path)
-  all_file_lines = strip_comments(all_file_lines, remove_additional_file = FALSE)
 
   package_lines_re = paste(filter_words, collapse = "|")
   package_lines = all_file_lines[grep(package_lines_re, all_file_lines)]
@@ -193,7 +195,7 @@ safe_package_version = function(pkg) {
   #' @return Package version as string; \code{NA} if unavailable.
   tryCatch(
     expr = {
-      return(packageVersion(pkg))
+      return(as.character(packageVersion(pkg)))
     },
     error = function(e) {
       return(NA_character_)
@@ -220,47 +222,79 @@ validate_eq_sym = function(eq_sym) {
 }
 
 
-append_version_requirement = function(pkg, eq_sym=COMP_GTE, rm_missing=FALSE) {
+append_version_requirements = function(matched_packages_df, eq_sym=COMP_GTE) {
   #' @keywords internal
-  #' Paste version requirements to character vector of package names
+  #' Paste requirement names and version numbers together
   #'
-  #' @param package_names String containing package name.
+  #' @param matched_packages_df data.frame with columns c("name", "version")
   #' @param eq_sym The equality symbol to be used when writing requirements (i.e. package>=1.0.0).
   #'   Use \code{NULL} to not include package versions in your requirements file.
-  #' @param rm_missing Should packages not installed locally be exlcuded from output?
   #'
-  #' @return Character vector of versioned package names;
-  #'   \code{NA} if package unavailable and \code{isTRUE(rm_missing)}.
-  pkg_version = safe_package_version(pkg)
+  #' @return Character vector of versioned package names.
+  if (nrow(matched_packages_df) == 0) return(character(0))
+  if (is.null(eq_sym)) return(sort(trimws(matched_packages_df$name)))
 
-  if (rm_missing & is.na(pkg_version)) {
-    versioned_package = NA_character_
-  } else if (is.na(pkg_version) | is.null(eq_sym)) {
-    versioned_package = pkg
-  } else {
-    eq_sym = validate_eq_sym(eq_sym)
-    versioned_package = paste0(pkg, eq_sym, pkg_version)
-  }
+  eq_sym = validate_eq_sym(eq_sym)
 
-  return(versioned_package)
+  versioned_packages_df = matched_packages_df[!is.na(matched_packages_df[["version"]]), ]
+  unversioned_packages_df = matched_packages_df[is.na(matched_packages_df[["version"]]), ]
+
+  versioned_requirements = mapply(paste0,
+                                  trimws(versioned_packages_df[["name"]]),
+                                  eq_sym,
+                                  trimws(versioned_packages_df[["version"]]),
+                                  USE.NAMES = FALSE)
+
+  sort(c(versioned_requirements, unversioned_packages_df[["name"]]))
 }
 
 
-append_version_requirements = function(package_names, eq_sym=COMP_GTE, rm_missing=FALSE) {
+rm_dup_matched_packages = function(matched_packages_df) {
   #' @keywords internal
-  #' Paste version requirements to character vector of package names
+  #' Remove duplicated packages from a matched_packages_df
   #'
-  #' @param package_names Character vector of package names.
-  #' @param eq_sym The equality symbol to be used when writing requirements (i.e. package>=1.0.0).
-  #'   Use \code{NULL} to not include package versions in your requirements file.
-  #' @param rm_missing Should packages not installed locally be exlcuded from output?
+  #' @details Duplicated packages occur when detecting packages from R files and packrat.lock file.
+  #' If duplicated packages with conflicting version numbers are found then the older version numbers will be dropped.
+  #' A warning will be displayed if a conflicting version number scenario occurs.
   #'
-  #' @return Character vector of versioned package names.
-  versioned_packages = vapply(package_names, function(p) {
-    append_version_requirement(p, eq_sym, rm_missing)
-  }, character(1), USE.NAMES = FALSE)  # nolint
+  #' @param matched_packages_df data.frame with columns c("name", "version")
+  #'
+  #' @return A data.frame of same structure as input `matched_packages_df` but with duplicates dropped
+  #'
+  #' @examples
+  #' matched_packages_df = data.frame(name = c("testthat", "testthat", "DT", "DT", "mgsub"),
+  #'                                  version = c("0.0.0", "1.0.0", "42.0.0", "3.0.0", "1.0.0"),
+  #'                                  stringsAsFactors = FALSE)
+  #' (matched_packages_df = rm_dup_matched_packages(matched_packages_df))
+  #' #       name version
+  #' # 1       DT  42.0.0
+  #' # 2    mgsub   1.0.0
+  #' # 3 testthat   1.0.0
+  matched_packages_df = unique(matched_packages_df)
 
-  return(versioned_packages[!is.na(versioned_packages)])
+  # Exit early if no dups found
+  if (!any(duplicated(matched_packages_df[["name"]]))) {
+    row.names(matched_packages_df) = NULL
+    return(matched_packages_df)
+  }
+
+  # Sort by version number and drop `duplicated()` names to avoid having to split/apply/recombine
+  package_versions = package_version(matched_packages_df[["version"]])
+  sorted_packages_df = matched_packages_df[order(package_versions, decreasing = TRUE), ]
+
+  dups = duplicated(sorted_packages_df[["name"]])
+  deduped_packages_df = sorted_packages_df[!dups, ]
+
+  # Warn about packages involved conflict resolution
+  dup_package_names = sort(unique(sorted_packages_df[["name"]][dups]))
+  warn_msg =
+    "packrat.lock version and installed version conlficted for the following packages: %s\n"
+  warning(sprintf(warn_msg, paste0(dup_package_names, collapse = ", ")),
+          "The most recent versions of these packages will be used.")
+
+  deduped_packages_df = deduped_packages_df[order(deduped_packages_df[["name"]]), ]
+  row.names(deduped_packages_df) = NULL
+  return(deduped_packages_df)
 }
 
 
