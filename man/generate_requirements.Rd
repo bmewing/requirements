@@ -2,9 +2,14 @@
 % Please edit documentation in R/gen_requirements.R
 \name{generate_requirements}
 \alias{generate_requirements}
+\alias{freeze_requirements}
 \title{Generate a requirements.txt for your project}
 \usage{
 generate_requirements(glob_paths = "*.R",
+  output_path = "requirements.txt", eq_sym = ">=",
+  packrat_lock_path = NULL, rm_missing = FALSE)
+
+freeze_requirements(glob_paths = "*.R",
   output_path = "requirements.txt", eq_sym = ">=",
   packrat_lock_path = NULL, rm_missing = FALSE)
 }

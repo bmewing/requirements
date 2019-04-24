@@ -220,6 +220,13 @@ test_that("generate_requirements", {
     readLines(test_requirements_file),
     c(AUTO_GEN_COMMENTS, sort(unique(c(PACKAGES_ALL, "testthat", "DT"))))
   )
+
+  freeze_requirements(test_glob, test_requirements_file, eq_sym = NULL, packrat_lock_path = LOCKFILE)
+
+  expect_equal(
+    readLines(test_requirements_file),
+    c(AUTO_GEN_COMMENTS, sort(unique(c(PACKAGES_ALL, "testthat", "DT"))))
+  )
 })
 
 test_that("packrat_to_requirements", {
