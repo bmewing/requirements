@@ -251,3 +251,21 @@ test_that("validate_eq_sym", {
     regexp = "length\\(eq_sym\\) == 1 is not TRUE"
   )
 })
+
+test_that("rm_dup_matched_packages", {
+  input_df = data.frame(name = "testthat",
+                        version = c("0.0.0", "1.0.0"),
+                        stringsAsFactors = FALSE)
+
+  expected_output_df = input_df[2, ]
+
+  expect_equal(
+    rm_dup_matched_packages(input_df),
+    expected_output_df
+  )
+
+  expect_warning(
+    rm_dup_matched_packages(input_df),
+    regexp = "testthat"
+  )
+})
