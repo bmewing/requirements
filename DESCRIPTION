@@ -1,7 +1,7 @@
 Package: requirements
 Type: Package
 Title: Version Specific Project Library Management
-Version: 0.1.0
+Version: 1.0.0
 Authors@R: c(
   person("Mark", "Ewing", email="b.mark@ewingsonline.com", role=c("aut","cre")),
   person("Adam", "Spannbauer", role=c("aut"))
