@@ -25,12 +25,12 @@ Package installation and loading is often a struggle in R. Lots of scripts start
 if(!require(mgsub)) install.packages('mgsub')
 ```
 
-This checks if a package is already installed and if not, installs it. Of course, this example fails to then load the package so the code will fail. But this always installs the latest version available for the person running the code. This can be an issue because the pacakges your code depends on may have made breaking changes. Now you've installed an incompatible version.
+This checks if a package is already installed and if not, installs it. Of course, this example fails to then load the package so the code will fail. But this always installs the latest version available for the person running the code. This can be an issue because the packages your code depends on may have made breaking changes. Now you've installed an incompatible version.
 
 ### packrat
 
-packrat is a great way of bundling code and packages together. It allows you to have multiple versions of packages installed across different projects. `requirements` is 100% comaptible with packrat, if you're using packrat it will check against project specifc versions and install into the packrat library. This allows you to have a standard set of packages that you use, including versions, which can initialize new projects without multiple installation commands.
+packrat is a great way of bundling code and packages together. It allows you to have multiple versions of packages installed across different projects. `requirements` is 100% compatible with packrat, if you're using packrat it will check against project specifc versions and install into the packrat library. This allows you to have a standard set of packages that you use, including versions, which can initialize new projects without multiple installation commands.
 
 ### pacman
 
-pacman provides a new command, `pacman::p_load()` which will install a package if it's not available. However, it does not allow you to specify specifc versions.
+pacman provides a new command, `pacman::p_load()` which will install a package if it's not available. However, it does not allow you to specify specific versions.
