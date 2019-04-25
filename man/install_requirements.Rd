@@ -19,7 +19,7 @@ the function}
 
 \item{verbose}{Flag to change verbosity}
 
-\item{repo}{What repository should be used to install pacakges?}
+\item{repo}{What repository should be used to install packages?}
 
 \item{gen}{Should required packages be generated?}
 
