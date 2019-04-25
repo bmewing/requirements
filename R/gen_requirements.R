@@ -85,3 +85,18 @@ generate_requirements = function(glob_paths = "*.R",
 
   write_requirements_file(requirements_vector, output_path)
 }
+
+
+#' @rdname generate_requirements
+#' @export
+freeze_requirements = function(glob_paths = "*.R",
+                               output_path = "requirements.txt",
+                               eq_sym = ">=",
+                               packrat_lock_path = NULL,
+                               rm_missing = FALSE) {
+  generate_requirements(glob_paths = glob_paths,
+                        output_path = output_path,
+                        eq_sym = eq_sym,
+                        packrat_lock_path = packrat_lock_path,
+                        rm_missing = rm_missing)
+}
