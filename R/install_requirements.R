@@ -13,7 +13,7 @@ install_requirements = function(requirements = "requirements.txt",
   #' @param dryrun Flag if you just want to see what would happen if you ran
   #' the function
   #' @param verbose Flag to change verbosity
-  #' @param repo What repository should be used to install pacakges?
+  #' @param repo What repository should be used to install packages?
   #' @param gen Should required packages be generated?
   #' @param glob_paths Character vector of patterns for relative or absolute filepaths.
   #'    Missing values will be ignored. See ?Sys.glob for more details.

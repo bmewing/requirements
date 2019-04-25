@@ -12,6 +12,7 @@ Description: Brings support to R for Python style requirements management via th
   Enables easy documentation of packages used along with single line installation and single line package loading in R.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Language: en-US
 LazyData: true
 Imports:
   remotes (>= 2.0.2),
