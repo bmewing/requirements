@@ -221,7 +221,7 @@ test_that("generate_requirements", {
     c(AUTO_GEN_COMMENTS, sort(unique(c(PACKAGES_ALL, "testthat", "DT"))))
   )
 
-  freeze_requirements(test_glob, test_requirements_file, eq_sym = NULL, packrat_lock_path = LOCKFILE)
+  rip_freeze(test_glob, test_requirements_file, eq_sym = NULL, packrat_lock_path = LOCKFILE)
 
   expect_equal(
     readLines(test_requirements_file),
@@ -229,10 +229,10 @@ test_that("generate_requirements", {
   )
 })
 
-test_that("packrat_to_requirements", {
+test_that("rip_freeze_packrat", {
   test_requirements_file = file.path(TMP_DIR, "requirements.txt")
 
-  packrat_to_requirements(LOCKFILE, test_requirements_file, append = FALSE)
+  rip_freeze_packrat(LOCKFILE, test_requirements_file, append = FALSE)
 
   expect_equal(
     readLines(test_requirements_file),

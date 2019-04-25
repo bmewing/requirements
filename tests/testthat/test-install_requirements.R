@@ -1,15 +1,15 @@
 context("test parent wrapper installation function")
 TMP_DIR = tempdir()  #nolint
-test_that("install_requirements", {
-  expect_message(install_requirements("testdata/requirements_2.txt",
-                                      packrat = FALSE,
-                                      dryrun = TRUE,
-                                      verbose = FALSE),
+test_that("rip_install", {
+  expect_message(rip_install("testdata/requirements_2.txt",
+                             packrat = FALSE,
+                             dryrun = TRUE,
+                             verbose = FALSE),
                  regexp = "NOTE: This was just a dry run. No packages have been installed.")
-  expect_error(install_requirements(file.path(TMP_DIR, "fake_requirements.txt"),
-                                    packrat = FALSE,
-                                    dryrun = TRUE,
-                                    verbose = FALSE),
+  expect_error(rip_install(file.path(TMP_DIR, "fake_requirements.txt"),
+                           packrat = FALSE,
+                           dryrun = TRUE,
+                           verbose = FALSE),
                regexp = "could not be installed")
 })
 

@@ -59,11 +59,11 @@ Because this line begins with `-r` it indicates additional requirements in anoth
 
 ## Installing Requirements
 
-Installing the requirements in `requirements.txt` is as simple as calling `requirements::install_requirements()`. This will parse all the requirements listed in the file and install them as needed.
+Installing the requirements in `requirements.txt` is as simple as calling `requirements::rip_install()`. This will parse all the requirements listed in the file and install them as needed.
 
 ## Creating a Requirements File
 
-A requirements file is a simple text file. It requires no headers or special formatting. It should be saved in the project directory, typically at the top level of the project directory and named `requirements.txt`. You can either create it by hand or you can use the convenient `requirements::generate_requirements()` function to grab all the packages used in your code and automatically generate the file for you. You an then edit the file to match your actual needs.
+A requirements file is a simple text file. It requires no headers or special formatting. It should be saved in the project directory, typically at the top level of the project directory and named `requirements.txt`. You can either create it by hand or you can use the convenient `requirements::rip_freeze()` function to grab all the packages used in your code and automatically generate the file for you. You an then edit the file to match your actual needs.
 
 ## Additional Details about Requirements
 
@@ -93,14 +93,14 @@ Versions may be specified using wildcards (e.g. 1.*). Use of the wildcard modifi
 
 ### Git packages
 
-If your code is dependent on a package only available via git, it may be specified one of two ways. The first is to prepend the standard url with `git+`, the other is to use the git protocol. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+If your code is dependent on a package only available via git, it may be specified one of two ways. The first is to prepend the standard url with `git+`, the other is to use the git protocol. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `rip_install()`
 
 * `git+https://github.com/AdamSpannbauer/lexRankr`
 * `git://github.com/AdamSpannbauer/lexRankr`
 
 ### SVN packages
 
-If your code is dependent on a package only available via svn, it may be specified by prepending the standard url with `svn+`. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+If your code is dependent on a package only available via svn, it may be specified by prepending the standard url with `svn+`. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `rip_install()`
 
 * `svn+svn://scm.r-forge.r-project.org/svnroot/daewr/pkg/mixexp`
 
@@ -116,13 +116,13 @@ If your code is dependent on a package only available via Bioconductor, it may b
 
 ### Built packages from a URL
 
-If your code is dependent on a package only available via a specific website, it may be specified by simply including the URL, beginning with `http(s)://`. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+If your code is dependent on a package only available via a specific website, it may be specified by simply including the URL, beginning with `http(s)://`. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `rip_install()`
 
 * `https://github.com/bmewing/mgsub/releases/download/v.1.5/mgsub_1.5.0.tar.gz`
 
 ### Build packages available locally
 
-If your code is dependent on a package that is only available locally, it may be specified by simply including the path to the file. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `install_requirements()`
+If your code is dependent on a package that is only available locally, it may be specified by simply including the path to the file. Note that this type of requirement cannot be checked against currently installed packages and so will always attempt to be installed by `rip_install()`
 
 * `some_package.tar.gz`
 

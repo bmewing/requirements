@@ -1,7 +1,7 @@
-packrat_to_requirements = function(packrat_lock_path = "packrat/packrat.lock",
-                                   output_path = "requirements.txt",
-                                   eq_sym = ">=",
-                                   append = TRUE) {
+rip_freeze_packrat = function(packrat_lock_path = "packrat/packrat.lock",
+                              output_path = "requirements.txt",
+                              eq_sym = ">=",
+                              append = TRUE) {
   #' Generate a requirements file from a \code{packrat.lock} file
   #'
   #' @param packrat_lock_path Path to \code{packrat.lock} to extract requirements from.
@@ -16,9 +16,9 @@ packrat_to_requirements = function(packrat_lock_path = "packrat/packrat.lock",
   #' @examples
   #'
   #' \dontrun{
-  #' packrat_to_requirements(output_path = "my_requirements.txt")
-  #' packrat_to_requirements(output_path = "versionless_requirements.txt", eq_sym = NULL)
-  #' packrat_to_requirements(output_path = "overwrite_requirements.txt", append = FALSE)
+  #' rip_freeze_packrat(output_path = "my_requirements.txt")
+  #' rip_freeze_packrat(output_path = "versionless_requirements.txt", eq_sym = NULL)
+  #' rip_freeze_packrat(output_path = "overwrite_requirements.txt", append = FALSE)
   #' }
   #' @export
   matched_packages_df = read_reqs_from_lockfile(packrat_lock_path, eq_sym)

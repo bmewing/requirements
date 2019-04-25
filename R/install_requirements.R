@@ -1,9 +1,9 @@
 #' @export
-install_requirements = function(requirements = "requirements.txt",
-                                 packrat = FALSE, dryrun = FALSE,
-                                 verbose = dryrun, repo = options()$repo[1],
-                                 gen = !file.exists(requirements),
-                                 glob_paths = file.path(dirname(requirements), "*.R")) {
+rip_install = function(requirements = "requirements.txt",
+                       packrat = FALSE, dryrun = FALSE,
+                       verbose = dryrun, repo = options()$repo[1],
+                       gen = !file.exists(requirements),
+                       glob_paths = file.path(dirname(requirements), "*.R")) {
   #' @title Install project requirements
   #'
   #' @description Install (and optionally generate) required packages
@@ -23,8 +23,8 @@ install_requirements = function(requirements = "requirements.txt",
   #' \dontrun{
   #' requirements(dryrun = TRUE)
   #' }
-  if (gen) generate_requirements(glob_paths = glob_paths,
-                                output_path = requirements)
+  if (gen) rip_freeze(glob_paths = glob_paths,
+                      output_path = requirements)
 
   reqs = process_requirements_file(requirements)
 
