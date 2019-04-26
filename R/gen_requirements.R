@@ -44,18 +44,18 @@
 #' @examples
 #'
 #' \dontrun{
-#' generate_requirements("R/*.R")
-#' generate_requirements("R/*.R", output_path = "my_requirements.txt")
-#' generate_requirements("R/*.R", output_path = "equal_to_requirements.txt", eq_sym = "==")
-#' generate_requirements("R/*.R", output_path = "versionless_requirements.txt", eq_sym = NULL)
-#' generate_requirements("R/*.R", output_path = "installed_requirements.txt", rm_missing = TRUE)
+#' rip_freeze("R/*.R")
+#' rip_freeze("R/*.R", output_path = "my_requirements.txt")
+#' rip_freeze("R/*.R", output_path = "equal_to_requirements.txt", eq_sym = "==")
+#' rip_freeze("R/*.R", output_path = "versionless_requirements.txt", eq_sym = NULL)
+#' rip_freeze("R/*.R", output_path = "installed_requirements.txt", rm_missing = TRUE)
 #' }
 #' @export
-generate_requirements = function(glob_paths = "*.R",
-                                 output_path = "requirements.txt",
-                                 eq_sym = ">=",
-                                 packrat_lock_path = NULL,
-                                 rm_missing = FALSE) {
+rip_freeze = function(glob_paths = "*.R",
+                      output_path = "requirements.txt",
+                      eq_sym = ">=",
+                      packrat_lock_path = NULL,
+                      rm_missing = FALSE) {
   file_paths = Sys.glob(glob_paths)
   package_text_lines = read_package_lines_from_files(file_paths)
 
@@ -87,16 +87,16 @@ generate_requirements = function(glob_paths = "*.R",
 }
 
 
-#' @rdname generate_requirements
+#' @rdname rip_freeze
 #' @export
-freeze_requirements = function(glob_paths = "*.R",
-                               output_path = "requirements.txt",
-                               eq_sym = ">=",
-                               packrat_lock_path = NULL,
-                               rm_missing = FALSE) {
-  generate_requirements(glob_paths = glob_paths,
-                        output_path = output_path,
-                        eq_sym = eq_sym,
-                        packrat_lock_path = packrat_lock_path,
-                        rm_missing = rm_missing)
+generate_requirements = function(glob_paths = "*.R",
+                                 output_path = "requirements.txt",
+                                 eq_sym = ">=",
+                                 packrat_lock_path = NULL,
+                                 rm_missing = FALSE) {
+  rip_freeze(glob_paths = glob_paths,
+             output_path = output_path,
+             eq_sym = eq_sym,
+             packrat_lock_path = packrat_lock_path,
+             rm_missing = rm_missing)
 }
