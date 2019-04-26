@@ -108,7 +108,7 @@ The other issue here is that this always installs the latest version available f
 
 ## Why `rip_*`?
 
-`pip` stand for 'Python Installs Packages' and so we wanted to call the project `rip` for 'R Installs Packages'. Sadly, that name is already in use on CRAN, so we satisfied ourselves by leveraging `rip` in our function names.
+`pip` stand for 'pip Installs Packages' and so we wanted to call the project `rip` for 'rip Installs Packages', building on the tradition in R packages of adding 'r' to names of things that already exist. Sadly, `rIP` is already in use on CRAN, so we satisfied ourselves by leveraging `rip` in our function names. So you can think of `rip` as standing for 'requirements installs packages' (or the more fun recurssive acronym). (We also consider `ripr` for 'ripr installs project requirements' and `pipr` 'pipr installs packages in R').
 
 * `rip_install()` == `pip install -r requirements.txt`
 * `rip_freeze()` == `pip freeze`
