@@ -1,3 +1,33 @@
+install_reqs = function(reqs, dryrun, verbose = dryrun,
+                        repo = options()$repo[1], ...){
+  #' @param reqs results of process_requirements_file
+  #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
+  #' @param verbose should the function be explicit about activities
+  #' @param repo what CRAN repository should be used?
+  #' @param ... values to pass to get_installed
+  #' @return data.frame of installed packages and their versions
+
+  installed = get_installed(...)
+
+  failures = 0
+
+  # Install git
+  failures = failures +
+    count_failures(reqs$git, install_special_req, GIT_REPLACE, remotes::install_git, dryrun, verbose) +
+    count_failures(reqs$svn, install_special_req, SVN_EXT_REP, remotes::install_svn, dryrun, verbose) +
+    count_failures(reqs$bioc, install_special_req, BIO_EXT_REP, remotes::install_bioc, dryrun, verbose) +
+    count_failures(reqs$url, install_special_req, "", remotes::install_url, dryrun, verbose) +
+    count_failures(reqs$local, install_special_req, "", remotes::install_local, dryrun, verbose) +
+    count_failures(reqs$unversioned, install_unversioned, installed, dryrun, verbose, repo) +
+    count_failures(reqs$versioned, install_versioned, installed, dryrun, verbose, repo)
+
+  if (failures > 0) stop(sprintf(ERROR_FAILURE_COUNT, failures))
+
+  return(0)
+}
+
+### Helpers
+
 install_special_req = function(i, pattern, f, dryrun, verbose){
   #' @param i single special requirement to be installed
   #' @param pattern regex pattern to match on
@@ -145,32 +175,4 @@ count_failures = function(elem, func, ...){
   } else {
     return(0)
   }
-}
-
-install_reqs = function(reqs, dryrun, verbose = dryrun,
-                        repo = options()$repo[1], ...){
-  #' @param reqs results of process_requirements_file
-  #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
-  #' @param verbose should the function be explicit about activities
-  #' @param repo what CRAN repository should be used?
-  #' @param ... values to pass to get_installed
-  #' @return data.frame of installed packages and their versions
-
-  installed = get_installed(...)
-
-  failures = 0
-
-  # Install git
-  failures = failures +
-    count_failures(reqs$git, install_special_req, GIT_REPLACE, remotes::install_git, dryrun, verbose) +
-    count_failures(reqs$svn, install_special_req, SVN_EXT_REP, remotes::install_svn, dryrun, verbose) +
-    count_failures(reqs$bioc, install_special_req, BIO_EXT_REP, remotes::install_bioc, dryrun, verbose) +
-    count_failures(reqs$url, install_special_req, "", remotes::install_url, dryrun, verbose) +
-    count_failures(reqs$local, install_special_req, "", remotes::install_local, dryrun, verbose) +
-    count_failures(reqs$unversioned, install_unversioned, installed, dryrun, verbose, repo) +
-    count_failures(reqs$versioned, install_versioned, installed, dryrun, verbose, repo)
-
-  if (failures > 0) stop(sprintf(ERROR_FAILURE_COUNT, failures))
-
-  return(0)
 }
