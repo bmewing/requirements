@@ -1,19 +1,28 @@
 Package: requirements
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Title: Version Specific Project Library Management
+Version: 1.0.0
+Authors@R: c(
+  person("Mark", "Ewing", email="b.mark@ewingsonline.com", role=c("aut","cre")),
+  person("Adam", "Spannbauer", role=c("aut"))
+  )
+BugReports: https://github.com/bmewing/requirements/issues
+Description: Brings support to R for Python style requirements management via the requirements.txt file.
+  Will eventually support most of the PEP 440 standard as described https://www.python.org/dev/peps/pep-0440/#version-specifiers.
+  Enables easy documentation of packages used along with single line installation and single line package loading in R.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Language: en-US
 LazyData: true
 Imports:
-  devtools (>= 1.13.5),
+  remotes (>= 2.0.2),
   packrat (>= 0.4.9),
-  stringr
+  httr
 Depends: R (>= 2.10)
 RoxygenNote: 6.1.1
 Suggests: 
-    testthat
+    testthat,
+    covr,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

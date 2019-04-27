@@ -1,2 +1,4 @@
-mgsub = 1.5.0
-dplyr >= 0.7.0
+mgsub >= 1.5.0
+lexRankr == 0.4.*
+readOffice < 1
+whitechapelR > 0.3

@@ -1,0 +1,5 @@
+# to test a mix of possible and impossible
+mgsub >= 1.5.0
+lexRankr == 0.4.*
+readOffice < 1.0
+whitechapelR >= 0.3
