@@ -110,7 +110,7 @@ test_that("str_match_all", {
 
   expect_equal(
     str_match_all(c("nope"), "(.)est"),
-    list(structure(character(0), .Dim = 0:1))
+    list(structure(character(0), .Dim = c(0L, 2L)))
   )
 })
 
@@ -143,6 +143,11 @@ test_that("match_packages", {
   expect_equal(
     sort(match_packages(PACKAGE_LINES_ALL, PACKAGE_RES)),
     sort(PACKAGES_ALL)
+  )
+
+  expect_equal(
+    sort(match_packages("library(requirements)", PACKAGE_RES)),
+    "requirements"
   )
 })
 
