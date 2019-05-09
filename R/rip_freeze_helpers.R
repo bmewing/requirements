@@ -141,7 +141,7 @@ str_match_all = function(string, pattern) {
   if (n_null_matches == 0) return(matches_list)
 
   if (n_null_matches == length(matches_list)) {
-    null_matrix_placeholder = matrix(character(0), nrow = 0, ncol = 1)
+    null_matrix_placeholder = matrix(character(0), nrow = 0, ncol = 2)
   } else {
     non_null_n_col = max(vapply(matches_list[!null_matches], ncol, integer(1)))
     null_matrix_placeholder = matrix(character(0), nrow = 0, ncol = non_null_n_col)
