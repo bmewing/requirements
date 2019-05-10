@@ -183,6 +183,11 @@ test_that("append_version_requirements", {
     append_version_requirements(expected_matched_package_df, eq_sym = NULL),
     c("DT", "testthat")
   )
+
+  expect_equal(
+    append_version_requirements(expected_matched_package_df[1, ]),
+    "testthat"
+  )
 })
 
 test_that("write_requirements_file", {

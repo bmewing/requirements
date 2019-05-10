@@ -237,7 +237,9 @@ append_version_requirements = function(matched_packages_df, eq_sym=COMP_GTE) {
   eq_sym = validate_eq_sym(eq_sym)
 
   versioned_packages_df = matched_packages_df[!is.na(matched_packages_df[["version"]]), ]
-  unversioned_packages_df = matched_packages_df[is.na(matched_packages_df[["version"]]), ]
+  unversioned_requirements = matched_packages_df[is.na(matched_packages_df[["version"]]), "name"]
+
+  if (nrow(versioned_packages_df) == 0) return(unversioned_requirements)
 
   versioned_requirements = mapply(paste0,
                                   trimws(versioned_packages_df[["name"]]),
@@ -245,7 +247,7 @@ append_version_requirements = function(matched_packages_df, eq_sym=COMP_GTE) {
                                   trimws(versioned_packages_df[["version"]]),
                                   USE.NAMES = FALSE)
 
-  sort(c(versioned_requirements, unversioned_packages_df[["name"]]))
+  sort(c(versioned_requirements, unversioned_requirements))
 }
 
 
