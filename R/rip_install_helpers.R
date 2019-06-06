@@ -118,7 +118,58 @@ get_installed = function(dummy=NULL) {
 }
 
 
-get_available_versions = function(package) {
+get_current_versions_extra = function(repo){
+  entries = readLines(paste0(repo, "/src/contrib/"))
+  packages = grep("\\.tar\\.gz", entries, value = TRUE)
+  packages = sub("^.*?href=\"(.*?)\\.tar\\.gz\".*$", "\\1", packages)
+  packages = as.data.frame(do.call(rbind, strsplit(packages, "_")))
+  names(packages) = c("package", "version")
+  return(packages)
+}
+
+get_archive_versions_extra = function(package, repo){
+  entries = readLines(paste0(repo ,"/src/contrib/Archive/", package))
+  packages = grep("\\.tar\\.gz", entries, value = TRUE)
+  packages = sub("^.*?href=\"(.*?)\\.tar\\.gz\".*$", "\\1", packages)
+  versions = vapply(strsplit(packages, "_"), `[`, 2, FUN.VALUE = character(1))
+  return(versions)
+}
+
+
+get_available_versions_extra = local({
+  current_version_cache = list()
+  package_archive_cache = list()
+
+  function(package, repo){
+    #' Get packages from extra-CRAN sources
+    #'
+    #' @param package name of package to fetch versions for
+    #' @param repo the url of the repo to look in
+    #'
+    #' @return character vector of available package versions; NULL if package not found
+    #' @export
+    #'
+    #' @examples
+    #' get_available_versions_extra('emnTAW', 'http://lnxaws01.emn.com/EastmanCRAN/')
+    if (is.null(current_version_cache[[repo]])){
+      current_version_cache[[repo]] <<- get_current_versions_extra(repo)
+    }
+    if (is.null(package_archive_cache[[repo]][[package]])){
+      try({
+        suppressWarnings(
+          package_archive_cache[[repo]][[package]] <<- get_archive_versions_extra(package, repo)
+        )
+      }, silent = TRUE)
+    }
+    versions = current_version_cache[[repo]]$version[current_version_cache[[repo]]$package == package]
+    versions = c(versions, package_archive_cache[[repo]][[package]])
+    if (length(versions) == 0) versions = NULL
+    return(versions)
+  }
+})
+
+
+get_available_versions = function(package, repos = NULL) {
   #' @param package name of package to fetch versions for
   #' @return character vector of available package versions; NULL if package not found
   #'
@@ -135,8 +186,14 @@ get_available_versions = function(package) {
 
   response_content = httr::content(response)
   version_timeline = response_content$timeline
+  versions = names(version_timeline)
+  
+  if(!is.null(repos)){
+    extra_versions = unlist(lapply(repos, get_available_versions_extra, package = package))
+    versions = c(versions, extra_versions)
+  }
 
-  return(names(version_timeline))
+  return(versions)
 }
 
 
