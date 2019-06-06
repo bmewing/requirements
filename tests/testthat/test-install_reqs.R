@@ -2,6 +2,21 @@ context("install_reqs.R")
 
 INST = c("mgsub" = "1.5.1.3", "lexRankr" = "0.4.1", "readOffice" = "0.2.2")  # nolint
 
+test_that("install_special_git", {
+  #check working fine message on git
+  expect_message(fail_count <- install_special_req("git+https://github.com/bmewing/mgsub@v1.0", # nolint
+                                                   GIT_REPLACE, remotes::install_git, TRUE, TRUE),
+                 regexp = "https://github\\.com/bmewing/mgsub")
+  #check git working fine
+  expect_equal(fail_count, 0)
+  #check failure message on git
+  expect_message(fail_count <- install_special_req("git+https://github.com/bmewing/mgsub@v0.5", # nolint
+                                                   GIT_REPLACE, remotes::install_git, FALSE, TRUE),
+                 regexp = sprintf(ERROR_OTHER_FAILURE, "https://github\\.com/bmewing/mgsub@v0.5"))
+  #check failure counts return properly
+  expect_equal(fail_count, 1)
+})
+
 test_that("install_special_req", {
   #check working fine message on git
   expect_message(fail_count <- install_special_req("git+https://github.com/bmewing/mgsub", # nolint

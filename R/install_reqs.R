@@ -13,7 +13,7 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
 
   # Install git
   failures = failures +
-    count_failures(reqs$git, install_special_req, GIT_REPLACE, remotes::install_git, dryrun, verbose) +
+    count_failures(reqs$git, install_special_git, GIT_REPLACE, dryrun, verbose) +
     count_failures(reqs$svn, install_special_req, SVN_EXT_REP, remotes::install_svn, dryrun, verbose) +
     count_failures(reqs$bioc, install_special_req, BIO_EXT_REP, remotes::install_bioc, dryrun, verbose) +
     count_failures(reqs$url, install_special_req, "", remotes::install_url, dryrun, verbose) +
@@ -27,8 +27,24 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
 }
 
 ### Helpers
+install_special_git = function(i, pattern, dryrun, verbose){
+  #' @param i single special requirement to be installed
+  #' @param pattern regex pattern to match on
+  #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
+  #' @param verbose should the function be explicit about activities
+  #'
+  #' @return count of failures
+  url = sub(pattern, "", i)
+  ref_pattern = "^.*?@(.*)$"
+  ref = NULL
+  if (grepl(ref_pattern, url)){
+    ref = sub(ref_pattern, "\\1", url)
+    url = sub("@.*", "", url)
+  }
+  return(install_special_req(url, "", remotes::install_git, dryrun, verbose, ref = ref))
+}
 
-install_special_req = function(i, pattern, f, dryrun, verbose){
+install_special_req = function(i, pattern, f, dryrun, verbose, ...){
   #' @param i single special requirement to be installed
   #' @param pattern regex pattern to match on
   #' @param f the function used to install
@@ -40,7 +56,7 @@ install_special_req = function(i, pattern, f, dryrun, verbose){
   url = sub(pattern, "", i)
   vmess(sprintf(NOTE_INSTALL_PACKAGE, url, ""), verbose)
   if (!dryrun) {
-    tryCatch(f(url),
+    tryCatch(f(url, ...),
              error = function(x) {
                failures <<- failures + 1 # nolint
                message(sprintf(ERROR_OTHER_FAILURE, url))
