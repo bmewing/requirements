@@ -64,15 +64,57 @@ read_reqs_from_lockfile = function(lockfile_path = "packrat/packrat.lock", eq_sy
 }
 
 
-read_package_lines_from_file = function(file_path, filter_words) {
+read_rmd_code_chunk_lines = function(file_path, filter_words) {
   #' @keywords internal
-  #' Pull package referencing lines from R file
+  #' Pull package referencing lines from an Rmd file's R code chunks
   #'
-  #' @param file_path String containg path to file to check for package references.
+  #' @param file_path String containing path to Rmd file to check for package references.
   #' @param filter_words Character vector of 'words' to use as filter for package references.
   #'
   #' @return Character vector containing package referencing lines from \code{file_path}.
-  all_file_lines = readLines(file_path)
+
+  rmd_lines = readLines(file_path)
+
+  # Find lines that start with ```{r
+  chunk_start_lines = grep("^```\\{r\\b", rmd_lines)
+
+  # Find lines that start with ```
+  potential_chunk_end_lines = grep("^```", rmd_lines)
+
+  # Rm ```{r lines from candidates list of chunk enders
+  potential_chunk_end_lines = setdiff(potential_chunk_end_lines, chunk_start_lines)
+
+  rmd_code_chunks = lapply(chunk_start_lines, function(chunk_start_line) {
+    # Find which candidate endline occurs most soon after an r code chunk start line
+    all_line_diffs = potential_chunk_end_lines - chunk_start_line
+    valid_line_diffs = all_line_diffs[all_line_diffs > 0]
+    chunk_end_line_diff = valid_line_diffs[which.min(valid_line_diffs)]
+    chunk_end_line = potential_chunk_end_lines[all_line_diffs == chunk_end_line_diff]
+
+    # Subset codechunk lines (drop ``` lines)
+    rmd_lines[(chunk_start_line + 1):(chunk_end_line - 1)]
+  })
+
+  return(unlist(rmd_code_chunks))
+}
+
+
+read_package_lines_from_file = function(file_path, filter_words = c("::", "library", "require", "p_load")) {
+  #' @keywords internal
+  #' Pull package referencing lines from R file
+  #'
+  #' @param file_path String containing path to file to check for package references.
+  #' @param filter_words Character vector of 'words' to use as filter for package references.
+  #'
+  #' @return Character vector containing package referencing lines from \code{file_path}.
+  file_extension = tolower(tools::file_ext(file_path))
+  if (file_extension %in% c("rmd", "rpres")) {
+    file_reader = read_rmd_code_chunk_lines
+  } else {
+    file_reader = readLines
+  }
+
+  all_file_lines = file_reader(file_path)
 
   package_lines_re = paste(filter_words, collapse = "|")
   package_lines = all_file_lines[grep(package_lines_re, all_file_lines)]
@@ -81,7 +123,7 @@ read_package_lines_from_file = function(file_path, filter_words) {
 }
 
 
-read_package_lines_from_files = function(file_paths, filter_words=c("::", "library", "require", "p_load")) {
+read_package_lines_from_files = function(file_paths, filter_words = c("::", "library", "require", "p_load")) {
   #' @keywords internal
   #' Pull package referencing lines from R files
   #'
@@ -222,7 +264,7 @@ validate_eq_sym = function(eq_sym) {
 }
 
 
-append_version_requirements = function(matched_packages_df, eq_sym=COMP_GTE) {
+append_version_requirements = function(matched_packages_df, eq_sym = COMP_GTE) {
   #' @keywords internal
   #' Paste requirement names and version numbers together
   #'
@@ -300,7 +342,7 @@ rm_dup_matched_packages = function(matched_packages_df) {
 }
 
 
-write_requirements_file = function(package_requirements, file_path="requirements.txt", append=FALSE) {
+write_requirements_file = function(package_requirements, file_path = "requirements.txt", append = FALSE) {
   #' @keywords internal
   #' Helper for writing requirements to file
   #'
