@@ -5,7 +5,8 @@ TMP_DIR = tempdir()
 FILE_1 = file.path(TMP_DIR, "file_1.R")
 FILE_2 = file.path(TMP_DIR, "file_2.R")
 FILE_3 = file.path(TMP_DIR, "file_3.R")
-LOCKFILE = file.path(TMP_DIR, "test_packrat.lock")
+dir.create(file.path(TMP_DIR, "test_packrat"))
+LOCKFILE = file.path(TMP_DIR, "test_packrat", "packrat.lock")
 LOCKFILE_MALFORMED = file.path(TMP_DIR, "test_malformed_packrat.lock")
 
 FILE_TEXT_1 = c(
@@ -215,23 +216,24 @@ test_that("write_requirements_file", {
 
 test_that("generate_requirements", {
   test_requirements_file = file.path(TMP_DIR, "requirements.txt")
-  test_glob = file.path(TMP_DIR, "file_*.R")
 
-  generate_requirements(FILE_3, test_requirements_file, rm_missing = TRUE)
+  generate_requirements(test_requirements_file,
+                        path = FILE_3,
+                        rm_missing = TRUE)
 
   expect_equal(
     readLines(test_requirements_file),
     c(AUTO_GEN_COMMENTS)
   )
 
-  generate_requirements(test_glob, test_requirements_file, eq_sym = NULL, packrat_lock_path = LOCKFILE)
+  generate_requirements(test_requirements_file, path = TMP_DIR, eq_sym = NULL)
 
   expect_equal(
     readLines(test_requirements_file),
     c(AUTO_GEN_COMMENTS, sort(unique(c(PACKAGES_ALL, "testthat", "DT"))))
   )
 
-  rip_freeze(test_glob, test_requirements_file, eq_sym = NULL, packrat_lock_path = LOCKFILE)
+  rip_freeze(test_requirements_file, path = TMP_DIR, eq_sym = NULL)
 
   expect_equal(
     readLines(test_requirements_file),

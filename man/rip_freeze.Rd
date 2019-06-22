@@ -5,24 +5,29 @@
 \alias{generate_requirements}
 \title{Generate a requirements.txt for your project}
 \usage{
-rip_freeze(glob_paths = "*.R", output_path = "requirements.txt",
-  eq_sym = ">=", packrat_lock_path = NULL, rm_missing = FALSE)
+rip_freeze(output_path = "requirements.txt", eq_sym = ">=",
+  inspect_files = c("R", "Rmd", "Rpres", "lock"), path = ".",
+  recursive = TRUE, rm_missing = FALSE)
 
-generate_requirements(glob_paths = "*.R",
-  output_path = "requirements.txt", eq_sym = ">=",
-  packrat_lock_path = NULL, rm_missing = FALSE)
+generate_requirements(output_path = "requirements.txt", eq_sym = ">=",
+  inspect_files = c("R", "Rmd", "Rpres", "lock"), path = ".",
+  recursive = TRUE, rm_missing = FALSE)
 }
 \arguments{
-\item{glob_paths}{Character vector of patterns for relative or absolute filepaths. Missing values will be ignored.
-See \code{?Sys.glob} for more details.}
-
 \item{output_path}{String indicating where to write resulting requirements file to.}
 
 \item{eq_sym}{The equality symbol to be used when writing requirements (i.e. package>=1.0.0).
 Use \code{NULL} to not include package versions in your requirements file.}
 
-\item{packrat_lock_path}{If not \code{NULL}, then requirements will be pulled from
-the \code{packrat.lock} at this location and appended to the final \code{requirements.txt} output.}
+\item{inspect_files}{Character vector of file extensions to search for dependencies in.
+Officially supports the following extensions: `c("R", "Rmd", "Rpres", "lock")`.
+Other extensions will be processed as if they were `.R` files.}
+
+\item{path}{Location where extensions from `inspect_files` should be searched for.
+(see `path` from `?list.files`).}
+
+\item{recursive}{Should the seatch for `inspect_files` recurse into directories?
+(see `recursive` from `?list.files`).}
 
 \item{rm_missing}{Should packages not installed locally be excluded from output?}
 }
@@ -33,6 +38,9 @@ Nothing is returned.  Results are written to \code{output_path}
 Generate a requirements file from existing file(s) and installed packages
 }
 \details{
+If `"lock"` is included in `inspect_files`, it is assumed to refer to a `packrat.lock`.  Only files matching the
+pattern `glob2rx("*packrat/packrat.lock")` will be considered.
+
 Methodology for package matching relies on string pattern matching rather than a more sophisticated method.
 This will match most 'standard' ways of referencing libraries in R code.
 The following lines of code show examples where the \code{data.table} package will be matched properly:

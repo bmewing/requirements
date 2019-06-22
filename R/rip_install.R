@@ -3,7 +3,9 @@ rip_install = function(requirements = "requirements.txt",
                        packrat = FALSE, dryrun = FALSE,
                        verbose = dryrun, repo = options()$repo[1],
                        gen = !file.exists(requirements),
-                       glob_paths = file.path(dirname(requirements), "*.R")) {
+                       inspect_files = c("R", "Rmd", "Rpres", "lock"),
+                       path = dirname(requirements),
+                       ...) {
   #' @title Install project requirements
   #'
   #' @description Install (and optionally generate) required packages
@@ -15,16 +17,22 @@ rip_install = function(requirements = "requirements.txt",
   #' @param verbose Flag to change verbosity
   #' @param repo What repository should be used to install packages?
   #' @param gen Should required packages be generated?
-  #' @param glob_paths Character vector of patterns for relative or absolute filepaths.
-  #'    Missing values will be ignored. See ?Sys.glob for more details.
+  #' @param inspect_files Character vector of file extensions to search for dependencies in.
+  #'                      Officially supports the following extensions: `c("R", "Rmd", "Rpres", "lock")`.
+  #'                      Other extensions will be processed as if they were `.R` files.
+  #' @param path Location where extensions from `inspect_files` should be searched for.
+  #'             (see `path` from `?list.files`).
+  #' @param ... Additional arguments to be passed to `rip_freeze()`
   #'
   #' @return invisible
   #' @examples
   #' \dontrun{
   #' requirements(dryrun = TRUE)
   #' }
-  if (gen) rip_freeze(glob_paths = glob_paths,
-                      output_path = requirements)
+  if (gen) rip_freeze(output_path = requirements,
+                      inspect_files = inspect_files,
+                      path = path,
+                      ...)
 
   reqs = process_requirements_file(requirements)
 
