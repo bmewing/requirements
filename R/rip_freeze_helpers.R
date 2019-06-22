@@ -246,6 +246,36 @@ safe_packageVersion = function(pkg) {
 }
 
 
+desc_order = function(..., na.last = TRUE, method = c("auto", "shell", "radix")) {
+  order(..., na.last = na.last, decreasing = TRUE, method = method)
+}
+
+
+order_package_versions = function(version_str, decreasing = TRUE) {
+  #' @keywords internal
+  #' Wrapper for package_version to fail gracefully
+  #'
+  #' @param version_str Character vector of package version strings to be coerced to package_version class
+  #'
+  #' @return Vector of package_version objects.
+
+  version_vec_list = lapply(version_str, function(p) {
+    p_version = NA_real_
+    try({p_version = package_version(p)}, silent = TRUE)  # nolint
+    class(p_version) = "list"
+    p_version[[1]]
+  })  # nolint
+
+  version_mat = suppressWarnings(do.call(rbind, version_vec_list))
+  version_df = as.data.frame(version_mat)
+
+  order_func = if (decreasing) desc_order else order
+  version_order = do.call(order_func, version_df)
+
+  return(version_order)
+}
+
+
 validate_eq_sym = function(eq_sym) {
   #' @keywords internal
   #' Raise exception if comparison operator is invalid
@@ -323,8 +353,8 @@ rm_dup_matched_packages = function(matched_packages_df) {
   }
 
   # Sort by version number and drop `duplicated()` names to avoid having to split/apply/recombine
-  package_versions = package_version(matched_packages_df[["version"]])
-  sorted_packages_df = matched_packages_df[order(package_versions, decreasing = TRUE), ]
+  pkg_version_order = order_package_versions(matched_packages_df[["version"]])
+  sorted_packages_df = matched_packages_df[pkg_version_order, ]
 
   dups = duplicated(sorted_packages_df[["name"]])
   deduped_packages_df = sorted_packages_df[!dups, ]
