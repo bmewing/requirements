@@ -228,7 +228,7 @@ match_packages = function(candidate_lines, package_regexes) {
 }
 
 
-safe_package_version = function(pkg) {
+safe_packageVersion = function(pkg) {
   #' @keywords internal
   #' Wrapper for packageVersion to fail gracefully
   #'
@@ -334,7 +334,7 @@ rm_dup_matched_packages = function(matched_packages_df) {
   warn_msg =
     "packrat.lock version and installed version conlficted for the following packages: %s\n"
   warning(sprintf(warn_msg, paste0(dup_package_names, collapse = ", ")),
-          "The most recent versions of these packages will be used.")
+          "The most recent version(s) of these packages will be used.")
 
   deduped_packages_df = deduped_packages_df[order(deduped_packages_df[["name"]]), ]
   row.names(deduped_packages_df) = NULL

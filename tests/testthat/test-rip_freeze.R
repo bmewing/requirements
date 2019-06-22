@@ -152,15 +152,15 @@ test_that("match_packages", {
   )
 })
 
-test_that("safe_package_version", {
+test_that("safe_packageVersion", {
   expect_equal(
-    safe_package_version(""),
+    safe_packageVersion(""),
     NA_character_,
     label = "return NA for fake package"
   )
 
   expect_equal(
-    safe_package_version("testthat"),
+    safe_packageVersion("testthat"),
     as.character(packageVersion("testthat")),
     label = "defaults"
   )
