@@ -1,4 +1,3 @@
-```markdown
 **IMPORTANT: Please do not create a Pull Request without creating an issue first.**
 
 *Any change needs to be discussed before proceeding. Failure to do so may result in the rejection of the pull request.*
@@ -26,5 +25,3 @@ Run `lintr::lint_package()` and `cyclocomp::cyclocomp_package_dir()` to ensure c
 **Closing issues**
 
 Put `closes #XXXX` in your comment to make it clear what issue this is related to.
-```
-
