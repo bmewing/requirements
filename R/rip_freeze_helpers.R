@@ -228,7 +228,7 @@ match_packages = function(candidate_lines, package_regexes) {
 }
 
 
-safe_packageVersion = function(pkg) {
+safe_packageVersion = function(pkg) {  # nolint
   #' @keywords internal
   #' Wrapper for packageVersion to fail gracefully
   #'
@@ -246,7 +246,7 @@ safe_packageVersion = function(pkg) {
 }
 
 
-desc_order = function(..., na.last = TRUE, method = c("auto", "shell", "radix")) {
+desc_order = function(..., na.last = TRUE, method = c("auto", "shell", "radix")) {  # nolint
   order(..., na.last = na.last, decreasing = TRUE, method = method)
 }
 
