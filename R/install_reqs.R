@@ -1,5 +1,5 @@
 install_reqs = function(reqs, dryrun, verbose = dryrun,
-                        repo = options()$repo[1], ...){
+                        repo = options()$repo[1], ...) {
   #' @param reqs results of process_requirements_file
   #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
   #' @param verbose should the function be explicit about activities
@@ -28,7 +28,7 @@ install_reqs = function(reqs, dryrun, verbose = dryrun,
 
 ### Helpers
 
-install_special_req = function(i, pattern, f, dryrun, verbose){
+install_special_req = function(i, pattern, f, dryrun, verbose) {
   #' @param i single special requirement to be installed
   #' @param pattern regex pattern to match on
   #' @param f the function used to install
@@ -49,7 +49,7 @@ install_special_req = function(i, pattern, f, dryrun, verbose){
   return(failures)
 }
 
-install_unversioned = function(i, installed, dryrun, verbose, repo){
+install_unversioned = function(i, installed, dryrun, verbose, repo) {
   #' @param i single unversioned package requirement (package name)
   #' @param installed list of installed packages
   #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
@@ -59,7 +59,7 @@ install_unversioned = function(i, installed, dryrun, verbose, repo){
   #' @return the number of failures
   failures = 0
   available_versions = get_available_versions(i)
-  if (is.null(available_versions)){
+  if (is.null(available_versions)) {
     failures = failures + 1
     vmess(sprintf(ERROR_NO_PACKAGE_EXISTS, i), TRUE)
   } else if (is.na(installed[i])) {
@@ -74,14 +74,14 @@ install_unversioned = function(i, installed, dryrun, verbose, repo){
   return(failures)
 }
 
-install_cran_package = function(package, version, repo, dryrun){
+install_cran_package = function(package, version, repo, dryrun) {
   failures = 0
   if (!dryrun) {
     tryCatch(remotes::install_version(package,
                                       version = version,
                                       repos = repo,
                                       quiet = TRUE),
-             error = function(x){
+             error = function(x) {
                failures <<- failures + 1 # nolint
                message(sprintf(ERROR_OTHER_FAILURE, package))
              })
@@ -89,7 +89,7 @@ install_cran_package = function(package, version, repo, dryrun){
   return(failures)
 }
 
-process_versioned_requirement = function(req){
+process_versioned_requirement = function(req) {
   comp = identify_comparison_op(req)
   split = strsplit(req, comp)[[1]]
   package = gsub(" *", "", split[1])
@@ -99,7 +99,7 @@ process_versioned_requirement = function(req){
               comp = comp))
 }
 
-is_versioned_install_needed = function(package, version, comp, installed, verbose){
+is_versioned_install_needed = function(package, version, comp, installed, verbose) {
   install_needed = FALSE
   if (is.na(installed[package])) {
     vmess(sprintf(NOTE_PACKAGE_NOT_INSTALLED, package), verbose)
@@ -110,7 +110,7 @@ is_versioned_install_needed = function(package, version, comp, installed, verbos
   return(install_needed)
 }
 
-install_if_compat_available = function(processed_element, repo, verbose, dryrun){
+install_if_compat_available = function(processed_element, repo, verbose, dryrun) {
   failures = 0
 
   package = processed_element$package
@@ -139,7 +139,7 @@ install_if_compat_available = function(processed_element, repo, verbose, dryrun)
   return(failures)
 }
 
-install_versioned = function(i, installed, dryrun, verbose, repo){
+install_versioned = function(i, installed, dryrun, verbose, repo) {
   #' @param i single versioned package requirements (package comp version)
   #' @param installed list of installed packages
   #' @param dryrun if TRUE, no packages will be installed, but you can see what would have happened
@@ -166,11 +166,11 @@ install_versioned = function(i, installed, dryrun, verbose, repo){
 }
 
 
-count_failures = function(elem, func, ...){
+count_failures = function(elem, func, ...) {
   #' @param elem the requirements to be installed
   #' @param func the internal function used to handle installation
   #' @param ... other arguments to pass to the internal function
-  if (length(elem) > 0){
+  if (length(elem) > 0) {
     return(sum(vapply(elem, func, FUN.VALUE = numeric(1), ...)))
   } else {
     return(0)

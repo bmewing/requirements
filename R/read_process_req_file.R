@@ -1,4 +1,4 @@
-read_requirements_file = function(req){
+read_requirements_file = function(req) {
   #' @param req path to requirements file
   #' @return dataframe of requirements file contents plus line numbers and source file reference
 
@@ -21,7 +21,7 @@ read_requirements_file = function(req){
   return(output)
 }
 
-identify_duplicate_reqs = function(content_df){
+identify_duplicate_reqs = function(content_df) {
   #' @param content_df dataframe of requirements with three columns
   #' @return content_df untouched
   #' @details content_df$content is the requirement line
@@ -34,11 +34,11 @@ identify_duplicate_reqs = function(content_df){
   content_dup$package = gsub(CANONICAL_PACKAGE_NAME_RE_EXTRACT, "\\1", content_dup$content)
 
   dups = duplicated(content_dup$package)
-  if (!any(dups)){
+  if (!any(dups)) {
     return(content_df)
   } else {
     error = ""
-    for (i in which(dups)){
+    for (i in which(dups)) {
       first_occur = which(content_dup$package == content_dup[2, "package"])[1]
       error = paste0(error,
                      sprintf(REQ_FILE_DUPLICATE_REQ,
@@ -55,14 +55,14 @@ identify_duplicate_reqs = function(content_df){
 }
 
 
-strip_comments = function(content, remove_additional_file = TRUE){
+strip_comments = function(content, remove_additional_file = TRUE) {
   #' @param content vector of characters
   #' @param remove_additional_file should lines starting with -r be removed?
   #' @return vector of chracters without comments or -r and trimmed whitespace
   #' @details This was originally part of another function but was split out to be used
   #' in a few different places.
   content = gsub("#.*", "", content)
-  if (remove_additional_file){
+  if (remove_additional_file) {
     content = gsub("^ *\\-r.*", "", content)
   }
   content = trimws(content, which = "both")
@@ -102,7 +102,7 @@ capture_special_installs = function(content) {
   return(output)
 }
 
-validate_versioning = function(req){
+validate_versioning = function(req) {
   #' @param req a requirement to be checked
   #' @return logical indicating if the versioned requirement is valid (including valid comparison operator)
 
@@ -117,7 +117,7 @@ capture_versioned_requirements = function(content) {
   #' versions installed.
   versioned = vapply(content, identify_comparison_op, character(1))
   versioned = versioned[!is.na(versioned)]
-  if (!all(versioned %in% COMPS)){
+  if (!all(versioned %in% COMPS)) {
     first_error = which(!versioned %in% COMPS)[1]
     illegal_comp = versioned[first_error]
     stop(sprintf(REQ_FILE_INVALID_COMP,
@@ -133,20 +133,20 @@ capture_versioned_requirements = function(content) {
   return(version_req[valid_packages])
 }
 
-identify_comparison_op = function(req){
+identify_comparison_op = function(req) {
   #' @param req a single versioned requirement string
   #' @return the comparison operator used
   #' @detail if there is not a valid comparison operator it returns NA
   comp = gsub(pattern = COMP_EXTRACTOR,
               replacement = "\\1",
               x = req)
-  if (comp == req){
+  if (comp == req) {
     comp = NA_character_
   }
   return(comp)
 }
 
-capture_local_requirements = function(content){
+capture_local_requirements = function(content) {
   #' @param content a vector of requirements
   #' @return vector of local file requirements
   #' @detail while there may be more legal file types, it checks to see if the requirement
@@ -160,7 +160,7 @@ capture_local_requirements = function(content){
   return(local_req)
 }
 
-process_requirements_file = function(req){
+process_requirements_file = function(req) {
   #' @param req path to requirements file
   #' @return list with all supported requirement types
 
