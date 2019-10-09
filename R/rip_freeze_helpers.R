@@ -76,7 +76,7 @@ read_rmd_code_chunk_lines = function(file_path, filter_words) {
   rmd_lines = readLines(file_path)
 
   # Find lines that start with ```{r
-  chunk_start_lines = grep("^```\\{r\\b", rmd_lines)
+  chunk_start_lines = grep("^```\\{r\\b.*\\}", rmd_lines)
 
   # Find lines that start with ```
   potential_chunk_end_lines = grep("^```", rmd_lines)
