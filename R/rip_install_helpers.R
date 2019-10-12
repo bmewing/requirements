@@ -119,19 +119,46 @@ get_installed = function(dummy=NULL) {
 
 
 get_current_versions_extra = function(repo){
-  entries = readLines(paste0(repo, "/src/contrib/"))
-  packages = grep("\\.tar\\.gz", entries, value = TRUE)
-  packages = sub("^.*?href=\"(.*?)\\.tar\\.gz\".*$", "\\1", packages)
-  packages = as.data.frame(do.call(rbind, strsplit(packages, "_")))
-  names(packages) = c("package", "version")
+  #' Get current versions of packages from extra-CRAN sources
+  #'
+  #' @param repo the url of the repo to look in
+  #'
+  #' @return data.frame of package names and versions, filled with NULL if unavailable
+  #'
+  #' @example
+  #' get_current_versions_extra('https://cran.microsoft.com/snapshot/2018-07-01/')
+  packages = data.frame(package = NULL, version = NULL)
+
+  try({
+    entries = readLines(paste0(repo, "/src/contrib/")) # nolint
+    packages = grep("\\.tar\\.gz", entries, value = TRUE)
+    packages = sub("^.*?href=\"(.*?)\\.tar\\.gz\".*$", "\\1", packages)
+    packages = as.data.frame(do.call(rbind, strsplit(packages, "_")))
+    names(packages) = c("package", "version")
+  }, silent = TRUE)
+
   return(packages)
 }
 
 get_archive_versions_extra = function(package, repo){
-  entries = readLines(paste0(repo ,"/src/contrib/Archive/", package))
-  packages = grep("\\.tar\\.gz", entries, value = TRUE)
-  packages = sub("^.*?href=\"(.*?)\\.tar\\.gz\".*$", "\\1", packages)
-  versions = vapply(strsplit(packages, "_"), `[`, 2, FUN.VALUE = character(1))
+  #' Get archived package versions from extra-CRAN sources
+  #'
+  #' @param package name of package to fetch archived versions for
+  #' @param repo the url of the repo to look in
+  #'
+  #' @return character vector of archived package versions, NULL if none
+  #'
+  #' @example
+  #' get_available_versions_extra('mgsub', 'https://cran.microsoft.com/snapshot/2018-07-01/')
+  versions = NULL
+
+  try({
+    entries = readLines(paste0(repo, "/src/contrib/Archive/", package)) # nolint
+    packages = grep("\\.tar\\.gz", entries, value = TRUE)
+    packages = sub("^.*?href=\"(.*?)\\.tar\\.gz\".*$", "\\1", packages)
+    versions = vapply(strsplit(packages, "_"), `[`, 2, FUN.VALUE = character(1))
+  }, silent = TRUE)
+
   return(versions)
 }
 
@@ -147,19 +174,16 @@ get_available_versions_extra = local({
     #' @param repo the url of the repo to look in
     #'
     #' @return character vector of available package versions; NULL if package not found
-    #' @export
     #'
     #' @examples
-    #' get_available_versions_extra('emnTAW', 'http://lnxaws01.emn.com/EastmanCRAN/')
+    #' get_available_versions_extra('mgsub', 'https://cran.microsoft.com/snapshot/2018-07-01/')
     if (is.null(current_version_cache[[repo]])){
-      current_version_cache[[repo]] <<- get_current_versions_extra(repo)
+      current_version_cache[[repo]] <<- get_current_versions_extra(repo) # nolint
     }
     if (is.null(package_archive_cache[[repo]][[package]])){
-      try({
-        suppressWarnings(
-          package_archive_cache[[repo]][[package]] <<- get_archive_versions_extra(package, repo)
-        )
-      }, silent = TRUE)
+      suppressWarnings(
+        package_archive_cache[[repo]][[package]] <<- get_archive_versions_extra(package, repo) # nolint
+      )
     }
     versions = current_version_cache[[repo]]$version[current_version_cache[[repo]]$package == package]
     versions = c(versions, package_archive_cache[[repo]][[package]])
@@ -171,6 +195,7 @@ get_available_versions_extra = local({
 
 get_available_versions = function(package, repos = NULL) {
   #' @param package name of package to fetch versions for
+  #' @param repos url of extra-CRAN repos to look in
   #' @return character vector of available package versions; NULL if package not found
   #'
   #' @examples
@@ -187,8 +212,8 @@ get_available_versions = function(package, repos = NULL) {
   response_content = httr::content(response)
   version_timeline = response_content$timeline
   versions = names(version_timeline)
-  
-  if(!is.null(repos)){
+
+  if (!is.null(repos)){
     extra_versions = unlist(lapply(repos, get_available_versions_extra, package = package))
     versions = c(versions, extra_versions)
   }

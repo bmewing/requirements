@@ -160,12 +160,64 @@ capture_local_requirements = function(content){
   return(local_req)
 }
 
+parse_additional_repos = function(line){
+  #' Parse a requirement file line to get the first URL after the option
+  #' @param line a single line from a requirements file
+  #' @return just the URL specifying the repository
+  url = sub("^.*?-[^ ]* +([^ ]*).*$", "\\1", line)
+  return(url)
+}
+
+process_find_links = function(loc){
+  #' Read location specified by --find-links
+  #' @param loc the location specified by --find-links
+  #' @return the contents of the location
+  #' @details
+  #' Once a --find-link option has been parsed, a location is returned. This location can be a URL or a file. The
+  #' assumption here is that the location can be read as plain text, so a readLines is applied. If the location
+  #' cannot be read, then an error should be returned to the user as requirements may not be able to be satisified.
+  tryCatch(urls = readLines(loc),
+           error = function(e){
+             stop(paste0(loc,", a --find-links specification, cannot be read."))
+           }
+  )
+  return(urls)
+}
+
+capture_repo_details = function(content){
+  #' Parse options relating to repositories
+  #' @param content a vector of repository option requirements
+  #' @return vector of cran requirements
+
+  no_base_cran = any(grepl("--no-index", content))
+  specific_repo = vapply(grep("--index-url|-i", content, value = TRUE),
+                         parse_additional_repos, FUN.VALUE = character(1))
+  if (length(specific_repo) > 1) stop("Additional Index URLs must be specified using --extra-index-url")
+  additional_repo = vapply(grep("--extra-index-url", content, value = TRUE),
+                           parse_additional_repos, FUN.VALUE = character(1))
+  additional_links = vapply(grep("--find-links|-f", content, value = TRUE),
+                            parse_additional_repos, FUN.VALUE = character(1))
+  additional_repo = c(specific_repo, additional_repo, unlist(lapply(additional_links, process_find_links)))
+  return(list(no_base_cran = no_base_cran,
+              additional_repos = additional_repo))
+}
+
+filter_repo_details = function(content){
+  #' Fetch the lines of a requirements file pertaining to repository options
+  #' @param content a vector of requirements
+  #' @return vector of cran requirements
+  repo = grep("--no-index|--index-url|-i|--extra-index-url|--find-links|-f", content, value = TRUE)
+  return(repo)
+}
+
 process_requirements_file = function(req){
   #' @param req path to requirements file
   #' @return list with all supported requirement types
 
   content = read_requirements_file(req)
   content = remove_comments_dups_from_req(content)
+  repo_options = filter_repo_details(content)
+  content = content[!content %in% repo_options]
   if (length(content) == 0) stop(sprintf(REQ_FILE_EMPTY_ERR, req))
 
   output = capture_special_installs(content)
@@ -179,6 +231,8 @@ process_requirements_file = function(req){
   # remaining packages
   output$unversioned = content[legal_r_package_name(trimws(content))]
   content = content[!content %in% output$unversioned]
+  # add repo data
+  output$repo_options = capture_repo_details(repo_options)
 
   if (length(content) > 0) {
     stop(sprintf(REQ_FILE_RESOLUTION_ERR, paste(content, collapse = ", ")))
