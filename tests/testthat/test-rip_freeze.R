@@ -5,7 +5,9 @@ TMP_DIR = tempdir()
 FILE_1 = file.path(TMP_DIR, "file_1.R")
 FILE_2 = file.path(TMP_DIR, "file_2.R")
 FILE_3 = file.path(TMP_DIR, "file_3.R")
-LOCKFILE = file.path(TMP_DIR, "test_packrat.lock")
+FILE_4 = file.path("testdata", "test_read.Rmd")
+dir.create(file.path(TMP_DIR, "test_packrat"))
+LOCKFILE = file.path(TMP_DIR, "test_packrat", "packrat.lock")
 LOCKFILE_MALFORMED = file.path(TMP_DIR, "test_malformed_packrat.lock")
 
 FILE_TEXT_1 = c(
@@ -57,24 +59,28 @@ Hash: 36b032203797956fedad5a25055016a9
 Requires: htmltools, htmlwidgets, magrittr
 "
 
-FILES = c(FILE_1, FILE_2, FILE_3)
-FILE_TEXTS = list(FILE_TEXT_1, FILE_TEXT_2, FILE_TEXT_3)
+WRITE_FILES = c(FILE_1, FILE_2, FILE_3)
+WRITE_FILE_TEXTS = list(FILE_TEXT_1, FILE_TEXT_2, FILE_TEXT_3)
+FILES = c(WRITE_FILES, FILE_4)
 
 PACKAGE_LINES_1 = FILE_TEXT_1[-length(FILE_TEXT_1)]
 PACKAGE_LINES_2 = trimws(FILE_TEXT_2)
 PACKAGE_LINES_3 = character(0)
+PACKAGE_LINES_4 = c("knitr::opts_chunk$set(echo = TRUE)", "base::summary(cars)")
 
-PACKAGE_LINES_ALL = c(PACKAGE_LINES_1, PACKAGE_LINES_2, PACKAGE_LINES_3)
+PACKAGE_LINES_ALL = c(PACKAGE_LINES_1, PACKAGE_LINES_2, PACKAGE_LINES_3, PACKAGE_LINES_4)
 PACKAGE_LINES_ALL = unique(PACKAGE_LINES_ALL)
 
 PACKAGES_1 = c("fake.package", "testthat", "dplyr", "pacman", "requirements", "devtools", "stringr", "readr")
 PACKAGES_2 = c("packrat")
-PACKAGES_ALL = c(PACKAGES_1, PACKAGES_2)
+PACKAGES_4 = c("knitr", "base")
+TMP_PACKAGES_ALL = c(PACKAGES_1, PACKAGES_2)
+PACKAGES_ALL = c(TMP_PACKAGES_ALL, PACKAGES_4)
 # nolint end
 
 setup({
   invisible(
-    mapply(writeLines, text = FILE_TEXTS, con = FILES)
+    mapply(writeLines, text = WRITE_FILE_TEXTS, con = WRITE_FILES)
   )
   write(LOCKFILE_TEXT, LOCKFILE)
   write(LOCKFILE_MALFORMED_TEXT, LOCKFILE_MALFORMED)
@@ -86,7 +92,6 @@ teardown({
 
 test_that("read_package_lines_from_files", {
   expect_equal(read_package_lines_from_files(character(0)), character(0))
-
   expect_equal(read_package_lines_from_files(FILES), PACKAGE_LINES_ALL)
 })
 
@@ -151,15 +156,15 @@ test_that("match_packages", {
   )
 })
 
-test_that("safe_package_version", {
+test_that("safe_packageVersion", {
   expect_equal(
-    safe_package_version(""),
+    safe_packageVersion(""),
     NA_character_,
     label = "return NA for fake package"
   )
 
   expect_equal(
-    safe_package_version("testthat"),
+    safe_packageVersion("testthat"),
     as.character(packageVersion("testthat")),
     label = "defaults"
   )
@@ -215,27 +220,28 @@ test_that("write_requirements_file", {
 
 test_that("generate_requirements", {
   test_requirements_file = file.path(TMP_DIR, "requirements.txt")
-  test_glob = file.path(TMP_DIR, "file_*.R")
 
-  generate_requirements(FILE_3, test_requirements_file, rm_missing = TRUE)
+  generate_requirements(test_requirements_file,
+                        path = FILE_3,
+                        rm_missing = TRUE)
 
   expect_equal(
     readLines(test_requirements_file),
     c(AUTO_GEN_COMMENTS)
   )
 
-  generate_requirements(test_glob, test_requirements_file, eq_sym = NULL, packrat_lock_path = LOCKFILE)
+  generate_requirements(test_requirements_file, path = TMP_DIR, eq_sym = NULL)
 
   expect_equal(
     readLines(test_requirements_file),
-    c(AUTO_GEN_COMMENTS, sort(unique(c(PACKAGES_ALL, "testthat", "DT"))))
+    c(AUTO_GEN_COMMENTS, sort(unique(c(TMP_PACKAGES_ALL, "testthat", "DT"))))
   )
 
-  rip_freeze(test_glob, test_requirements_file, eq_sym = NULL, packrat_lock_path = LOCKFILE)
+  rip_freeze(test_requirements_file, path = TMP_DIR, eq_sym = NULL)
 
   expect_equal(
     readLines(test_requirements_file),
-    c(AUTO_GEN_COMMENTS, sort(unique(c(PACKAGES_ALL, "testthat", "DT"))))
+    c(AUTO_GEN_COMMENTS, sort(unique(c(TMP_PACKAGES_ALL, "testthat", "DT"))))
   )
 })
 

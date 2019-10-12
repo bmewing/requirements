@@ -9,7 +9,8 @@ test_that("rip_install", {
   expect_error(rip_install(file.path(TMP_DIR, "fake_requirements.txt"),
                            packrat = FALSE,
                            dryrun = TRUE,
-                           verbose = FALSE),
+                           verbose = FALSE,
+                           inspect_files = c(".R")),
                regexp = "could not be installed")
 })
 

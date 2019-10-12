@@ -6,8 +6,8 @@
 \usage{
 rip_install(requirements = "requirements.txt", packrat = FALSE,
   dryrun = FALSE, verbose = dryrun, repo = options()$repo[1],
-  gen = !file.exists(requirements),
-  glob_paths = file.path(dirname(requirements), "*.R"))
+  gen = !file.exists(requirements), inspect_files = c("R", "Rmd",
+  "Rpres", "lock"), path = dirname(requirements), ...)
 }
 \arguments{
 \item{requirements}{filename where requirements are stored}
@@ -23,8 +23,14 @@ the function}
 
 \item{gen}{Should required packages be generated?}
 
-\item{glob_paths}{Character vector of patterns for relative or absolute filepaths.
-Missing values will be ignored. See ?Sys.glob for more details.}
+\item{inspect_files}{Character vector of file extensions to search for dependencies in.
+Officially supports the following extensions: `c("R", "Rmd", "Rpres", "lock")`.
+Other extensions will be processed as if they were `.R` files.}
+
+\item{path}{Location where extensions from `inspect_files` should be searched for.
+(see `path` from `?list.files`).}
+
+\item{...}{Additional arguments to be passed to `rip_freeze()`}
 }
 \value{
 invisible
