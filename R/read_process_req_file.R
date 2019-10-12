@@ -176,9 +176,10 @@ process_find_links = function(loc){
   #' Once a --find-link option has been parsed, a location is returned. This location can be a URL or a file. The
   #' assumption here is that the location can be read as plain text, so a readLines is applied. If the location
   #' cannot be read, then an error should be returned to the user as requirements may not be able to be satisified.
+  urls = ""
   tryCatch(urls = readLines(loc),
            error = function(e){
-             stop(paste0(loc,", a --find-links specification, cannot be read."))
+             stop(paste0(loc, ", a --find-links specification, cannot be read."))
            }
   )
   return(urls)

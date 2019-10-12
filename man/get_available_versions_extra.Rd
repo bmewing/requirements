@@ -18,5 +18,5 @@ character vector of available package versions; NULL if package not found
 Get packages from extra-CRAN sources
 }
 \examples{
-get_available_versions_extra('emnTAW', 'http://lnxaws01.emn.com/EastmanCRAN/')
+get_available_versions_extra('mgsub', 'https://cran.microsoft.com/snapshot/2018-07-01/')
 }

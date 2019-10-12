@@ -135,7 +135,7 @@ get_current_versions_extra = function(repo){
     packages = sub("^.*?href=\"(.*?)\\.tar\\.gz\".*$", "\\1", packages)
     packages = as.data.frame(do.call(rbind, strsplit(packages, "_")))
     names(packages) = c("package", "version")
-  }, silent = TRUE)
+  }, silent = TRUE) # nolint
 
   return(packages)
 }
@@ -157,7 +157,7 @@ get_archive_versions_extra = function(package, repo){
     packages = grep("\\.tar\\.gz", entries, value = TRUE)
     packages = sub("^.*?href=\"(.*?)\\.tar\\.gz\".*$", "\\1", packages)
     versions = vapply(strsplit(packages, "_"), `[`, 2, FUN.VALUE = character(1))
-  }, silent = TRUE)
+  }, silent = TRUE) # nolint
 
   return(versions)
 }
