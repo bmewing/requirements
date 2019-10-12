@@ -121,21 +121,17 @@
     <p>Generate a requirements file from existing file(s) and installed packages</p>
     </div>
 
-    <pre class="usage"><span class='fu'>rip_freeze</span>(<span class='kw'>glob_paths</span> <span class='kw'>=</span> <span class='st'>"*.R"</span>, <span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"requirements.txt"</span>,
-  <span class='kw'>eq_sym</span> <span class='kw'>=</span> <span class='st'>"&gt;="</span>, <span class='kw'>packrat_lock_path</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>rm_missing</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+    <pre class="usage"><span class='fu'>rip_freeze</span>(<span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"requirements.txt"</span>, <span class='kw'>eq_sym</span> <span class='kw'>=</span> <span class='st'>"&gt;="</span>,
+  <span class='kw'>inspect_files</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"R"</span>, <span class='st'>"Rmd"</span>, <span class='st'>"Rpres"</span>, <span class='st'>"lock"</span>), <span class='kw'>path</span> <span class='kw'>=</span> <span class='st'>"."</span>,
+  <span class='kw'>recursive</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>rm_missing</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
-<span class='fu'>generate_requirements</span>(<span class='kw'>glob_paths</span> <span class='kw'>=</span> <span class='st'>"*.R"</span>,
-  <span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"requirements.txt"</span>, <span class='kw'>eq_sym</span> <span class='kw'>=</span> <span class='st'>"&gt;="</span>,
-  <span class='kw'>packrat_lock_path</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>rm_missing</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+<span class='fu'>generate_requirements</span>(<span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"requirements.txt"</span>, <span class='kw'>eq_sym</span> <span class='kw'>=</span> <span class='st'>"&gt;="</span>,
+  <span class='kw'>inspect_files</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"R"</span>, <span class='st'>"Rmd"</span>, <span class='st'>"Rpres"</span>, <span class='st'>"lock"</span>), <span class='kw'>path</span> <span class='kw'>=</span> <span class='st'>"."</span>,
+  <span class='kw'>recursive</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>rm_missing</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>glob_paths</th>
-      <td><p>Character vector of patterns for relative or absolute filepaths. Missing values will be ignored.
-See <code><a href='https://rdrr.io/r/base/Sys.glob.html'>?Sys.glob</a></code> for more details.</p></td>
-    </tr>
     <tr>
       <th>output_path</th>
       <td><p>String indicating where to write resulting requirements file to.</p></td>
@@ -146,9 +142,20 @@ See <code><a href='https://rdrr.io/r/base/Sys.glob.html'>?Sys.glob</a></code> fo
 Use <code>NULL</code> to not include package versions in your requirements file.</p></td>
     </tr>
     <tr>
-      <th>packrat_lock_path</th>
-      <td><p>If not <code>NULL</code>, then requirements will be pulled from
-the <code>packrat.lock</code> at this location and appended to the final <code>requirements.txt</code> output.</p></td>
+      <th>inspect_files</th>
+      <td><p>Character vector of file extensions to search for dependencies in.
+Officially supports the following extensions: `c("R", "Rmd", "Rpres", "lock")`.
+Other extensions will be processed as if they were `.R` files.</p></td>
+    </tr>
+    <tr>
+      <th>path</th>
+      <td><p>Location where extensions from `inspect_files` should be searched for.
+(see `path` from `?list.files`).</p></td>
+    </tr>
+    <tr>
+      <th>recursive</th>
+      <td><p>Should the seatch for `inspect_files` recurse into directories?
+(see `recursive` from `?list.files`).</p></td>
     </tr>
     <tr>
       <th>rm_missing</th>
@@ -161,7 +168,9 @@ the <code>packrat.lock</code> at this location and appended to the final <code>r
     <p>Nothing is returned.  Results are written to <code>output_path</code></p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Methodology for package matching relies on string pattern matching rather than a more sophisticated method.
+    <p>If `"lock"` is included in `inspect_files`, it is assumed to refer to a `packrat.lock`.  Only files matching the
+pattern `glob2rx("*packrat/packrat.lock")` will be considered.</p>
+<p>Methodology for package matching relies on string pattern matching rather than a more sophisticated method.
 This will match most 'standard' ways of referencing libraries in R code.
 The following lines of code show examples where the <code>data.table</code> package will be matched properly:</p><ul>
 <li><p><code><a href='https://rdrr.io/r/base/library.html'>library(data.table)</a></code></p></li>

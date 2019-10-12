@@ -123,8 +123,8 @@
 
     <pre class="usage"><span class='fu'>rip_install</span>(<span class='kw'>requirements</span> <span class='kw'>=</span> <span class='st'>"requirements.txt"</span>, <span class='kw'>packrat</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>dryrun</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='no'>dryrun</span>, <span class='kw'>repo</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/options.html'>options</a></span>()$<span class='no'>repo</span>[<span class='fl'>1</span>],
-  <span class='kw'>gen</span> <span class='kw'>=</span> !<span class='fu'><a href='https://rdrr.io/r/base/files.html'>file.exists</a></span>(<span class='no'>requirements</span>),
-  <span class='kw'>glob_paths</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/file.path.html'>file.path</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/basename.html'>dirname</a></span>(<span class='no'>requirements</span>), <span class='st'>"*.R"</span>))</pre>
+  <span class='kw'>gen</span> <span class='kw'>=</span> !<span class='fu'><a href='https://rdrr.io/r/base/files.html'>file.exists</a></span>(<span class='no'>requirements</span>), <span class='kw'>inspect_files</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"R"</span>, <span class='st'>"Rmd"</span>,
+  <span class='st'>"Rpres"</span>, <span class='st'>"lock"</span>), <span class='kw'>path</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/basename.html'>dirname</a></span>(<span class='no'>requirements</span>), <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -155,9 +155,19 @@ the function</p></td>
       <td><p>Should required packages be generated?</p></td>
     </tr>
     <tr>
-      <th>glob_paths</th>
-      <td><p>Character vector of patterns for relative or absolute filepaths.
-Missing values will be ignored. See ?Sys.glob for more details.</p></td>
+      <th>inspect_files</th>
+      <td><p>Character vector of file extensions to search for dependencies in.
+Officially supports the following extensions: `c("R", "Rmd", "Rpres", "lock")`.
+Other extensions will be processed as if they were `.R` files.</p></td>
+    </tr>
+    <tr>
+      <th>path</th>
+      <td><p>Location where extensions from `inspect_files` should be searched for.
+(see `path` from `?list.files`).</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Additional arguments to be passed to `rip_freeze()`</p></td>
     </tr>
     </table>
 
