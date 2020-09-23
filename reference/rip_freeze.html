@@ -129,13 +129,13 @@
     <p>Generate a requirements file from existing file(s) and installed packages</p>
     </div>
 
-    <pre class="usage"><span class='fu'>rip_freeze</span>(<span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"requirements.txt"</span>, <span class='kw'>eq_sym</span> <span class='kw'>=</span> <span class='st'>"&gt;="</span>,
-  <span class='kw'>inspect_files</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"R"</span>, <span class='st'>"Rmd"</span>, <span class='st'>"Rpres"</span>, <span class='st'>"lock"</span>), <span class='kw'>path</span> <span class='kw'>=</span> <span class='st'>"."</span>,
-  <span class='kw'>recursive</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>rm_missing</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+    <pre class="usage"><span class='fu'>rip_freeze</span>(output_path = <span class='st'>"requirements.txt"</span>, eq_sym = <span class='st'>"&gt;="</span>,
+  inspect_files = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"R"</span>, <span class='st'>"Rmd"</span>, <span class='st'>"Rpres"</span>, <span class='st'>"lock"</span>), path = <span class='st'>"."</span>,
+  recursive = <span class='fl'>TRUE</span>, rm_missing = <span class='fl'>FALSE</span>)
 
-<span class='fu'>generate_requirements</span>(<span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"requirements.txt"</span>, <span class='kw'>eq_sym</span> <span class='kw'>=</span> <span class='st'>"&gt;="</span>,
-  <span class='kw'>inspect_files</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"R"</span>, <span class='st'>"Rmd"</span>, <span class='st'>"Rpres"</span>, <span class='st'>"lock"</span>), <span class='kw'>path</span> <span class='kw'>=</span> <span class='st'>"."</span>,
-  <span class='kw'>recursive</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>rm_missing</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+<span class='fu'>generate_requirements</span>(output_path = <span class='st'>"requirements.txt"</span>, eq_sym = <span class='st'>"&gt;="</span>,
+  inspect_files = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"R"</span>, <span class='st'>"Rmd"</span>, <span class='st'>"Rpres"</span>, <span class='st'>"lock"</span>), path = <span class='st'>"."</span>,
+  recursive = <span class='fl'>TRUE</span>, rm_missing = <span class='fl'>FALSE</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -181,12 +181,12 @@ pattern `glob2rx("*packrat/packrat.lock")` will be considered.</p>
 <p>Methodology for package matching relies on string pattern matching rather than a more sophisticated method.
 This will match most 'standard' ways of referencing libraries in R code.
 The following lines of code show examples where the <code>data.table</code> package will be matched properly:</p><ul>
-<li><p><code><a href='https://rdrr.io/pkg/data.table/man'>library(data.table)</a></code></p></li>
-<li><p><code><a href='https://rdrr.io/pkg/data.table/man'>library("data.table")</a></code></p></li>
-<li><p><code><a href='https://rdrr.io/pkg/data.table/man'>library(data.table, warn.conflicts = TRUE)</a></code></p></li>
-<li><p><code><a href='https://rdrr.io/pkg/data.table/man'>require(data.table)</a></code></p></li>
-<li><p><code><a href='https://rdrr.io/pkg/data.table/man'>require("data.table")</a></code></p></li>
-<li><p><code><a href='https://rdrr.io/pkg/data.table/man'>require(data.table, quietly = TRUE)</a></code></p></li>
+<li><p><code>library(data.table)</code></p></li>
+<li><p><code>library("data.table")</code></p></li>
+<li><p><code>library(data.table, warn.conflicts = TRUE)</code></p></li>
+<li><p><code>require(data.table)</code></p></li>
+<li><p><code>require("data.table")</code></p></li>
+<li><p><code>require(data.table, quietly = TRUE)</code></p></li>
 <li><p><code>pacman::p_load(data.table)</code></p></li>
 <li><p><code>pacman::p_load("data.table")</code></p></li>
 <li><p><code>pacman::p_load(data.table, install = FALSE)</code></p></li>
@@ -206,13 +206,14 @@ The following lines of code show examples where the <code>data.table</code> pack
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='co'>if</span> (<span class='fl'>FALSE</span>) {
 <span class='fu'>rip_freeze</span>(<span class='st'>"R/*.R"</span>)
-<span class='fu'>rip_freeze</span>(<span class='st'>"R/*.R"</span>, <span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"my_requirements.txt"</span>)
-<span class='fu'>rip_freeze</span>(<span class='st'>"R/*.R"</span>, <span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"equal_to_requirements.txt"</span>, <span class='kw'>eq_sym</span> <span class='kw'>=</span> <span class='st'>"=="</span>)
-<span class='fu'>rip_freeze</span>(<span class='st'>"R/*.R"</span>, <span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"versionless_requirements.txt"</span>, <span class='kw'>eq_sym</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
-<span class='fu'>rip_freeze</span>(<span class='st'>"R/*.R"</span>, <span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"installed_requirements.txt"</span>, <span class='kw'>rm_missing</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
-}</div></pre>
+<span class='fu'>rip_freeze</span>(<span class='st'>"R/*.R"</span>, output_path = <span class='st'>"my_requirements.txt"</span>)
+<span class='fu'>rip_freeze</span>(<span class='st'>"R/*.R"</span>, output_path = <span class='st'>"equal_to_requirements.txt"</span>, eq_sym = <span class='st'>"=="</span>)
+<span class='fu'>rip_freeze</span>(<span class='st'>"R/*.R"</span>, output_path = <span class='st'>"versionless_requirements.txt"</span>, eq_sym = <span class='kw'>NULL</span>)
+<span class='fu'>rip_freeze</span>(<span class='st'>"R/*.R"</span>, output_path = <span class='st'>"installed_requirements.txt"</span>, rm_missing = <span class='fl'>TRUE</span>)
+}
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -228,7 +229,7 @@ The following lines of code show examples where the <code>data.table</code> pack
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

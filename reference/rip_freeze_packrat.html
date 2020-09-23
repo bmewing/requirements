@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Generate a requirements file from a <code>packrat.lock</code> file — rip_freeze_packrat • requirements</title>
+<title>Generate a requirements file from a packrat.lock file — rip_freeze_packrat • requirements</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,7 @@
 
 
 
-<meta property="og:title" content="Generate a requirements file from a <code>packrat.lock</code> file — rip_freeze_packrat" />
+<meta property="og:title" content="Generate a requirements file from a packrat.lock file — rip_freeze_packrat" />
 <meta property="og:description" content="Generate a requirements file from a packrat.lock file" />
 
 
@@ -129,8 +129,8 @@
     <p>Generate a requirements file from a <code>packrat.lock</code> file</p>
     </div>
 
-    <pre class="usage"><span class='fu'>rip_freeze_packrat</span>(<span class='kw'>packrat_lock_path</span> <span class='kw'>=</span> <span class='st'>"packrat/packrat.lock"</span>,
-  <span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"requirements.txt"</span>, <span class='kw'>eq_sym</span> <span class='kw'>=</span> <span class='st'>"&gt;="</span>, <span class='kw'>append</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>rip_freeze_packrat</span>(packrat_lock_path = <span class='st'>"packrat/packrat.lock"</span>,
+  output_path = <span class='st'>"requirements.txt"</span>, eq_sym = <span class='st'>"&gt;="</span>, append = <span class='fl'>TRUE</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -161,11 +161,12 @@ Overwrites contents of <code>output_path</code> if <code>FALSE</code>.</p></td>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-<span class='fu'>rip_freeze_packrat</span>(<span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"my_requirements.txt"</span>)
-<span class='fu'>rip_freeze_packrat</span>(<span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"versionless_requirements.txt"</span>, <span class='kw'>eq_sym</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
-<span class='fu'>rip_freeze_packrat</span>(<span class='kw'>output_path</span> <span class='kw'>=</span> <span class='st'>"overwrite_requirements.txt"</span>, <span class='kw'>append</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
-}</div></pre>
+<span class='co'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='fu'>rip_freeze_packrat</span>(output_path = <span class='st'>"my_requirements.txt"</span>)
+<span class='fu'>rip_freeze_packrat</span>(output_path = <span class='st'>"versionless_requirements.txt"</span>, eq_sym = <span class='kw'>NULL</span>)
+<span class='fu'>rip_freeze_packrat</span>(output_path = <span class='st'>"overwrite_requirements.txt"</span>, append = <span class='fl'>FALSE</span>)
+}
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -181,7 +182,7 @@ Overwrites contents of <code>output_path</code> if <code>FALSE</code>.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

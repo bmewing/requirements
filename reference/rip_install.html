@@ -129,10 +129,10 @@
     <p>Install (and optionally generate) required packages</p>
     </div>
 
-    <pre class="usage"><span class='fu'>rip_install</span>(<span class='kw'>requirements</span> <span class='kw'>=</span> <span class='st'>"requirements.txt"</span>, <span class='kw'>packrat</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>dryrun</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='no'>dryrun</span>, <span class='kw'>repo</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/options.html'>options</a></span>()$<span class='no'>repo</span>[<span class='fl'>1</span>],
-  <span class='kw'>gen</span> <span class='kw'>=</span> !<span class='fu'><a href='https://rdrr.io/r/base/files.html'>file.exists</a></span>(<span class='no'>requirements</span>), <span class='kw'>inspect_files</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"R"</span>, <span class='st'>"Rmd"</span>,
-  <span class='st'>"Rpres"</span>, <span class='st'>"lock"</span>), <span class='kw'>path</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/basename.html'>dirname</a></span>(<span class='no'>requirements</span>), <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>rip_install</span>(requirements = <span class='st'>"requirements.txt"</span>, packrat = <span class='fl'>FALSE</span>,
+  dryrun = <span class='fl'>FALSE</span>, verbose = <span class='kw'>dryrun</span>, repo = <span class='fu'><a href='https://rdrr.io/r/base/options.html'>options</a></span>()<span class='op'>$</span><span class='kw'>repo</span>[<span class='fl'>1</span>],
+  gen = <span class='op'>!</span><span class='fu'><a href='https://rdrr.io/r/base/files.html'>file.exists</a></span>(<span class='kw'>requirements</span>), inspect_files = <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"R"</span>, <span class='st'>"Rmd"</span>,
+  <span class='st'>"Rpres"</span>, <span class='st'>"lock"</span>), path = <span class='fu'><a href='https://rdrr.io/r/base/basename.html'>dirname</a></span>(<span class='kw'>requirements</span>), <span class='kw'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -184,9 +184,10 @@ Other extensions will be processed as if they were `.R` files.</p></td>
     <p>invisible</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-<span class='fu'>requirements</span>(<span class='kw'>dryrun</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
-}</div></pre>
+    <pre class="examples"><div class='input'><span class='co'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='fu'>requirements</span>(dryrun = <span class='fl'>TRUE</span>)
+}
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -202,7 +203,7 @@ Other extensions will be processed as if they were `.R` files.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
