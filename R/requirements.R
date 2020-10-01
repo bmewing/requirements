@@ -2,10 +2,10 @@ requirement = R6::R6Class("requirement",
   public = list(
     package = NA_character_,
     version = NA_character_,
-    initialize = function(requirement){
+    initialize = function(requirement) {
 
     },
-    is_installed = function(){
+    is_installed = function() {
       return(private$installed)
     }
   ),
@@ -13,7 +13,7 @@ requirement = R6::R6Class("requirement",
     installed = FALSE,
     dry_run = FALSE,
     verbose = TRUE,
-    message = function(m){
+    message = function(m) {
       if (private$verbose) {
         message(m)
       }
@@ -23,12 +23,12 @@ requirement = R6::R6Class("requirement",
   )
 )
 
-cran_req = R6::R6Class("CRAN_Requirement",
+cran_req = R6::R6Class("CRAN_Requirement", #nolint
   inherit = requirement,
   public = list(
     repo = NA_character_,
 
-    initialize = function(requirement, repos=options("repos")[[1]], verbose=TRUE, dry_run=FALSE){
+    initialize = function(requirement, repos=options("repos")[[1]], verbose=TRUE, dry_run=FALSE) {
       if (repos == "@CRAN@") repos = "https://cran.rstudio.com/"
       private$dry_run = dry_run
       self$repo = repos
@@ -36,23 +36,23 @@ cran_req = R6::R6Class("CRAN_Requirement",
       private$find_available_versions()
     },
 
-    install = function(){
-      if (private$installed){
+    install = function() {
+      if (private$installed) {
         private
       }
       if (!private$installed & !private$dry_run) remotes::install_version(self$package, self$version)
       private$installed = TRUE
     },
 
-    get_status = function(){
+    get_status = function() {
       m = ifelse(private$installed, "Installed", "Not Installed")
       private$message(m)
 
       return(private$installed)
     },
 
-    get_available_versions = function(){
-      private$message(paste(private$available_versions, collapse = ', '))
+    get_available_versions = function() {
+      private$message(paste(private$available_versions, collapse = ", "))
       return(invisible(private$available_versions))
     }
   ),
@@ -69,21 +69,21 @@ cran_req = R6::R6Class("CRAN_Requirement",
     valid_comparison = function(version) {
       #' @param req a vector of version comparisons
       #' @return logical indicating if specified comparison is valid
-      if (length(version) == 0){
+      if (length(version) == 0) {
         return(NA_character_)
-      } else if (length(version) > 2){
-        stop(paste0("Too many versions specified: ", paste(version, collapse=", ")))
+      } else if (length(version) > 2) {
+        stop(paste0("Too many versions specified: ", paste(version, collapse = ", ")))
       }
       formatted = gsub(pattern = sprintf("([^ 0-9\\.]+) ?(%s)$", MINIMUM_PACKAGE_REQ),
                   replacement = "\\1 \\2",
                   x = version)
       comp = vapply(strsplit(formatted, " "), `[[`, FUN.VALUE = NA_character_, 1)
       valid_comps = all(comp %in% COMPS)
-      if (length(version) > 1){
+      if (length(version) > 1) {
         valid_comps = valid_comps & !any(comp %in% COMP_UNCOMBINABLE)
       }
-      if (!valid_comps){
-        stop(paste0("Illegal comparisons specified: ", paste(version, collapse=", ")))
+      if (!valid_comps) {
+        stop(paste0("Illegal comparisons specified: ", paste(version, collapse = ", ")))
       }
       return(formatted)
     },
@@ -95,17 +95,17 @@ cran_req = R6::R6Class("CRAN_Requirement",
       if (!private$valid_name(package_name)) {
         stop(paste0("Illegal package name detected: ", package_name))
       }
-      version = strsplit(trimws(rev(strsplit(req, package_name, fixed=TRUE)[[1]])[1]), ", *")[[1]]
+      version = strsplit(trimws(rev(strsplit(req, package_name, fixed = TRUE)[[1]])[1]), ", *")[[1]]
       self$package = package_name
       self$version = private$valid_comparison(version)
       invisible(self)
     },
 
-    install_needed = function(){
+    install_needed = function() {
       #check if valid version already installed
       installed_version = installed.packages()[, 3][self$package]
-      if (!is.na(installed_version)){
-        checks = vapply(self$version, compare_version, FUN.VALUE = logical(1), existing=installed_version)
+      if (!is.na(installed_version)) {
+        checks = vapply(self$version, compare_version, FUN.VALUE = logical(1), existing = installed_version)
         private$installed = all(checks)
       }
     },
@@ -124,11 +124,11 @@ cran_req = R6::R6Class("CRAN_Requirement",
       response = httr::GET(crandb_url)
 
       if (httr::status_code(response) == 404) {
-        for (r in self$repo){
+        for (r in self$repo) {
           archive_url = sprintf("%ssrc/contrib/Archive/%s", r, self$package)
           current_url = sprintf("%ssrc/contrib/", r)
-          archive_page = httr::content(httr::GET(archive_url), as='text')
-          current_page = httr::content(httr::GET(current_url), as='text')
+          archive_page = httr::content(httr::GET(archive_url), as = "text")
+          current_page = httr::content(httr::GET(current_url), as = "text")
           output = c(private$extract_versions(archive_page), private$extract_versions(current_page))
           output = output[output != ""]
           if (length(output) == 0) output = NA_character_
@@ -144,12 +144,14 @@ cran_req = R6::R6Class("CRAN_Requirement",
       if (all(is.na(private$available_versions))) stop(sprintf("Package %s not found in provided repos.", self$package))
     },
 
-    extract_versions = function(cnt){
-      matches = gregexpr(sprintf('%s_[0-9]+(\\.[0-9]+)+\\.[a-zA-Z]', self$package), cnt)
+    extract_versions = function(cnt) {
+      matches = gregexpr(sprintf("%s_[0-9]+(\\.[0-9]+)+\\.[a-zA-Z]", self$package), cnt)
       start = matches[[1]]
       length = attr(matches[[1]], "match.length")
       versions = vapply(seq_along(start),
-                        function(i){substr(cnt, start[i], start[i] + length[i] - 1)},
+                        function(i) {
+                          substr(cnt, start[i], start[i] + length[i] - 1)
+                        },
                         FUN.VALUE = NA_character_)
       final_versions = unique(gsub(sprintf(".*?(%s)\\.[a-zA-Z]", MINIMUM_PACKAGE_REQ), "\\1", versions))
       return(final_versions)
@@ -246,4 +248,3 @@ cran_req = R6::R6Class("CRAN_Requirement",
     }
   )
 )
-

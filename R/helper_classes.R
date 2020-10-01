@@ -2,14 +2,14 @@ cran_locations = R6::R6Class("CRAN_Locations",
   public = list(
     urls = NULL,
     original = options("repos"),
-    initialize = function(index_url = NULL, extra_index_urls = NULL){
-      if(!is.null(index_url)){
+    initialize = function(index_url = NULL, extra_index_urls = NULL) {
+      if (!is.null(index_url)) {
         self$urls = c(index_url, extra_index_urls)
       } else {
         self$urls = c(options("repos")[["repos"]], extra_index_urls)
       }
     },
-    reset = function(){
+    reset = function() {
       options("repos") = self$original
     }
   )
@@ -18,13 +18,13 @@ cran_locations = R6::R6Class("CRAN_Locations",
 installed_packages = R6::R6Class("Installed_Packages",
   public = list(
     installed = installed.packages()[, 3],
-    initialize = function(dummy=NULL){
-      if (!is.null(dummy)){
+    initialize = function(dummy=NULL) {
+      if (!is.null(dummy)) {
         self$installed = dummy
       }
     },
 
-    is_installed = function(requirement){
+    is_installed = function(requirement) {
       details = self$installed[requirement$name]
       installed = !is.na(details) && private$compare_version(details, requirement$version, requirement$comparison)
       return(installed)
