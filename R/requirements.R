@@ -2,7 +2,6 @@ requirement = R6::R6Class("requirement",
   public = list(
     package = NA_character_,
     version = NA_character_,
-    dry_run = FALSE,
     initialize = function(requirement){
 
     },
@@ -16,7 +15,7 @@ requirement = R6::R6Class("requirement",
     verbose = TRUE,
     message = function(m){
       if (private$verbose) {
-        message(x)
+        message(m)
       }
 
       invisible(return(NULL))
@@ -30,14 +29,17 @@ cran_req = R6::R6Class("CRAN_Requirement",
     repo = NA_character_,
 
     initialize = function(requirement, repos=options("repos")[[1]], verbose=TRUE, dry_run=FALSE){
-      self$dry_run = dry_run
+      private$dry_run = dry_run
       self$repo = repos
       private$valid_requirement(requirement)
       private$find_available_versions()
     },
 
     install = function(){
-      if (!private$installed) remotes::install_version(self$package, self$version)
+      if (private$installed){
+        private
+      }
+      if (!private$installed & !private$dry_run) remotes::install_version(self$package, self$version)
       private$installed = TRUE
     },
 
@@ -50,7 +52,7 @@ cran_req = R6::R6Class("CRAN_Requirement",
 
     get_available_versions = function(){
       private$message(paste(private$available_versions, collapse = ', '))
-      return(invisble(private$available_versions))
+      return(invisible(private$available_versions))
     }
   ),
 
