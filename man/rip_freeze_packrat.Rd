@@ -4,8 +4,12 @@
 \alias{rip_freeze_packrat}
 \title{Generate a requirements file from a \code{packrat.lock} file}
 \usage{
-rip_freeze_packrat(packrat_lock_path = "packrat/packrat.lock",
-  output_path = "requirements.txt", eq_sym = ">=", append = TRUE)
+rip_freeze_packrat(
+  packrat_lock_path = "packrat/packrat.lock",
+  output_path = "requirements.txt",
+  eq_sym = ">=",
+  append = TRUE
+)
 }
 \arguments{
 \item{packrat_lock_path}{Path to \code{packrat.lock} to extract requirements from.}

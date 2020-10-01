@@ -6,6 +6,9 @@ COMP_GT = ">"
 COMP_COMPATIBLE = "~="
 COMP_NOT_EQUAL = "!="
 
+COMP_UNCOMBINABLE = c(COMP_EXACTLY_EQUAL,
+                      COMP_COMPATIBLE)
+
 COMP_EQUALITY = c(COMP_EXACTLY_EQUAL,
                   COMP_LTE,
                   COMP_GTE,

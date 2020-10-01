@@ -5,13 +5,23 @@
 \alias{generate_requirements}
 \title{Generate a requirements.txt for your project}
 \usage{
-rip_freeze(output_path = "requirements.txt", eq_sym = ">=",
-  inspect_files = c("R", "Rmd", "Rpres", "lock"), path = ".",
-  recursive = TRUE, rm_missing = FALSE)
+rip_freeze(
+  output_path = "requirements.txt",
+  eq_sym = ">=",
+  inspect_files = c("R", "Rmd", "Rpres", "lock"),
+  path = ".",
+  recursive = TRUE,
+  rm_missing = FALSE
+)
 
-generate_requirements(output_path = "requirements.txt", eq_sym = ">=",
-  inspect_files = c("R", "Rmd", "Rpres", "lock"), path = ".",
-  recursive = TRUE, rm_missing = FALSE)
+generate_requirements(
+  output_path = "requirements.txt",
+  eq_sym = ">=",
+  inspect_files = c("R", "Rmd", "Rpres", "lock"),
+  path = ".",
+  recursive = TRUE,
+  rm_missing = FALSE
+)
 }
 \arguments{
 \item{output_path}{String indicating where to write resulting requirements file to.}

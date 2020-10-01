@@ -4,10 +4,17 @@
 \alias{rip_install}
 \title{Install project requirements}
 \usage{
-rip_install(requirements = "requirements.txt", packrat = FALSE,
-  dryrun = FALSE, verbose = dryrun, repo = options()$repo[1],
-  gen = !file.exists(requirements), inspect_files = c("R", "Rmd",
-  "Rpres", "lock"), path = dirname(requirements), ...)
+rip_install(
+  requirements = "requirements.txt",
+  packrat = FALSE,
+  dryrun = FALSE,
+  verbose = dryrun,
+  repo = options()$repo[1],
+  gen = !file.exists(requirements),
+  inspect_files = c("R", "Rmd", "Rpres", "lock"),
+  path = dirname(requirements),
+  ...
+)
 }
 \arguments{
 \item{requirements}{filename where requirements are stored}

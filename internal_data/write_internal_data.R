@@ -5,6 +5,7 @@ source('internal_data/messages.R')
 usethis::use_data(
   COMPS,                      # Character vector of valid comparison symbols
   COMP_EQUALITY,              # Character vector of valid equality comparison symbols
+  COMP_UNCOMBINABLE,          # Character vector of comparison symbols which cannot be combined with other comparisons (==, ~=)
   COMP_EXACTLY_EQUAL,   # ==
   COMP_LTE,             # <=
   COMP_LT,              # <
@@ -31,6 +32,7 @@ usethis::use_data(
   REQ_FILE_DUPLICATE_REQ,       # Error message for duplicated requirements
   VALID_REQ,                    # Pattern for validating versioned requirements
   COMP_EXTRACTOR,               # Pattern for extracting comparison operator
+  MINIMUM_PACKAGE_REQ,          # Pattern for matching package versions
   CANONICAL_PACKAGE_NAME_RE_STANDALONE,  # String containing regex to match valid package names by CRAN standards
   CANONICAL_PACKAGE_NAME_RE_EXTRACT,     # String containing regex to extract valid package names by CRAN standards
   PACKAGE_RES,                # Character vector of regexes to match package names used in code (i.e. `library(name)`)
