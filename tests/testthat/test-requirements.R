@@ -24,6 +24,8 @@ test_that("CRAN_Requirement works properly", {
   expect_message(tmp$get_available_versions(), regexp = "1\\.1\\.1")
   expect_false(tmp$is_installed())
 
+  #valid name, doesn't exist
+  expect_error(cran_req$new("emnTAW"), regexp = "not found in provided repos")
   #all failpoints
   expect_error(cran_req$new("AGread >0.5, >=1.2, >= 6.2"), regexp = "Too many versions")
   expect_error(cran_req$new("AGread >0.5, ==1.2"), regexp = "Illegal comparisons")

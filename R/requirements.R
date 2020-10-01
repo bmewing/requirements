@@ -29,6 +29,7 @@ cran_req = R6::R6Class("CRAN_Requirement",
     repo = NA_character_,
 
     initialize = function(requirement, repos=options("repos")[[1]], verbose=TRUE, dry_run=FALSE){
+      if (repos == "@CRAN@") repos = "https://cran.rstudio.com/"
       private$dry_run = dry_run
       self$repo = repos
       private$valid_requirement(requirement)
@@ -128,7 +129,7 @@ cran_req = R6::R6Class("CRAN_Requirement",
           current_url = sprintf("%ssrc/contrib/", r)
           archive_page = httr::content(httr::GET(archive_url), as='text')
           current_page = httr::content(httr::GET(current_url), as='text')
-          output = c(extract_versions(archive_page), extract_versions(current_page))
+          output = c(private$extract_versions(archive_page), private$extract_versions(current_page))
           output = output[output != ""]
           if (length(output) == 0) output = NA_character_
           if (!is.na(output)) break
@@ -140,7 +141,7 @@ cran_req = R6::R6Class("CRAN_Requirement",
       }
 
       private$available_versions = output
-      if (all(is.na(private$available_versions))) stop(sprintf("Package %s not found in provided repos.", package_name))
+      if (all(is.na(private$available_versions))) stop(sprintf("Package %s not found in provided repos.", self$package))
     },
 
     extract_versions = function(cnt){
