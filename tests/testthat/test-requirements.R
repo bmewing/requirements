@@ -21,7 +21,7 @@ test_that("CRAN_Requirement works properly", {
   expect_equal(class(tmp <- cran_req$new("AGread >0.5, <1.0"))[2], "requirement") #nolint
   expect_equal(tmp$package, "AGread")
   expect_length(tmp$version, 2)
-  expect_message(tmp$get_available_versions(), regexp = "1\\.1\\.1")
+  expect_message(x <- tmp$get_available_versions(), regexp = "1\\.1\\.1")
   expect_false(tmp$is_installed())
 
   #valid name, doesn't exist

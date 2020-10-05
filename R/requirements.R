@@ -27,20 +27,25 @@ cran_req = R6::R6Class("CRAN_Requirement", #nolint
   inherit = requirement,
   public = list(
     repo = NA_character_,
+    version_to_install = NA_character_,
 
     initialize = function(requirement, repos=options("repos")[[1]], verbose=TRUE, dry_run=FALSE) {
       if (repos == "@CRAN@") repos = "https://cran.rstudio.com/"
       private$dry_run = dry_run
       self$repo = repos
       private$valid_requirement(requirement)
-      private$find_available_versions()
+      private$check_if_installed()
+      if (!private$installed) {
+        private$find_available_versions()
+        private$choose_version_to_install()
+      }
     },
 
     install = function() {
       if (private$installed) {
         private
       }
-      if (!private$installed & !private$dry_run) remotes::install_version(self$package, self$version)
+      if (!private$installed & !private$dry_run) remotes::install_version(self$package, self$version_to_install)
       private$installed = TRUE
     },
 
@@ -52,6 +57,9 @@ cran_req = R6::R6Class("CRAN_Requirement", #nolint
     },
 
     get_available_versions = function() {
+      if (any(is.na(private$available_versions))) {
+        private$find_available_versions()
+      }
       private$message(paste(private$available_versions, collapse = ", "))
       return(invisible(private$available_versions))
     }
@@ -59,6 +67,7 @@ cran_req = R6::R6Class("CRAN_Requirement", #nolint
 
   private = list(
     available_versions = NA_character_,
+    installed_version = NA_character_,
     valid_name = function(name) {
       #' @param name package name to be checked for validity
       #' @return logical vector of names being legal r package names
@@ -201,8 +210,8 @@ cran_req = R6::R6Class("CRAN_Requirement", #nolint
       compatible_version_wildcard = sub("(.*\\.)(.+)", "\\1*", target)
 
       # Per PEP 440 `~= 2.2` is equivalent to `>= 2.2 & == 2.*`
-      compare_version(existing, compatible_version_wildcard, COMP_EXACTLY_EQUAL) &
-        compare_version(existing, target, COMP_GTE)
+      private$compare_version(existing, compatible_version_wildcard, COMP_EXACTLY_EQUAL) &
+        private$compare_version(existing, target, COMP_GTE)
     },
 
     compare_version = function(version, existing) {
@@ -224,27 +233,67 @@ cran_req = R6::R6Class("CRAN_Requirement", #nolint
       #' [1] FALSE
 
       # Push compatible version check to dedicated helper
-      split_version = strsplit(version, " ")
-      comp = split_version[[1]][1]
-      target = split_version[[1]][2]
-      if (comp == COMP_COMPATIBLE) return(compare_compatible_version(existing, target))
 
-      # Check if existing == target would satisfy comparison
-      is_equality_check = comp %in% COMP_EQUALITY
+      if (is.na(version)){
+        output = TRUE
+      } else {
+        split_version = strsplit(version, " ")
+        comp = split_version[[1]][1]
+        target = split_version[[1]][2]
+        if (comp == COMP_COMPATIBLE) return(private$compare_compatible_version(existing, target))
 
-      # Check if `target` is equivalent to `existing` wrt wildcards
-      is_equivalent_version = equivalent_version(existing, target)
+        # Check if existing == target would satisfy comparison
+        is_equality_check = comp %in% COMP_EQUALITY
 
-      if (is_equality_check & is_equivalent_version) return(TRUE)
-      if (comp == COMP_NOT_EQUAL & is_equivalent_version) return(FALSE)
+        # Check if `target` is equivalent to `existing` wrt wildcards
+        is_equivalent_version = private$equivalent_version(existing, target)
 
-      # TODO: definitively prove this is a valid substitution
-      non_wild_card_target = gsub("*", "0", target, fixed = TRUE)
+        if (is_equality_check & is_equivalent_version) return(TRUE)
+        if (comp == COMP_NOT_EQUAL & is_equivalent_version) return(FALSE)
 
-      existing_version = package_version(existing)
-      target_version = package_version(non_wild_card_target)
+        # TODO: definitively prove this is a valid substitution
+        non_wild_card_target = gsub("*", "0", target, fixed = TRUE)
 
-      get(comp)(existing_version, target_version)
+        existing_version = package_version(existing)
+        target_version = package_version(non_wild_card_target)
+
+        output = get(comp)(existing_version, target_version)
+      }
+      return(output)
+    },
+
+    check_if_installed = function() {
+      installed = installed.packages()[, 3]
+      private$installed_version = installed[self$package]
+      if (!is.na(private$installed_version)) {
+        valid_local = vapply(self$version, private$compare_version, FUN.VALUE = logical(1), existing = private$installed_version)
+        private$installed = all(valid_local)
+      }
+    },
+
+    choose_version_to_install = function(){
+      sorted = FALSE
+      sorted_av = rev(private$available_versions)
+      while (!sorted) {
+        sorted = TRUE
+        for (i in 2:length(private$available_versions)) {
+          a = sorted_av[i-1]
+          b = sorted_av[i]
+          if (package_version(a) < package_version(b)) {
+            sorted_av[i] = a
+            sorted_av[i-1] = b
+            sorted = FALSE
+          }
+        }
+      }
+      for (v in sorted_av) {
+        valid_version = vapply(self$version, private$compare_version, FUN.VALUE = logical(1),
+                               existing = v)
+        if (all(valid_version)) {
+          self$version_to_install = v
+          break
+        }
+      }
     }
   )
 )
