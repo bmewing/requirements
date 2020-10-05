@@ -137,7 +137,7 @@ cran_req = R6::R6Class("CRAN_Requirement", #nolint
           output = c(private$extract_versions(archive_page), private$extract_versions(current_page))
           output = output[output != ""]
           if (length(output) == 0) output = NA_character_
-          if (!is.na(output)) break
+          if (!all(is.na(output))) break
         }
       } else {
         response_content = httr::content(response)
@@ -206,8 +206,8 @@ cran_req = R6::R6Class("CRAN_Requirement", #nolint
       compatible_version_wildcard = sub("(.*\\.)(.+)", "\\1*", target)
 
       # Per PEP 440 `~= 2.2` is equivalent to `>= 2.2 & == 2.*`
-      private$compare_version(existing, compatible_version_wildcard, COMP_EXACTLY_EQUAL) &
-        private$compare_version(existing, target, COMP_GTE)
+      private$compare_version(sprintf('%s %s', COMP_EXACTLY_EQUAL, compatible_version_wildcard), existing) &
+        private$compare_version(sprintf('%s %s', COMP_GTE, target), existing)
     },
 
     compare_version = function(version, existing) {

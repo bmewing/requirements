@@ -27,12 +27,17 @@ test_that("CRAN_Requirement works properly", {
   expect_message(x <- tmp$get_available_versions(), regexp = "1\\.1\\.1")
   expect_true(is.na(tmp$version_to_install))
   expect_false(tmp$is_installed())
-  #totally valid, unversioned
-  expect_equal(class(tmp <- cran_req$new("base"))[1], "CRAN_Requirement") #nolint
+  #totally valid, installed
+  expect_equal(class(tmp <- cran_req$new("base > 0.1"))[1], "CRAN_Requirement") #nolint
   expect_equal(tmp$package, "base")
-  expect_equal(tmp$version, NA_character_)
+  expect_equal(tmp$version, "> 0.1")
   expect_true(tmp$is_installed())
   expect_message(tmp$is_installed(), regexp="Installed")
+  #totally valid, wrong version installed
+  expect_equal(class(tmp <- cran_req$new("base ~= 1.0"))[1], "CRAN_Requirement") #nolint
+  expect_equal(tmp$package, "base")
+  expect_equal(tmp$version, "~= 1.0")
+  expect_false(tmp$is_installed())
 
   #valid name, doesn't exist
   expect_error(cran_req$new("emnTAW"), regexp = "not found in provided repos")
