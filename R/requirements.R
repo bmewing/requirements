@@ -6,6 +6,9 @@ requirement = R6::R6Class("requirement",
 
     },
     is_installed = function() {
+      m = ifelse(private$installed, "Installed", "Not Installed")
+      private$message(m)
+
       return(private$installed)
     }
   ),
@@ -43,17 +46,10 @@ cran_req = R6::R6Class("CRAN_Requirement", #nolint
 
     install = function() {
       if (private$installed) {
-        private
+        private$message('Package already installed')
       }
       if (!private$installed & !private$dry_run) remotes::install_version(self$package, self$version_to_install)
       private$installed = TRUE
-    },
-
-    get_status = function() {
-      m = ifelse(private$installed, "Installed", "Not Installed")
-      private$message(m)
-
-      return(private$installed)
     },
 
     get_available_versions = function() {
